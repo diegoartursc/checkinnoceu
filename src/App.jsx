@@ -954,7 +954,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
             Estoure o Medo!
           </h2>
           <CatcherGame
-            data={{ target: '☁️', avoid: 'nothing' }}
+            data={{ target: '☁️', avoid: '⚡' }}
             onWin={() => setTimeout(() => setStep(3), 1000)}
           />
         </div>
