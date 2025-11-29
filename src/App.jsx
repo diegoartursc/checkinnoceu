@@ -883,6 +883,57 @@ const StoryOverlay = memo(({ story, onClose }) => {
 StoryOverlay.displayName = 'StoryOverlay';
 
 /* ========================================
+   LAR SCREEN (Pet Home)
+   ======================================== */
+
+const LarScreen = memo(() => {
+  return (
+    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-purple-50 to-blue-50 -z-10"></div>
+      <CloudBackground />
+
+      {/* Coming soon message */}
+      <div className="relative z-10 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-1000">
+        {/* Icon */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-pink-400 blur-3xl opacity-30 rounded-full animate-pulse"></div>
+          <div className="relative bg-gradient-to-br from-pink-400 to-purple-500 p-8 rounded-full shadow-2xl">
+            <Heart size={80} className="text-white fill-white drop-shadow-lg animate-pulse" />
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+            Lar do Amiguinho
+          </h1>
+          <p className="text-lg font-bold text-gray-600">
+            🐾 Em breve você poderá cuidar do seu pet! 🐾
+          </p>
+        </div>
+
+        {/* Description */}
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border-2 border-pink-200 max-w-sm">
+          <p className="text-gray-700 font-medium leading-relaxed">
+            Aqui você vai poder alimentar, brincar e cuidar do seu amiguinho especial todos os dias! ✨
+          </p>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="flex gap-4 text-4xl animate-bounce">
+          <span>🐶</span>
+          <span>🐱</span>
+          <span>🐰</span>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+LarScreen.displayName = 'LarScreen';
+
+/* ========================================
    CHECK-IN SCREEN (Optimized)
    ======================================== */
 
@@ -1011,31 +1062,42 @@ CheckInScreen.displayName = 'CheckInScreen';
    ======================================== */
 
 // Optimized: Memoize individual day component
-const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick }) => {
-  const isPast = false; // Simplified for demo
+const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick, monthIndex }) => {
+  // Calculate if this day is in the past
+  const isPast = useMemo(() => {
+    const today = new Date();
+    const currentMonth = today.getMonth(); // 0-11
+    const currentDay = today.getDate();
+
+    // monthIndex: 0=Janeiro, 1=Fevereiro, ..., 11=Dezembro
+    if (monthIndex < currentMonth) return true; // Mês já passou
+    if (monthIndex > currentMonth) return false; // Mês futuro
+    return dayNum < currentDay; // Mesmo mês: compara dia
+  }, [dayNum, monthIndex]);
+
   const neonStyle = specialDate ? `${specialDate.color}` : '';
   const SpecialIcon = specialDate?.icon;
 
   return (
     <div className="relative flex justify-center z-10">
       <div
-        onClick={() => specialDate && onSpecialClick(specialDate)}
+        onClick={() => specialDate && !isPast && onSpecialClick(specialDate)}
         className={`
             w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-2
             ${isCurrentDay
                 ? 'bg-yellow-400 border-white scale-125 sm:scale-150 shadow-[0_0_25px_#facc15] z-20 animate-pulse'
                 : isPast
-                    ? 'bg-slate-800/50 border-slate-700 text-slate-600 opacity-50 scale-90'
+                    ? 'bg-slate-700/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale'
                     : specialDate
-                        ? `${neonStyle} cursor-pointer hover:scale-125`
-                        : 'bg-blue-500 border-blue-300 text-white shadow-lg'
+                        ? `${neonStyle} cursor-pointer hover:scale-125 shadow-lg`
+                        : 'bg-blue-500 border-blue-300 text-white shadow-lg hover:scale-110'
             }
         `}
       >
         {isCurrentDay ? (
           <Sun size={18} className="text-yellow-900 animate-spin-slow sm:w-6 sm:h-6" strokeWidth={2.5} />
         ) : (
-          specialDate ? <SpecialIcon size={10} className="animate-spin-slow"/> : dayNum
+          specialDate ? <SpecialIcon size={10} className={!isPast && "animate-spin-slow"}/> : dayNum
         )}
       </div>
     </div>
@@ -1102,29 +1164,71 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
 
       {selectedSpecialDate && (
         <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in"
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300"
             onClick={() => setSelectedSpecialDate(null)}
         >
             <div
-                className="bg-white rounded-3xl p-6 text-center shadow-2xl border-4 border-yellow-400 max-w-xs w-full relative"
+                className="bg-gradient-to-b from-yellow-50 to-white rounded-3xl p-8 text-center shadow-[0_0_50px_rgba(250,204,21,0.5)] border-4 border-yellow-400 max-w-xs w-full relative animate-in zoom-in duration-500"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-yellow-400 p-3 rounded-full shadow-lg">
-                    <selectedSpecialDate.icon size={32} className="text-yellow-900" />
+                {/* Sparkles decoration */}
+                <div className="absolute -top-2 -left-2 text-yellow-400 animate-pulse">
+                  <Star size={24} fill="currentColor" />
                 </div>
-                <h3 className="mt-6 text-xl font-black text-gray-800 mb-2">{selectedSpecialDate.label}</h3>
-                <p className="text-gray-600 mb-6 font-medium leading-relaxed">
-                  "{selectedSpecialDate.message}"
-                </p>
-                <Button onClick={() => setSelectedSpecialDate(null)} color="bg-sky-500 w-full text-sm">
-                    Aguardar a surpresa... <Clock size={16}/>
-                </Button>
-            </div>
+                <div className="absolute -top-2 -right-2 text-yellow-400 animate-pulse delay-150">
+                  <Star size={20} fill="currentColor" />
+                </div>
+                <div className="absolute -bottom-2 -left-2 text-yellow-400 animate-pulse delay-300">
+                  <Star size={16} fill="currentColor" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 text-yellow-400 animate-pulse delay-500">
+                  <Star size={18} fill="currentColor" />
+                </div>
+
+                {/* Icon with glow effect */}
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-30 rounded-full animate-pulse"></div>
+                  <div className="relative bg-gradient-to-br from-yellow-400 to-orange-500 p-5 rounded-full shadow-2xl inline-block animate-bounce">
+                    <selectedSpecialDate.icon size={48} className="text-white drop-shadow-lg" strokeWidth={2.5} />
+                  </div>
+                </div>
+
+                {/* Hype title with animation */}
+                <div className="mb-3 animate-in slide-in-from-bottom-4 duration-700">
+                  <div className="inline-block bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 bg-clip-text text-transparent">
+                    <h3 className="text-2xl font-black uppercase tracking-tight animate-pulse">
+                      🎉 Em Breve! 🎉
+                    </h3>
+                  </div>
+                  <h4 className="text-xl font-black text-gray-800 mt-2">{selectedSpecialDate.label}</h4>
+                </div>
+
+                {/* Message with better styling */}
+                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl mb-6 border-2 border-yellow-200 shadow-inner animate-in fade-in duration-1000">
+                  <p className="text-gray-700 font-bold leading-relaxed text-base">
+                    "{selectedSpecialDate.message}"
+                  </p>
+                </div>
+
+                {/* CTA Button with pulse effect */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-sky-400 to-blue-500 blur-md opacity-50 rounded-xl animate-pulse"></div>
+                  <Button
+                    onClick={() => setSelectedSpecialDate(null)}
+                    color="bg-gradient-to-r from-sky-500 to-blue-600 w-full text-base shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
+                  >
+                    <Clock size={20} className="animate-spin-slow"/>
+                    Aguarde o dia da surpresa!
+                  </Button>
+                </div>
+              </div>
         </div>
       )}
 
       <div className="flex flex-col items-center px-2">
-        {reversedMonths.map((month) => {
+        {reversedMonths.map((month, reverseIndex) => {
+          // Calculate real month index (0-11) for date comparison
+          const monthIndex = 11 - reverseIndex; // Dezembro=11, Janeiro=0
           const daysInThisMonth = useMemo(() => Array.from({ length: 31 }, (_, i) => 31 - i), []);
           const isDecorLeft = Math.random() > 0.5;
           const isStoryLeft = !isDecorLeft;
@@ -1318,6 +1422,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                       <DayNode
                         dayNum={dayNum}
                         month={month}
+                        monthIndex={monthIndex}
                         isCurrentDay={isCurrentDay}
                         specialDate={specialDate}
                         onSpecialClick={handleSpecialDateClick}
@@ -1431,7 +1536,7 @@ export default function CheckInApp() {
         </div>
         <div className="bg-black/20 backdrop-blur-md px-3 sm:px-4 py-1 rounded-full border border-white/10">
              <span className="text-white font-[nunito] font-black text-xs sm:text-sm tracking-widest uppercase">
-               {screen === 'checkin' ? 'Hoje' : 'Caminho'}
+               {screen === 'checkin' ? 'Hoje' : screen === 'map' ? 'Caminho' : 'Lar'}
              </span>
         </div>
         <div className="w-8 sm:w-12"></div>
@@ -1459,6 +1564,7 @@ export default function CheckInApp() {
             readStories={readStories}
           />
         )}
+        {screen === 'lar' && <LarScreen />}
       </div>
 
       {currentGameConfig && (
@@ -1500,6 +1606,18 @@ export default function CheckInApp() {
         >
            <Map size={20} strokeWidth={screen === 'map' ? 3 : 2.5} className="sm:w-5 sm:h-5" />
            <span className="text-[9px] font-black mt-1 uppercase whitespace-nowrap">Caminho</span>
+        </button>
+        <div className="w-px h-6 bg-gray-200"></div>
+        <button
+          onClick={() => setScreen('lar')}
+          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl transition-all duration-300 ${
+            screen === 'lar'
+              ? 'bg-pink-100 text-pink-600 -translate-y-2 sm:-translate-y-3 shadow-lg scale-110'
+              : 'text-gray-400 hover:bg-gray-50'
+          }`}
+        >
+           <Heart size={20} strokeWidth={screen === 'lar' ? 3 : 2.5} className="sm:w-5 sm:h-5" fill={screen === 'lar' ? 'currentColor' : 'none'} />
+           <span className="text-[9px] font-black mt-1 uppercase">Lar</span>
         </button>
       </div>
     </div>
