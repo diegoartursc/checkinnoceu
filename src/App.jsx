@@ -285,6 +285,62 @@ const MONTHS_CONFIG = [
 ];
 
 /* ========================================
+   REUSABLE UI COMPONENTS
+   ======================================== */
+
+// Physical 3D Button Component (Candy Crush Style)
+const Button = memo(({
+  children,
+  onClick,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  className = '',
+  icon: Icon,
+  ...props
+}) => {
+  const variants = {
+    primary: 'bg-gradient-to-b from-blue-400 to-blue-600 border-blue-700 text-white shadow-[0_6px_0_0_rgb(29,78,216)] active:shadow-[0_2px_0_0_rgb(29,78,216)]',
+    success: 'bg-gradient-to-b from-green-400 to-green-600 border-green-700 text-white shadow-[0_6px_0_0_rgb(21,128,61)] active:shadow-[0_2px_0_0_rgb(21,128,61)]',
+    warning: 'bg-gradient-to-b from-orange-400 to-orange-600 border-orange-700 text-white shadow-[0_6px_0_0_rgb(194,65,12)] active:shadow-[0_2px_0_0_rgb(194,65,12)]',
+    danger: 'bg-gradient-to-b from-red-400 to-red-600 border-red-700 text-white shadow-[0_6px_0_0_rgb(185,28,28)] active:shadow-[0_2px_0_0_rgb(185,28,28)]',
+    secondary: 'bg-gradient-to-b from-slate-300 to-slate-500 border-slate-600 text-slate-900 shadow-[0_6px_0_0_rgb(71,85,105)] active:shadow-[0_2px_0_0_rgb(71,85,105)]',
+    gold: 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-600 text-yellow-900 shadow-[0_6px_0_0_rgb(202,138,4)] active:shadow-[0_2px_0_0_rgb(202,138,4)]'
+  };
+
+  const sizes = {
+    sm: 'px-3 py-2 text-xs',
+    md: 'px-4 py-3 text-sm',
+    lg: 'px-6 py-4 text-base',
+    xl: 'px-8 py-5 text-lg'
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        ${variants[variant]}
+        ${sizes[size]}
+        border-b-4 rounded-xl font-black uppercase tracking-wide
+        transition-all duration-150 ease-out
+        active:translate-y-1 active:border-b-0
+        hover:brightness-110
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:border-b-4
+        flex items-center justify-center gap-2
+        ${className}
+      `}
+      {...props}
+    >
+      {Icon && <Icon size={size === 'sm' ? 16 : size === 'md' ? 20 : size === 'lg' ? 24 : 28} strokeWidth={2.5} />}
+      {children}
+    </button>
+  );
+});
+
+Button.displayName = 'Button';
+
+/* ========================================
    UTILITY FUNCTIONS
    ======================================== */
 
@@ -326,18 +382,6 @@ const CloudBackground = memo(() => (
 ));
 
 CloudBackground.displayName = 'CloudBackground';
-
-const Button = memo(({ children, onClick, color = "bg-gradient-to-b from-blue-400 to-blue-600", className = "", disabled }) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`${color} ${className} text-white font-black py-4 px-8 rounded-3xl border-b-6 border-opacity-50 shadow-xl active:border-b-0 active:translate-y-2 transition-all transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
-  >
-    {children}
-  </button>
-));
-
-Button.displayName = 'Button';
 
 const SeasonButton = memo(({ season, onClick }) => {
     const { buttonStyle, decor } = useMemo(() => {
@@ -913,6 +957,160 @@ const FlyingStar = memo(({ startPos, endPos, onComplete }) => {
 });
 
 FlyingStar.displayName = 'FlyingStar';
+
+/* ========================================
+   DAILY MODAL (Progression System)
+   ======================================== */
+
+const DailyModal = memo(({ dayNumber, monthData, onComplete, onClose }) => {
+  const [currentStep, setCurrentStep] = useState(0); // 0: Game, 1: Story, 2: Quiz
+  const [starsEarned, setStarsEarned] = useState([false, false, false]);
+  const [showStepComplete, setShowStepComplete] = useState(false);
+
+  const steps = [
+    { name: 'Desafio', icon: Gamepad2, color: 'from-purple-400 to-purple-600' },
+    { name: 'História', icon: BookOpen, color: 'from-blue-400 to-blue-600' },
+    { name: 'Quiz', icon: Lightbulb, color: 'from-green-400 to-green-600' }
+  ];
+
+  const handleStepComplete = () => {
+    // Mark current step as complete
+    const newStars = [...starsEarned];
+    newStars[currentStep] = true;
+    setStarsEarned(newStars);
+    setShowStepComplete(true);
+
+    // Wait before moving to next step or completing
+    setTimeout(() => {
+      setShowStepComplete(false);
+      if (currentStep < 2) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        // All steps complete!
+        onComplete();
+      }
+    }, 1500);
+  };
+
+  const renderStepContent = () => {
+    if (currentStep === 0) {
+      // Game step
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <div className="text-6xl animate-bounce">{monthData.gameType === GAME_TYPES.MEMORY ? '🎮' : monthData.gameType === GAME_TYPES.CATCHER ? '🎯' : '❓'}</div>
+          <h3 className="text-xl font-black text-gray-800">Jogue e Ganhe uma Estrela!</h3>
+          <p className="text-gray-600 text-center">{monthData.gameData?.title || 'Complete o desafio do dia'}</p>
+          <Button variant="primary" size="lg" onClick={handleStepComplete} icon={Play}>
+            Jogar Agora
+          </Button>
+        </div>
+      );
+    } else if (currentStep === 1) {
+      // Story step
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <div className="text-6xl animate-pulse">📖</div>
+          <h3 className="text-xl font-black text-gray-800">{monthData.story?.title || 'História do Dia'}</h3>
+          <p className="text-gray-600 text-center max-h-32 overflow-y-auto">
+            {monthData.story?.slides?.[0]?.text || 'Descubra a história de hoje!'}
+          </p>
+          <Button variant="primary" size="lg" onClick={handleStepComplete} icon={BookOpen}>
+            Ler História
+          </Button>
+        </div>
+      );
+    } else {
+      // Quiz step
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <div className="text-6xl animate-bounce">🧠</div>
+          <h3 className="text-xl font-black text-gray-800">Quiz Final!</h3>
+          <p className="text-gray-600 text-center">Responda corretamente e complete o dia!</p>
+          <Button variant="success" size="lg" onClick={handleStepComplete} icon={Lightbulb}>
+            Responder Quiz
+          </Button>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      <div className="bg-gradient-to-b from-white to-slate-50 rounded-3xl p-8 max-w-md w-full relative shadow-2xl border-4 border-white/50">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <X size={24} />
+        </button>
+
+        {/* Day header */}
+        <div className="text-center mb-6">
+          <div className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-black text-sm mb-2">
+            DIA {dayNumber}
+          </div>
+          <h2 className="text-2xl font-black text-gray-800">{monthData.name}</h2>
+        </div>
+
+        {/* Progress stars */}
+        <div className="flex justify-center gap-4 mb-8">
+          {starsEarned.map((earned, idx) => (
+            <div
+              key={idx}
+              className={`transition-all duration-500 ${
+                idx === currentStep ? 'scale-125 animate-pulse' : ''
+              } ${earned ? 'text-yellow-400' : 'text-gray-300'}`}
+            >
+              <Star
+                size={40}
+                fill={earned ? 'currentColor' : 'none'}
+                strokeWidth={2}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Step indicator */}
+        <div className="flex justify-center gap-2 mb-6">
+          {steps.map((step, idx) => {
+            const StepIcon = step.icon;
+            return (
+              <div
+                key={idx}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300 ${
+                  idx === currentStep
+                    ? `bg-gradient-to-r ${step.color} text-white shadow-lg scale-110`
+                    : idx < currentStep
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-gray-100 text-gray-400'
+                }`}
+              >
+                <StepIcon size={16} strokeWidth={2.5} />
+                <span className="text-xs font-bold hidden sm:inline">{step.name}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Step content */}
+        <div className="min-h-[200px] flex items-center justify-center">
+          {showStepComplete ? (
+            <div className="text-center animate-in zoom-in duration-300">
+              <div className="text-8xl mb-4">⭐</div>
+              <h3 className="text-2xl font-black text-green-600">Parabéns!</h3>
+              <p className="text-gray-600">Você ganhou uma estrela!</p>
+            </div>
+          ) : (
+            renderStepContent()
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+DailyModal.displayName = 'DailyModal';
 
 /* ========================================
    VICTORY MODAL (Juicy UI)
@@ -2214,22 +2412,39 @@ const PathItems = memo(({ dayIndex }) => {
 
 PathItems.displayName = 'PathItems';
 
-// Optimized: Memoize individual day component with base/shadow
-const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick, monthIndex, style }) => {
-  // Calculate if this day is in the past
-  const isPast = useMemo(() => {
-    const today = new Date();
-    const currentMonth = today.getMonth(); // 0-11
-    const currentDay = today.getDate();
+// Optimized: Memoize individual day component with bloqueio progression system
+const DayNode = memo(({
+  dayNum,
+  month,
+  isCurrentDay,
+  specialDate,
+  onSpecialClick,
+  monthIndex,
+  style,
+  dayIndexInYear,
+  lastCompletedDay,
+  onDayClick,
+  completedDays = []
+}) => {
+  // Calculate if this day is locked (not completed previous day)
+  const isLocked = dayIndexInYear > lastCompletedDay + 1;
+  const isCompleted = dayIndexInYear <= lastCompletedDay;
+  const isAvailable = dayIndexInYear === lastCompletedDay + 1;
 
-    // monthIndex: 0=Janeiro, 1=Fevereiro, ..., 11=Dezembro
-    if (monthIndex < currentMonth) return true; // Mês já passou
-    if (monthIndex > currentMonth) return false; // Mês futuro
-    return dayNum < currentDay; // Mesmo mês: compara dia
-  }, [dayNum, monthIndex]);
+  // Check if day has all 3 stars
+  const stars = completedDays[dayIndexInYear] || 0;
 
   const neonStyle = specialDate ? `${specialDate.color}` : '';
   const SpecialIcon = specialDate?.icon;
+
+  const handleClick = () => {
+    if (isLocked) return; // Can't click locked days
+    if (specialDate && !isCompleted) {
+      onSpecialClick(specialDate);
+    } else if (isAvailable || isCurrentDay) {
+      onDayClick(dayIndexInYear, month);
+    }
+  };
 
   return (
     <div className="absolute flex flex-col items-center z-10" style={style}>
@@ -2238,38 +2453,69 @@ const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick
 
       {/* Botão do Dia (Level Node) */}
       <div
-        onClick={() => specialDate && !isPast && onSpecialClick(specialDate)}
+        onClick={handleClick}
         className={`
             relative w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-[3px]
-            ${isCurrentDay
-                ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-600 scale-125 sm:scale-150 shadow-[0_0_25px_rgba(250,204,21,0.8)] z-20 animate-pulse'
-                : isPast
-                    ? 'bg-gradient-to-b from-slate-700/60 to-slate-800/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale'
-                    : specialDate
-                        ? `${neonStyle} cursor-pointer hover:scale-125 shadow-lg border-white/50`
-                        : 'bg-gradient-to-b from-blue-400 to-blue-600 border-blue-700 text-white shadow-[0_4px_15px_rgba(59,130,246,0.5)] hover:scale-110 hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)]'
+            ${isAvailable || isCurrentDay
+                ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-600 scale-125 sm:scale-150 shadow-[0_0_25px_rgba(250,204,21,0.8)] z-20 animate-pulse cursor-pointer'
+                : isCompleted
+                    ? 'bg-gradient-to-b from-green-400 to-green-600 border-green-700 text-white shadow-[0_4px_15px_rgba(34,197,94,0.5)] cursor-pointer hover:scale-110'
+                    : isLocked
+                        ? 'bg-gradient-to-b from-slate-700/60 to-slate-800/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale cursor-not-allowed'
+                        : specialDate
+                            ? `${neonStyle} cursor-pointer hover:scale-125 shadow-lg border-white/50`
+                            : 'bg-gradient-to-b from-blue-400 to-blue-600 border-blue-700 text-white shadow-[0_4px_15px_rgba(59,130,246,0.5)] hover:scale-110 hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)]'
             }
         `}
       >
-        {isCurrentDay ? (
+        {isLocked ? (
+          <Lock size={12} className="text-slate-400" strokeWidth={2.5} />
+        ) : isAvailable || isCurrentDay ? (
           <Sun size={18} className="text-yellow-900 animate-spin-slow sm:w-6 sm:h-6" strokeWidth={2.5} />
+        ) : isCompleted && stars >= 3 ? (
+          <CheckCircle size={14} className="text-white" strokeWidth={2.5} />
         ) : (
-          specialDate ? <SpecialIcon size={10} className={!isPast && "animate-spin-slow"}/> : dayNum
+          specialDate ? <SpecialIcon size={10} className="animate-spin-slow"/> : dayNum
         )}
       </div>
+
+      {/* Stars indicator for completed days */}
+      {isCompleted && stars > 0 && (
+        <div className="absolute -bottom-3 flex gap-[2px]">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Star
+              key={i}
+              size={8}
+              className={i < stars ? 'text-yellow-400' : 'text-gray-300'}
+              fill={i < stars ? 'currentColor' : 'none'}
+              strokeWidth={2}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 });
 
 DayNode.displayName = 'DayNode';
 
-const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedStories, readStories }) => {
+const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedStories, readStories, onDayClick, completedDays = {} }) => {
   const containerRef = useRef(null);
   const currentDayRef = useRef(null);
   const [activeDecoration, setActiveDecoration] = useState(null);
   const [selectedSpecialDate, setSelectedSpecialDate] = useState(null);
 
   const reversedMonths = useMemo(() => [...MONTHS_CONFIG].reverse(), []);
+
+  // Calculate day index in year from month and day
+  const calculateDayIndexInYear = useCallback((monthIndex, dayNum) => {
+    let dayIndex = 0;
+    for (let i = 0; i < monthIndex; i++) {
+      dayIndex += MONTHS_CONFIG[i].days;
+    }
+    dayIndex += dayNum - 1; // dayNum starts from 1
+    return dayIndex;
+  }, []);
 
   // Optimized: Scroll animation only runs once on mount
   useLayoutEffect(() => {
@@ -2614,7 +2860,8 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                   const dayIndex = i; // Index for path calculation
                   const pathPosition = calculatePathPosition(dayIndex, month.days);
                   const specialDate = month.specialDates?.find(sd => sd.day === dayNum);
-                  const isCurrentDay = month.name === 'Novembro' && dayNum === 27;
+                  const dayIndexInYear = calculateDayIndexInYear(monthIndex, dayNum);
+                  const isCurrentDay = dayIndexInYear === lastCompletedDay + 1;
 
                   return (
                     <div key={dayNum} ref={isCurrentDay ? currentDayRef : null}>
@@ -2622,9 +2869,13 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                         dayNum={dayNum}
                         month={month}
                         monthIndex={monthIndex}
+                        dayIndexInYear={dayIndexInYear}
                         isCurrentDay={isCurrentDay}
                         specialDate={specialDate}
                         onSpecialClick={handleSpecialDateClick}
+                        lastCompletedDay={lastCompletedDay}
+                        onDayClick={onDayClick}
+                        completedDays={completedDays}
                         style={pathPosition}
                       />
                       {/* PathItems - Itens decorativos entre os dias */}
@@ -2688,6 +2939,8 @@ export default function CheckInApp() {
   const [lastCheckInDate, setLastCheckInDate] = useState(null);
   const [showStreakBonus, setShowStreakBonus] = useState(false);
   const [streakBonusAmount, setStreakBonusAmount] = useState(0);
+  const [dailyModal, setDailyModal] = useState(null); // { dayNumber, monthData }
+  const [completedDays, setCompletedDays] = useState({}); // { dayIndex: stars (0-3) }
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -2705,6 +2958,10 @@ export default function CheckInApp() {
     setStreak(savedStreak);
     const savedLastCheckIn = localStorage.getItem('checkin_last_date');
     setLastCheckInDate(savedLastCheckIn);
+
+    // Load completed days data
+    const savedCompletedDays = JSON.parse(localStorage.getItem('checkin_completed_days') || '{}');
+    setCompletedDays(savedCompletedDays);
   }, []);
 
   const handleDayComplete = useCallback(() => {
@@ -2846,6 +3103,46 @@ export default function CheckInApp() {
       }
   }, [readStories]);
 
+  // Daily Modal handlers
+  const handleDayClick = useCallback((dayIndexInYear, monthData) => {
+    setDailyModal({
+      dayNumber: dayIndexInYear + 1,
+      monthData
+    });
+  }, []);
+
+  const handleCloseDailyModal = useCallback(() => {
+    setDailyModal(null);
+  }, []);
+
+  const handleDailyComplete = useCallback(() => {
+    if (!dailyModal) return;
+
+    const dayIndex = dailyModal.dayNumber - 1;
+
+    // Mark day as complete with 3 stars
+    setCompletedDays(prev => {
+      const updated = { ...prev, [dayIndex]: 3 };
+      localStorage.setItem('checkin_completed_days', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Advance progression
+    setLastCompletedDay(dayIndex);
+    localStorage.setItem('checkin_day', dayIndex.toString());
+
+    // Add coins reward
+    const coinsToAdd = 30; // 10 per step
+    addCoins(coinsToAdd);
+
+    // Close modal
+    setDailyModal(null);
+
+    // Show victory
+    setVictoryCoins(coinsToAdd);
+    setShowVictoryModal(true);
+  }, [dailyModal, addCoins]);
+
   return (
     <div className="w-full h-screen max-w-md mx-auto bg-slate-900 overflow-hidden relative font-sans shadow-2xl">
       {/* HEADER */}
@@ -2892,6 +3189,8 @@ export default function CheckInApp() {
             onOpenStory={handleOpenStory}
             unlockedStories={unlockedStories}
             readStories={readStories}
+            onDayClick={handleDayClick}
+            completedDays={completedDays}
           />
         )}
         {screen === 'lar' && <LarScreen coins={coins} onSpendCoins={spendCoins} />}
@@ -2927,6 +3226,16 @@ export default function CheckInApp() {
           streak={streak}
           bonusAmount={streakBonusAmount}
           onClose={handleCloseStreakBonus}
+        />
+      )}
+
+      {/* Daily Modal (Progression System) */}
+      {dailyModal && (
+        <DailyModal
+          dayNumber={dailyModal.dayNumber}
+          monthData={dailyModal.monthData}
+          onComplete={handleDailyComplete}
+          onClose={handleCloseDailyModal}
         />
       )}
 
