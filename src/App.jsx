@@ -2236,14 +2236,6 @@ const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick
       {/* Sombra Projetada Realista (projetada sobre a estrada) */}
       <div className="absolute top-[32px] sm:top-[42px] w-12 h-3 bg-black/40 rounded-full blur-[3px] opacity-60"></div>
 
-      {/* Base Circular de Pedra (ancora o nó na estrada) */}
-      <div className={`absolute top-[28px] sm:top-[36px] w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-stone-400 via-stone-500 to-stone-600 border-2 border-stone-700 opacity-80 shadow-inner ${
-        isCurrentDay ? 'scale-110' : ''
-      }`}>
-        {/* Textura de pedra na base */}
-        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),transparent_50%)]"></div>
-      </div>
-
       {/* Botão do Dia (Level Node) */}
       <div
         onClick={() => specialDate && !isPast && onSpecialClick(specialDate)}
