@@ -366,7 +366,7 @@ const SeasonButton = memo(({ season, onClick }) => {
     return (
         <div className="relative group">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/20 rounded-full blur-xl -z-10 group-hover:bg-white/40 transition-all"></div>
-            <button onClick={onClick} className={`relative w-40 sm:w-48 py-3 sm:py-4 rounded-2xl shadow-2xl border-4 flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:scale-95 hover:scale-105 hover:-translate-y-1 ${buttonStyle}`}>
+            <button onClick={onClick} className={`relative w-40 sm:w-48 py-3 sm:py-4 rounded-3xl shadow-2xl border-4 border-b-6 flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:border-b-0 active:translate-y-2 hover:scale-105 hover:-translate-y-1 ${buttonStyle}`}>
                 <Icon size={24} className="drop-shadow-md" />
                 <span className="text-xs font-black uppercase tracking-widest drop-shadow-sm">{season.name}</span>
                 {decor}
@@ -1425,10 +1425,10 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
               <button
                 key={petOption.type}
                 onClick={() => changePet(petOption.type, petOption.name)}
-                className={`p-3 rounded-2xl border-2 transition-all ${
+                className={`p-3 rounded-3xl border-b-4 transition-all ${
                   pet.type === petOption.type
-                    ? 'bg-gradient-to-br from-pink-200 to-purple-200 border-pink-400 scale-110 shadow-lg'
-                    : 'bg-white/80 border-gray-200 hover:scale-105'
+                    ? 'bg-gradient-to-br from-pink-300 to-purple-300 border-pink-500 scale-110 shadow-[0_8px_30px_rgba(244,114,182,0.4)]'
+                    : 'bg-gradient-to-b from-white to-gray-50 border-gray-300 hover:scale-105 hover:shadow-lg active:border-b-0 active:translate-y-1'
                 }`}
               >
                 <div className="text-3xl">{petOption.emoji}</div>
@@ -1544,10 +1544,10 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
                 key={fruit.id}
                 onClick={() => feedPet(fruit)}
                 disabled={coins < fruit.cost}
-                className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-green-200 transition-all ${
+                className={`bg-gradient-to-b from-white to-green-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 transition-all ${
                   coins < fruit.cost
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:scale-105 active:scale-95 hover:shadow-xl'
+                    ? 'opacity-50 cursor-not-allowed border-gray-300'
+                    : 'border-green-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(34,197,94,0.3)] active:border-b-0 active:translate-y-1'
                 }`}
               >
                 <div className="text-4xl mb-2">{fruit.emoji}</div>
@@ -1570,10 +1570,10 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
             <button
               onClick={playWithPet}
               disabled={coins < 10 || pet.energy < 10}
-              className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-pink-200 transition-all ${
+              className={`bg-gradient-to-b from-white to-pink-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 transition-all ${
                 coins < 10 || pet.energy < 10
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:scale-105 active:scale-95 hover:shadow-xl'
+                  ? 'opacity-50 cursor-not-allowed border-gray-300'
+                  : 'border-pink-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(244,114,182,0.3)] active:border-b-0 active:translate-y-1'
               }`}
             >
               <div className="text-4xl mb-2">🎾</div>
@@ -1589,10 +1589,10 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
             <button
               onClick={petSleep}
               disabled={pet.energy === 100}
-              className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-blue-200 transition-all ${
+              className={`bg-gradient-to-b from-white to-blue-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 transition-all ${
                 pet.energy === 100
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:scale-105 active:scale-95 hover:shadow-xl'
+                  ? 'opacity-50 cursor-not-allowed border-gray-300'
+                  : 'border-blue-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(59,130,246,0.3)] active:border-b-0 active:translate-y-1'
               }`}
             >
               <div className="text-4xl mb-2">😴</div>
