@@ -918,7 +918,7 @@ FlyingStar.displayName = 'FlyingStar';
    VICTORY MODAL (Juicy UI)
    ======================================== */
 
-const VictoryModal = memo(({ coins, onClaim }) => {
+const VictoryModal = memo(({ coins, onClaim, storyUnlocked }) => {
   const [confettiPieces, setConfettiPieces] = useState([]);
   const [claimed, setClaimed] = useState(false);
 
@@ -1003,6 +1003,21 @@ const VictoryModal = memo(({ coins, onClaim }) => {
             </div>
             <p className="text-xs font-bold text-gray-500 mt-2">Estrelas da Virtude</p>
           </div>
+
+          {/* Story Unlocked Notification */}
+          {storyUnlocked && (
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border-2 border-purple-300 mb-4 animate-in zoom-in duration-500">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-full animate-bounce">
+                  <BookOpen size={24} className="text-white" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-black text-purple-700 uppercase">📖 Bônus Desbloqueado!</p>
+                  <p className="text-xs font-bold text-gray-600">Nova história disponível!</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Claim button */}
@@ -1697,6 +1712,9 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
         className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-950"
         onClick={handleCloseDecoration}
     >
+        {/* Parallax Decorations */}
+        <ParallaxDecorations position={0} />
+
         <div className="pt-20 sm:pt-32 pb-10 text-center animate-pulse z-10 relative">
             <div className="inline-block relative">
                 <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-50 rounded-full"></div>
@@ -1963,7 +1981,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                   const isCurrentDay = month.name === 'Novembro' && dayNum === 27;
 
                   return (
-                    <div key={dayNum} ref={isCurrentDay ? currentDayRef : null}>
+                    <div key={dayNum} ref={isCurrentDay ? currentDayRef : null} className="relative">
                       <DayNode
                         dayNum={dayNum}
                         month={month}
@@ -1972,6 +1990,11 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                         specialDate={specialDate}
                         onSpecialClick={handleSpecialDateClick}
                       />
+                      {isCurrentDay && (
+                        <div className="absolute -top-16 left-1/2 -translate-x-1/2">
+                          <FloatingAvatar />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -2012,6 +2035,7 @@ export default function CheckInApp() {
   const [showVictoryModal, setShowVictoryModal] = useState(false);
   const [victoryCoins, setVictoryCoins] = useState(0);
   const [flyingStars, setFlyingStars] = useState([]);
+  const [storyUnlocked, setStoryUnlocked] = useState(false);
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -2058,6 +2082,7 @@ export default function CheckInApp() {
     const coinsToAdd = 50;
 
     const storyIdToUnlock = currentGameConfig?.story?.id || currentGameConfig?.seasonEvent?.story?.id;
+    let hasUnlockedStory = false;
 
     if (storyIdToUnlock && !unlockedStories.includes(storyIdToUnlock)) {
         setUnlockedStories(prev => {
@@ -2065,12 +2090,13 @@ export default function CheckInApp() {
           localStorage.setItem('checkin_stories', JSON.stringify(newStories));
           return newStories;
         });
-        setTimeout(() => alert(`Nova História Desbloqueada!`), 500);
+        hasUnlockedStory = true;
     }
 
     // Close game and show victory modal
     setCurrentGameConfig(null);
     setVictoryCoins(coinsToAdd);
+    setStoryUnlocked(hasUnlockedStory);
     setShowVictoryModal(true);
   }, [currentGameConfig, unlockedStories]);
 
@@ -2183,6 +2209,7 @@ export default function CheckInApp() {
         <VictoryModal
           coins={victoryCoins}
           onClaim={handleClaimReward}
+          storyUnlocked={storyUnlocked}
         />
       )}
 
