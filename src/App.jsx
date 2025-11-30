@@ -1339,6 +1339,12 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
       return;
     }
 
+    // Check if hunger is already full
+    if (pet.hunger >= 100) {
+      addFloatingText('🍽️ Já está cheio!', 'text-orange-500');
+      return;
+    }
+
     onSpendCoins(fruit.cost);
     setPet(prev => ({
       ...prev,
@@ -1349,7 +1355,7 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
     animateAction('eating');
     addFloatingText(`-${fruit.cost} ⭐`, 'text-yellow-500');
     setTimeout(() => addFloatingText(`+${fruit.hunger} 🍽️`, 'text-green-500'), 200);
-  }, [coins, onSpendCoins, addFloatingText, animateAction]);
+  }, [coins, pet.hunger, onSpendCoins, addFloatingText, animateAction]);
 
   // Play with pet
   const playWithPet = useCallback(() => {
@@ -1360,6 +1366,12 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
 
     if (pet.energy < 10) {
       addFloatingText('Sem energia!', 'text-orange-500');
+      return;
+    }
+
+    // Check if happiness is already full
+    if (pet.happiness >= 100) {
+      addFloatingText('😊 Já está feliz!', 'text-pink-500');
       return;
     }
 
@@ -1374,10 +1386,16 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
     animateAction('playing');
     addFloatingText('-10 ⭐', 'text-yellow-500');
     setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
-  }, [coins, pet.energy, onSpendCoins, addFloatingText, animateAction]);
+  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction]);
 
   // Pet sleep (free action)
   const petSleep = useCallback(() => {
+    // Check if energy is already full
+    if (pet.energy >= 100) {
+      addFloatingText('⚡ Energia cheia!', 'text-blue-500');
+      return;
+    }
+
     setPet(prev => ({
       ...prev,
       energy: 100,
@@ -1386,7 +1404,7 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
 
     animateAction('sleeping');
     addFloatingText('+100 ⚡', 'text-blue-500');
-  }, [addFloatingText, animateAction]);
+  }, [pet.energy, addFloatingText, animateAction]);
 
   // Determine pet mood
   const getPetMood = useCallback(() => {
