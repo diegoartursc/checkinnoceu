@@ -883,48 +883,305 @@ const StoryOverlay = memo(({ story, onClose }) => {
 StoryOverlay.displayName = 'StoryOverlay';
 
 /* ========================================
-   LAR SCREEN (Pet Home)
+   LAR SCREEN (Pet Home - Tamagotchi System)
    ======================================== */
 
-const LarScreen = memo(() => {
+const LarScreen = memo(({ coins, onSpendCoins }) => {
+  // Pet state with localStorage persistence
+  const [pet, setPet] = useState(() => {
+    const saved = localStorage.getItem('checkin_pet');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      type: 'ovelhinha',
+      name: 'Ovelhinha',
+      hunger: 100,
+      happiness: 100,
+      energy: 100,
+      lastUpdate: Date.now()
+    };
+  });
+
+  // Floating feedback texts
+  const [floatingTexts, setFloatingTexts] = useState([]);
+
+  // Calculate decay based on time passed (runs once on mount)
+  useEffect(() => {
+    const now = Date.now();
+    const hoursPassed = (now - pet.lastUpdate) / (1000 * 60 * 60);
+
+    // Decay if more than 0.1 hours passed (6 minutes - for testing)
+    if (hoursPassed > 0.1) {
+      const hungerDecay = Math.floor(hoursPassed * 5);
+      const happinessDecay = Math.floor(hoursPassed * 3);
+      const energyDecay = Math.floor(hoursPassed * 4);
+
+      setPet(prev => ({
+        ...prev,
+        hunger: Math.max(0, prev.hunger - hungerDecay),
+        happiness: Math.max(0, prev.happiness - happinessDecay),
+        energy: Math.max(0, prev.energy - energyDecay),
+        lastUpdate: now
+      }));
+    }
+  }, []);
+
+  // Save to localStorage whenever pet state changes
+  useEffect(() => {
+    localStorage.setItem('checkin_pet', JSON.stringify(pet));
+  }, [pet]);
+
+  // Frutos do Espírito (Gálatas 5:22-23)
+  const fruits = useMemo(() => [
+    { id: 1, name: 'Maçã do Amor', emoji: '🍎', cost: 15, hunger: 30, verse: 'Amor' },
+    { id: 2, name: 'Uva da Alegria', emoji: '🍇', cost: 12, hunger: 25, verse: 'Alegria' },
+    { id: 3, name: 'Pêra da Paz', emoji: '🍐', cost: 10, hunger: 20, verse: 'Paz' },
+    { id: 4, name: 'Pêssego da Paciência', emoji: '🍑', cost: 18, hunger: 35, verse: 'Paciência' },
+    { id: 5, name: 'Mel da Amabilidade', emoji: '🍯', cost: 15, hunger: 30, verse: 'Amabilidade' },
+    { id: 6, name: 'Pão da Bondade', emoji: '🍞', cost: 20, hunger: 40, verse: 'Bondade' },
+  ], []);
+
+  // Add floating text animation
+  const addFloatingText = useCallback((text, color) => {
+    const id = Date.now() + Math.random();
+    setFloatingTexts(prev => [...prev, { id, text, color }]);
+    setTimeout(() => {
+      setFloatingTexts(prev => prev.filter(t => t.id !== id));
+    }, 2000);
+  }, []);
+
+  // Feed pet with fruit
+  const feedPet = useCallback((fruit) => {
+    if (coins < fruit.cost) {
+      addFloatingText('⭐ Insuficiente!', 'text-red-500');
+      return;
+    }
+
+    onSpendCoins(fruit.cost);
+    setPet(prev => ({
+      ...prev,
+      hunger: Math.min(100, prev.hunger + fruit.hunger),
+      lastUpdate: Date.now()
+    }));
+
+    addFloatingText(`-${fruit.cost} ⭐`, 'text-yellow-500');
+    setTimeout(() => addFloatingText(`+${fruit.hunger} 🍽️`, 'text-green-500'), 200);
+  }, [coins, onSpendCoins, addFloatingText]);
+
+  // Play with pet
+  const playWithPet = useCallback(() => {
+    if (coins < 10) {
+      addFloatingText('⭐ Insuficiente!', 'text-red-500');
+      return;
+    }
+
+    if (pet.energy < 10) {
+      addFloatingText('Sem energia!', 'text-orange-500');
+      return;
+    }
+
+    onSpendCoins(10);
+    setPet(prev => ({
+      ...prev,
+      happiness: Math.min(100, prev.happiness + 30),
+      energy: Math.max(0, prev.energy - 10),
+      lastUpdate: Date.now()
+    }));
+
+    addFloatingText('-10 ⭐', 'text-yellow-500');
+    setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
+  }, [coins, pet.energy, onSpendCoins, addFloatingText]);
+
+  // Pet sleep (free action)
+  const petSleep = useCallback(() => {
+    setPet(prev => ({
+      ...prev,
+      energy: 100,
+      lastUpdate: Date.now()
+    }));
+
+    addFloatingText('+100 ⚡', 'text-blue-500');
+  }, [addFloatingText]);
+
+  // Determine pet mood
+  const getPetMood = useCallback(() => {
+    const avg = (pet.hunger + pet.happiness + pet.energy) / 3;
+    if (avg > 70) return { emoji: '😊', mood: 'Muito Feliz!', color: 'text-green-500' };
+    if (avg > 40) return { emoji: '😐', mood: 'Ok', color: 'text-yellow-600' };
+    return { emoji: '😢', mood: 'Precisa de cuidados!', color: 'text-red-500' };
+  }, [pet.hunger, pet.happiness, pet.energy]);
+
+  const mood = getPetMood();
+
   return (
-    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-purple-50 to-blue-50 -z-10"></div>
+    <div className="h-full flex flex-col relative overflow-hidden bg-gradient-to-b from-amber-100 via-green-50 to-sky-100">
       <CloudBackground />
 
-      {/* Coming soon message */}
-      <div className="relative z-10 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-1000">
-        {/* Icon */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-pink-400 blur-3xl opacity-30 rounded-full animate-pulse"></div>
-          <div className="relative bg-gradient-to-br from-pink-400 to-purple-500 p-8 rounded-full shadow-2xl">
-            <Heart size={80} className="text-white fill-white drop-shadow-lg animate-pulse" />
+      {/* Content */}
+      <div className="relative z-10 h-full overflow-y-auto pb-24 pt-16 px-4 custom-scrollbar">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+            Lar do Amiguinho
+          </h1>
+          <p className="text-sm font-bold text-gray-600 mt-1">
+            Use suas Estrelas da Virtude! ⭐
+          </p>
+        </div>
+
+        {/* Pet Display */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-xl border-2 border-pink-200 relative overflow-hidden">
+          {/* Floating texts */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
+            {floatingTexts.map((ft, index) => (
+              <div
+                key={ft.id}
+                className={`absolute font-black text-2xl ${ft.color}`}
+                style={{
+                  animation: 'floatUp 2s ease-out forwards',
+                  left: `${(index % 3 - 1) * 30}px`
+                }}
+              >
+                {ft.text}
+              </div>
+            ))}
+          </div>
+
+          {/* Pet */}
+          <div className="text-center mb-4">
+            <div className="text-8xl mb-2 animate-bounce">
+              {pet.type === 'ovelhinha' ? '🐑' : pet.type === 'leao' ? '🦁' : '🕊️'}
+            </div>
+            <div className="text-4xl mb-1">{mood.emoji}</div>
+            <p className="font-bold text-gray-700 text-lg">{pet.name}</p>
+            <p className={`text-sm font-bold ${mood.color}`}>{mood.mood}</p>
+          </div>
+
+          {/* Status Bars */}
+          <div className="space-y-3">
+            {/* Hunger */}
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span>🍽️ Fome</span>
+                <span>{pet.hunger}%</span>
+              </div>
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-orange-400 to-red-500 transition-all duration-500"
+                  style={{ width: `${pet.hunger}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Happiness */}
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span>😊 Alegria</span>
+                <span>{pet.happiness}%</span>
+              </div>
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-pink-400 to-purple-500 transition-all duration-500"
+                  style={{ width: `${pet.happiness}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Energy */}
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span>⚡ Energia</span>
+                <span>{pet.energy}%</span>
+              </div>
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-400 to-cyan-500 transition-all duration-500"
+                  style={{ width: `${pet.energy}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Title */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
-            Lar do Amiguinho
-          </h1>
-          <p className="text-lg font-bold text-gray-600">
-            🐾 Em breve você poderá cuidar do seu pet! 🐾
-          </p>
+        {/* Frutos do Espírito Section */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-black text-lg text-gray-700">🍎 Frutos do Espírito</h2>
+            <p className="text-[10px] text-gray-500 font-bold">Gálatas 5:22</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {fruits.map(fruit => (
+              <button
+                key={fruit.id}
+                onClick={() => feedPet(fruit)}
+                disabled={coins < fruit.cost}
+                className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-green-200 transition-all ${
+                  coins < fruit.cost
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:scale-105 active:scale-95 hover:shadow-xl'
+                }`}
+              >
+                <div className="text-4xl mb-2">{fruit.emoji}</div>
+                <p className="font-bold text-xs text-gray-700 mb-1">{fruit.name}</p>
+                <div className="flex items-center justify-center gap-1 text-xs mb-1">
+                  <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                  <span className="font-bold">{fruit.cost}</span>
+                </div>
+                <p className="text-[10px] text-green-600 font-bold">+{fruit.hunger} Fome</p>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Description */}
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border-2 border-pink-200 max-w-sm">
-          <p className="text-gray-700 font-medium leading-relaxed">
-            Aqui você vai poder alimentar, brincar e cuidar do seu amiguinho especial todos os dias! ✨
-          </p>
+        {/* Activities Section */}
+        <div className="mb-6">
+          <h2 className="font-black text-lg text-gray-700 mb-3">🎯 Atividades</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Play */}
+            <button
+              onClick={playWithPet}
+              disabled={coins < 10 || pet.energy < 10}
+              className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-pink-200 transition-all ${
+                coins < 10 || pet.energy < 10
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105 active:scale-95 hover:shadow-xl'
+              }`}
+            >
+              <div className="text-4xl mb-2">🎾</div>
+              <p className="font-bold text-xs text-gray-700 mb-1">Brincar</p>
+              <div className="flex items-center justify-center gap-1 text-xs mb-1">
+                <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                <span className="font-bold">10</span>
+              </div>
+              <p className="text-[10px] text-pink-600 font-bold">+30 Alegria | -10 Energia</p>
+            </button>
+
+            {/* Sleep */}
+            <button
+              onClick={petSleep}
+              disabled={pet.energy === 100}
+              className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-blue-200 transition-all ${
+                pet.energy === 100
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105 active:scale-95 hover:shadow-xl'
+              }`}
+            >
+              <div className="text-4xl mb-2">😴</div>
+              <p className="font-bold text-xs text-gray-700 mb-1">Dormir</p>
+              <div className="flex items-center justify-center gap-1 text-xs mb-1">
+                <span className="font-bold text-green-600">Grátis!</span>
+              </div>
+              <p className="text-[10px] text-blue-600 font-bold">Restaura Energia</p>
+            </button>
+          </div>
         </div>
 
-        {/* Decorative elements */}
-        <div className="flex gap-4 text-4xl animate-bounce">
-          <span>🐶</span>
-          <span>🐱</span>
-          <span>🐰</span>
+        {/* Info Box */}
+        <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border-2 border-purple-200">
+          <p className="text-xs text-gray-700 text-center font-medium leading-relaxed">
+            💡 <strong>Dica Espiritual:</strong> Pratique as virtudes nos jogos para ganhar Estrelas e cultivar os Frutos do Espírito no seu amiguinho!
+          </p>
         </div>
       </div>
     </div>
@@ -1498,6 +1755,14 @@ export default function CheckInApp() {
     });
   }, []);
 
+  const spendCoins = useCallback((amount) => {
+    setCoins(prev => {
+      const newTotal = Math.max(0, prev - amount);
+      localStorage.setItem('checkin_coins', newTotal.toString());
+      return newTotal;
+    });
+  }, []);
+
   const handleWinGame = useCallback(() => {
     addCoins(50);
 
@@ -1564,7 +1829,7 @@ export default function CheckInApp() {
             readStories={readStories}
           />
         )}
-        {screen === 'lar' && <LarScreen />}
+        {screen === 'lar' && <LarScreen coins={coins} onSpendCoins={spendCoins} />}
       </div>
 
       {currentGameConfig && (

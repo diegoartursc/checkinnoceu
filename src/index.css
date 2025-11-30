@@ -144,6 +144,17 @@
   animation-timing-function: linear;
 }
 
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(1.5);
+  }
+}
+
 /* Performance optimizations */
 .gpu-accelerate {
   transform: translateZ(0);
