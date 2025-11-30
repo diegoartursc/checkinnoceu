@@ -1261,12 +1261,59 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animationType, setAnimationType] = useState(null);
 
+  // Pet selector modal
+  const [showPetSelector, setShowPetSelector] = useState(false);
+
   // Available pets
   const petTypes = useMemo(() => [
     { type: 'ovelhinha', name: 'Ovelhinha', emoji: '🐑', emojiAlt: '🐏' },
     { type: 'leao', name: 'Leãozinho', emoji: '🦁', emojiAlt: '🐯' },
     { type: 'pomba', name: 'Pombinha', emoji: '🕊️', emojiAlt: '🦅' }
   ], []);
+
+  // Get habitat decoration based on pet type
+  const getHabitatDecoration = useCallback(() => {
+    switch (pet.type) {
+      case 'ovelhinha':
+        // Campo/Fazenda
+        return (
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
+            <div className="text-6xl absolute top-2 left-4">🌾</div>
+            <div className="text-5xl absolute top-8 right-6">🌻</div>
+            <div className="text-4xl absolute bottom-4 left-8">🌾</div>
+            <div className="text-5xl absolute bottom-2 right-4">🌾</div>
+            <div className="text-3xl absolute top-1/2 left-2">🌻</div>
+            <div className="text-3xl absolute top-1/3 right-2">🌼</div>
+          </div>
+        );
+      case 'leao':
+        // Savana
+        return (
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
+            <div className="text-6xl absolute top-4 left-6">🌴</div>
+            <div className="text-5xl absolute top-2 right-8">☀️</div>
+            <div className="text-4xl absolute bottom-6 left-4">🌿</div>
+            <div className="text-5xl absolute bottom-2 right-6">🌴</div>
+            <div className="text-3xl absolute top-1/2 left-12">🍃</div>
+            <div className="text-4xl absolute top-1/3 right-4">🌿</div>
+          </div>
+        );
+      case 'pomba':
+        // Céu
+        return (
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
+            <div className="text-6xl absolute top-4 left-8">☁️</div>
+            <div className="text-5xl absolute top-12 right-6">☁️</div>
+            <div className="text-4xl absolute bottom-8 left-6">☁️</div>
+            <div className="text-5xl absolute bottom-4 right-8">☁️</div>
+            <div className="text-6xl absolute top-1/2 left-4">⭐</div>
+            <div className="text-4xl absolute top-1/3 right-12">✨</div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  }, [pet.type]);
 
   // Calculate decay based on time passed (runs once on mount)
   useEffect(() => {
@@ -1439,32 +1486,19 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
           </p>
         </div>
 
-        {/* Pet Selector */}
-        <div className="mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Repeat2 size={16} className="text-gray-600" />
-            <p className="text-xs font-bold text-gray-600">Escolha seu amiguinho:</p>
-          </div>
-          <div className="flex gap-3 justify-center">
-            {petTypes.map(petOption => (
-              <button
-                key={petOption.type}
-                onClick={() => changePet(petOption.type, petOption.name)}
-                className={`p-3 rounded-3xl border-b-4 transition-all ${
-                  pet.type === petOption.type
-                    ? 'bg-gradient-to-br from-pink-300 to-purple-300 border-pink-500 scale-110 shadow-[0_8px_30px_rgba(244,114,182,0.4)]'
-                    : 'bg-gradient-to-b from-white to-gray-50 border-gray-300 hover:scale-105 hover:shadow-lg active:border-b-0 active:translate-y-1'
-                }`}
-              >
-                <div className="text-3xl">{petOption.emoji}</div>
-                <p className="text-[10px] font-bold text-gray-600 mt-1">{petOption.name}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Pet Display */}
+        {/* Pet Display com Habitat */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-xl border-2 border-pink-200 relative overflow-hidden">
+          {/* Decoração de Habitat Natural */}
+          {getHabitatDecoration()}
+
+          {/* Botão de Trocar Pet */}
+          <button
+            onClick={() => setShowPetSelector(true)}
+            className="absolute top-3 right-3 bg-gradient-to-b from-purple-400 to-purple-600 text-white p-2 rounded-full shadow-lg border-b-4 border-purple-700 hover:scale-110 active:border-b-0 active:translate-y-1 transition-all z-30"
+            title="Trocar amiguinho"
+          >
+            <Repeat2 size={20} strokeWidth={3} />
+          </button>
           {/* Floating texts */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
             {floatingTexts.map((ft, index) => (
@@ -1661,6 +1695,65 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
           </p>
         </div>
       </div>
+
+      {/* Modal de Seleção de Pet */}
+      {showPetSelector && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
+          onClick={() => setShowPetSelector(false)}
+        >
+          <div
+            className="bg-gradient-to-b from-white to-purple-50 rounded-3xl p-8 text-center shadow-[0_0_80px_rgba(168,85,247,0.8)] border-4 border-purple-400 max-w-sm w-full relative animate-in zoom-in duration-500"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Sparkles */}
+            <div className="absolute -top-4 -left-4 text-purple-400 animate-pulse">
+              <Sparkles size={32} fill="currentColor" />
+            </div>
+            <div className="absolute -top-4 -right-4 text-pink-400 animate-pulse" style={{ animationDelay: '0.3s' }}>
+              <Sparkles size={28} fill="currentColor" />
+            </div>
+
+            {/* Header */}
+            <div className="mb-6">
+              <Repeat2 size={48} className="mx-auto mb-3 text-purple-600" strokeWidth={2.5} />
+              <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500">
+                Trocar Amiguinho
+              </h2>
+              <p className="text-sm font-bold text-gray-600 mt-2">Escolha seu companheiro espiritual:</p>
+            </div>
+
+            {/* Pet Options */}
+            <div className="flex gap-4 justify-center mb-6">
+              {petTypes.map(petOption => (
+                <button
+                  key={petOption.type}
+                  onClick={() => {
+                    changePet(petOption.type, petOption.name);
+                    setShowPetSelector(false);
+                  }}
+                  className={`p-4 rounded-3xl border-b-4 transition-all ${
+                    pet.type === petOption.type
+                      ? 'bg-gradient-to-br from-purple-300 to-pink-300 border-purple-600 scale-110 shadow-[0_8px_30px_rgba(168,85,247,0.5)]'
+                      : 'bg-gradient-to-b from-white to-gray-50 border-gray-300 hover:scale-110 hover:shadow-lg active:border-b-0 active:translate-y-1'
+                  }`}
+                >
+                  <div className="text-5xl mb-2">{petOption.emoji}</div>
+                  <p className="text-xs font-black text-gray-700">{petOption.name}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPetSelector(false)}
+              className="w-full bg-gradient-to-r from-gray-400 to-gray-600 text-white font-black text-sm py-3 rounded-2xl shadow-lg border-b-4 border-gray-700 hover:scale-105 active:border-b-0 active:translate-y-1 transition-all"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
