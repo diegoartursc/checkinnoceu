@@ -1915,63 +1915,60 @@ const calculatePathPosition = (dayIndex, totalDays) => {
    ROAD & SCENERY COMPONENTS
    ======================================== */
 
-// SVG Road Path - Estrada de Pedras Cobblestone 3D Realista
-const RoadPath = memo(({ height }) => {
-  // Generate SVG path data for sinuous road with perspective
-  const generateRoadPath = (widthMultiplier = 1) => {
-    const numPoints = Math.ceil(height / 55);
+// Dynamic Road Path - Conecta Pontos Exatos dos Nodes (King/Zynga Professional Style)
+const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
+  // Gera SVG path que conecta EXATAMENTE os centros dos nodes
+  const generateConnectedPath = useCallback(() => {
+    if (!nodePositions || nodePositions.length === 0) return '';
+
     let pathData = '';
 
-    for (let i = 0; i <= numPoints; i++) {
-      const y = i * 55;
-      // Perspective: wider at bottom (i = 0), narrower at top
-      const perspectiveFactor = 1 - (i / numPoints) * 0.3; // Vai de 1.0 (base) até 0.7 (topo)
-      const amplitude = 25 * perspectiveFactor * widthMultiplier;
-      const x = 50 + (Math.sin(i * (Math.PI * 2) / 12) * amplitude);
+    // Move to primeiro node
+    pathData += `M ${nodePositions[0].x} ${nodePositions[0].y} `;
 
-      if (i === 0) {
-        pathData += `M ${x} ${y} `;
-      } else {
-        const prevPerspective = 1 - ((i - 1) / numPoints) * 0.3;
-        const prevAmplitude = 25 * prevPerspective * widthMultiplier;
-        const prevX = 50 + (Math.sin((i-1) * (Math.PI * 2) / 12) * prevAmplitude);
-        const controlX = (prevX + x) / 2;
-        const controlY = y - 27.5;
-        pathData += `Q ${controlX} ${controlY}, ${x} ${y} `;
-      }
+    // Conecta todos os nodes com curvas suaves
+    for (let i = 1; i < nodePositions.length; i++) {
+      const prev = nodePositions[i - 1];
+      const curr = nodePositions[i];
+
+      // Quadratic Bezier para curva suave
+      const controlX = (prev.x + curr.x) / 2;
+      const controlY = (prev.y + curr.y) / 2;
+
+      pathData += `Q ${controlX} ${controlY}, ${curr.x} ${curr.y} `;
     }
 
     return pathData;
-  };
+  }, [nodePositions]);
+
+  const pathData = useMemo(() => generateConnectedPath(), [generateConnectedPath]);
+
+  if (!pathData) return null;
 
   return (
     <svg
       className="absolute inset-0 pointer-events-none z-[1]"
       width="100%"
-      height={height}
+      height={containerHeight}
       style={{ minHeight: '100%' }}
     >
       <defs>
-        {/* Cobblestone Pattern - Textura de Pedras */}
-        <pattern id="cobblestone" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-          {/* Pedras individuais com cores variadas */}
+        {/* Cobblestone Texture Pattern */}
+        <pattern id="roadTexture" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
           <rect x="0" y="0" width="18" height="18" fill="#6b7280" rx="3" opacity="0.9" />
           <rect x="20" y="0" width="18" height="18" fill="#78716c" rx="3" opacity="0.85" />
           <rect x="0" y="20" width="18" height="18" fill="#737373" rx="3" opacity="0.88" />
           <rect x="20" y="20" width="18" height="18" fill="#71717a" rx="3" opacity="0.92" />
 
-          {/* Sombras entre pedras (linhas escuras) */}
           <line x1="19" y1="0" x2="19" y2="40" stroke="#3f3f46" strokeWidth="1.5" opacity="0.7" />
           <line x1="0" y1="19" x2="40" y2="19" stroke="#3f3f46" strokeWidth="1.5" opacity="0.7" />
 
-          {/* Detalhes de musgo/sujeira */}
           <circle cx="5" cy="5" r="1.5" fill="#84cc16" opacity="0.3" />
           <circle cx="25" cy="28" r="1" fill="#84cc16" opacity="0.4" />
           <circle cx="12" cy="32" r="1.5" fill="#65a30d" opacity="0.25" />
         </pattern>
 
-        {/* Filter para adicionar textura e relevo */}
-        <filter id="stoneTexture">
+        <filter id="roadRelief">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" />
           <feDiffuseLighting in="noise" lightingColor="#d4d4d8" surfaceScale="1.5" result="diffLight">
             <feDistantLight azimuth="45" elevation="60" />
@@ -1979,71 +1976,77 @@ const RoadPath = memo(({ height }) => {
           <feComposite in="diffLight" in2="SourceGraphic" operator="multiply" />
         </filter>
 
-        {/* Gradient para profundidade da estrada */}
-        <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id="depthGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#57534e" stopOpacity="0.9" />
           <stop offset="50%" stopColor="#78716c" stopOpacity="0.95" />
           <stop offset="100%" stopColor="#6b7280" stopOpacity="1" />
         </linearGradient>
       </defs>
 
-      {/* CAMADA 1: Borda de Terra/Grama (mais escura) */}
+      {/* CAMADA 1: Sombra (Profundidade 3D) */}
       <path
-        d={generateRoadPath(1.15)}
+        d={pathData}
+        fill="none"
+        stroke="#27272a"
+        strokeWidth="76"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.5"
+        transform="translate(0, 4)"
+      />
+
+      {/* CAMADA 2: Borda Grama Escura */}
+      <path
+        d={pathData}
         fill="none"
         stroke="#4d7c0f"
-        strokeWidth="95"
+        strokeWidth="88"
         strokeLinecap="round"
+        strokeLinejoin="round"
         opacity="0.6"
       />
 
-      {/* CAMADA 2: Borda de Grama */}
+      {/* CAMADA 3: Borda Grama Clara */}
       <path
-        d={generateRoadPath(1.1)}
+        d={pathData}
         fill="none"
         stroke="#65a30d"
-        strokeWidth="88"
+        strokeWidth="80"
         strokeLinecap="round"
+        strokeLinejoin="round"
         opacity="0.75"
       />
 
-      {/* CAMADA 3: Base da Estrada (sombra) */}
+      {/* CAMADA 4: Estrada Cobblestone */}
       <path
-        d={generateRoadPath(1.0)}
+        d={pathData}
         fill="none"
-        stroke="#27272a"
-        strokeWidth="78"
+        stroke="url(#roadTexture)"
+        strokeWidth="68"
         strokeLinecap="round"
-        opacity="0.5"
+        strokeLinejoin="round"
+        filter="url(#roadRelief)"
       />
 
-      {/* CAMADA 4: Estrada Principal com Textura Cobblestone */}
+      {/* CAMADA 5: Overlay Profundidade */}
       <path
-        d={generateRoadPath(1.0)}
+        d={pathData}
         fill="none"
-        stroke="url(#cobblestone)"
-        strokeWidth="70"
+        stroke="url(#depthGradient)"
+        strokeWidth="68"
         strokeLinecap="round"
-        filter="url(#stoneTexture)"
-      />
-
-      {/* CAMADA 5: Overlay de profundidade */}
-      <path
-        d={generateRoadPath(1.0)}
-        fill="none"
-        stroke="url(#roadGradient)"
-        strokeWidth="70"
-        strokeLinecap="round"
+        strokeLinejoin="round"
         opacity="0.3"
       />
 
-      {/* CAMADA 6: Highlight superior (brilho nas pedras) */}
+      {/* CAMADA 6: Highlight */}
       <path
-        d={generateRoadPath(1.0)}
+        d={pathData}
         fill="none"
         stroke="rgba(255, 255, 255, 0.15)"
         strokeWidth="2"
         strokeLinecap="round"
+        strokeLinejoin="round"
         strokeDasharray="5,10"
         opacity="0.6"
       />
@@ -2051,7 +2054,7 @@ const RoadPath = memo(({ height }) => {
   );
 });
 
-RoadPath.displayName = 'RoadPath';
+DynamicRoadPath.displayName = 'DynamicRoadPath';
 
 // Campo Gramado + Decorações de Bioma 3D com Parallax
 const BiomeDecorations = memo(({ monthName, monthIndex }) => {
@@ -2618,8 +2621,23 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                   <Cloud size={55} className="absolute right-[-8px] top-[90%] text-white fill-white" />
                 </div>
 
-                {/* RoadPath SVG - Estrada Sinuosa */}
-                <RoadPath height={month.days * 55 + 100} />
+                {/* Dynamic Road Path - Conecta os centros exatos dos nodes (King/Zynga Style) */}
+                {(() => {
+                  // COLETAR todas as coordenadas dos nodes ANTES de renderizar
+                  const nodePositions = Array.from({ length: month.days }, (_, i) => {
+                    const dayIndex = i;
+                    const pathPosition = calculatePathPosition(dayIndex, month.days);
+
+                    // Converter de porcentagem para pixels absolutos
+                    const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
+                    const x = (parseFloat(pathPosition.left) / 100) * containerWidth;
+                    const y = parseInt(pathPosition.top);
+
+                    return { x, y };
+                  });
+
+                  return <DynamicRoadPath nodePositions={nodePositions} containerHeight={month.days * 55 + 100} />;
+                })()}
 
                 {/* BiomeDecorations - Decorações Sazonais */}
                 <BiomeDecorations monthName={month.name} monthIndex={monthIndex} />
