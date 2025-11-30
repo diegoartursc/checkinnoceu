@@ -1621,8 +1621,29 @@ CheckInScreen.displayName = 'CheckInScreen';
    MAP SCREEN (Highly Optimized)
    ======================================== */
 
+// Calculate sinuous path position (Match-3 style)
+const calculatePathPosition = (dayIndex, totalDays) => {
+  // Vertical spacing between days
+  const verticalSpacing = 55;
+  const top = dayIndex * verticalSpacing;
+
+  // S-curve using sine wave
+  // Frequency: completes wave every ~12 days
+  const waveFrequency = (Math.PI * 2) / 12;
+  const waveAmplitude = 25; // Amplitude in %
+  const centerPosition = 50; // Center position in %
+
+  // Create smooth S-curve
+  const left = centerPosition + (Math.sin(dayIndex * waveFrequency) * waveAmplitude);
+
+  return {
+    left: `${left}%`,
+    top: `${top}px`
+  };
+};
+
 // Optimized: Memoize individual day component
-const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick, monthIndex }) => {
+const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick, monthIndex, style }) => {
   // Calculate if this day is in the past
   const isPast = useMemo(() => {
     const today = new Date();
@@ -1639,7 +1660,7 @@ const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick
   const SpecialIcon = specialDate?.icon;
 
   return (
-    <div className="relative flex justify-center z-10">
+    <div className="absolute flex justify-center z-10" style={style}>
       <div
         onClick={() => specialDate && !isPast && onSpecialClick(specialDate)}
         className={`
@@ -1974,14 +1995,32 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                 </div>
               </div>
 
-              <div className="grid grid-cols-5 gap-y-2 gap-x-2 sm:gap-y-3 sm:gap-x-3 max-w-[200px] sm:max-w-[240px] mx-auto relative">
-                <div className="absolute inset-0 border-l-2 border-r-2 border-dashed border-white/10 rounded-3xl pointer-events-none"></div>
-                {daysInThisMonth.map((dayNum) => {
+              {/* Sinuous Path Container (Match-3 Style) */}
+              <div className="relative w-full" style={{ height: `${month.days * 55 + 100}px` }}>
+                {/* Cloud borders for depth */}
+                <div className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none overflow-hidden opacity-20">
+                  <Cloud size={80} className="absolute left-[-20px] top-[10%] text-white fill-white" />
+                  <Cloud size={60} className="absolute left-[-10px] top-[30%] text-white fill-white" />
+                  <Cloud size={70} className="absolute left-[-15px] top-[60%] text-white fill-white" />
+                  <Cloud size={50} className="absolute left-[-5px] top-[85%] text-white fill-white" />
+                </div>
+                <div className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none overflow-hidden opacity-20">
+                  <Cloud size={70} className="absolute right-[-15px] top-[15%] text-white fill-white" />
+                  <Cloud size={80} className="absolute right-[-20px] top-[40%] text-white fill-white" />
+                  <Cloud size={60} className="absolute right-[-10px] top-[70%] text-white fill-white" />
+                  <Cloud size={55} className="absolute right-[-8px] top-[90%] text-white fill-white" />
+                </div>
+
+                {/* Sinuous path of days */}
+                {Array.from({ length: month.days }, (_, i) => {
+                  const dayNum = month.days - i; // Countdown from month.days to 1
+                  const dayIndex = i; // Index for path calculation
+                  const pathPosition = calculatePathPosition(dayIndex, month.days);
                   const specialDate = month.specialDates?.find(sd => sd.day === dayNum);
                   const isCurrentDay = month.name === 'Novembro' && dayNum === 27;
 
                   return (
-                    <div key={dayNum} ref={isCurrentDay ? currentDayRef : null} className="relative">
+                    <div key={dayNum} ref={isCurrentDay ? currentDayRef : null}>
                       <DayNode
                         dayNum={dayNum}
                         month={month}
@@ -1989,9 +2028,17 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                         isCurrentDay={isCurrentDay}
                         specialDate={specialDate}
                         onSpecialClick={handleSpecialDateClick}
+                        style={pathPosition}
                       />
                       {isCurrentDay && (
-                        <div className="absolute -top-16 left-1/2 -translate-x-1/2">
+                        <div
+                          className="absolute z-50"
+                          style={{
+                            left: pathPosition.left,
+                            top: `${parseInt(pathPosition.top) - 60}px`,
+                            transform: 'translateX(-50%)'
+                          }}
+                        >
                           <FloatingAvatar />
                         </div>
                       )}
