@@ -2464,6 +2464,12 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                   <Cloud size={55} className="absolute right-[-8px] top-[90%] text-white fill-white" />
                 </div>
 
+                {/* RoadPath SVG - Estrada Sinuosa */}
+                <RoadPath height={month.days * 55 + 100} />
+
+                {/* BiomeDecorations - Decorações Sazonais */}
+                <BiomeDecorations monthName={month.name} monthIndex={monthIndex} />
+
                 {/* Sinuous path of days */}
                 {Array.from({ length: month.days }, (_, i) => {
                   const dayNum = month.days - i; // Countdown from month.days to 1
@@ -2483,6 +2489,10 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                         onSpecialClick={handleSpecialDateClick}
                         style={pathPosition}
                       />
+                      {/* PathItems - Itens decorativos entre os dias */}
+                      <div className="absolute" style={pathPosition}>
+                        <PathItems dayIndex={dayIndex} />
+                      </div>
                       {isCurrentDay && (
                         <div
                           className="absolute z-50"
