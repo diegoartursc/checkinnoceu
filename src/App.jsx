@@ -911,12 +911,14 @@ const StoryOverlay = memo(({ story, onClose }) => {
                         </p>
                     </div>
                     <div className="mt-4 sm:mt-6 w-full">
-                        <Button onClick={handleNext} color="bg-yellow-500 w-full shadow-yellow-700 text-base sm:text-lg py-3 sm:py-4">
-                            {slideIndex < totalSlides - 1 ? (
-                                <span className="flex items-center gap-2">Continuar <ArrowRight size={20}/></span>
-                            ) : (
-                                <span className="flex items-center gap-2">Amém! <Heart fill="white" size={20}/></span>
-                            )}
+                        <Button
+                          onClick={handleNext}
+                          variant="gold"
+                          size="lg"
+                          className="w-full"
+                          icon={slideIndex < totalSlides - 1 ? ArrowRight : Heart}
+                        >
+                          {slideIndex < totalSlides - 1 ? 'Continuar' : 'Amém!'}
                         </Button>
                     </div>
                 </div>
