@@ -4,7 +4,8 @@ import {
   Sun, Cloud, X, ArrowUp, Gift, Heart, Music, Anchor,
   Book, Crown, Sprout, Flame, Zap, Shield, Trophy, Lock, BookOpen,
   Snowflake, Leaf, Flower, ThermometerSun, AlertCircle, Lightbulb,
-  CloudRain, Hammer, Users, Wind, Cross, Clock, Gamepad2
+  CloudRain, Hammer, Users, Wind, Cross, Clock, Gamepad2,
+  Sparkles, PartyPopper, Repeat2
 } from 'lucide-react';
 
 /* ========================================
@@ -883,6 +884,216 @@ const StoryOverlay = memo(({ story, onClose }) => {
 StoryOverlay.displayName = 'StoryOverlay';
 
 /* ========================================
+   FLYING STAR ANIMATION (Juicy UI)
+   ======================================== */
+
+const FlyingStar = memo(({ startPos, endPos, onComplete }) => {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 1000);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  const deltaX = endPos.x - startPos.x;
+  const deltaY = endPos.y - startPos.y;
+
+  return (
+    <div
+      className="fixed z-[100] pointer-events-none"
+      style={{
+        left: `${startPos.x}px`,
+        top: `${startPos.y}px`,
+        '--target-x': `${deltaX}px`,
+        '--target-y': `${deltaY}px`,
+        animation: 'flyToHUD 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards'
+      }}
+    >
+      <Star size={32} className="fill-yellow-400 text-yellow-400 drop-shadow-lg" />
+    </div>
+  );
+});
+
+FlyingStar.displayName = 'FlyingStar';
+
+/* ========================================
+   VICTORY MODAL (Juicy UI)
+   ======================================== */
+
+const VictoryModal = memo(({ coins, onClaim }) => {
+  const [confettiPieces, setConfettiPieces] = useState([]);
+  const [claimed, setClaimed] = useState(false);
+
+  useEffect(() => {
+    // Generate confetti
+    const pieces = Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      color: ['bg-yellow-400', 'bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400'][Math.floor(Math.random() * 5)]
+    }));
+    setConfettiPieces(pieces);
+  }, []);
+
+  const handleClaim = () => {
+    setClaimed(true);
+    setTimeout(onClaim, 100);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+      {/* Rotating sun rays background */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        <div
+          className="w-[200%] h-[200%] bg-gradient-to-r from-yellow-400/20 via-transparent to-yellow-400/20"
+          style={{ animation: 'rotateRays 4s linear infinite' }}
+        />
+      </div>
+
+      {/* Confetti */}
+      {confettiPieces.map(piece => (
+        <div
+          key={piece.id}
+          className={`absolute w-3 h-3 ${piece.color} rounded-sm`}
+          style={{
+            left: `${piece.left}%`,
+            top: '-10px',
+            animation: `confetti 3s ease-out ${piece.delay}s infinite`
+          }}
+        />
+      ))}
+
+      {/* Victory Card */}
+      <div className="bg-gradient-to-b from-yellow-50 to-white rounded-3xl p-8 text-center shadow-[0_0_80px_rgba(250,204,21,0.8)] border-4 border-yellow-400 max-w-sm w-full relative animate-in zoom-in duration-500">
+        {/* Sparkles */}
+        <div className="absolute -top-4 -left-4 text-yellow-400 animate-pulse">
+          <Sparkles size={32} fill="currentColor" />
+        </div>
+        <div className="absolute -top-4 -right-4 text-pink-400 animate-pulse" style={{ animationDelay: '0.3s' }}>
+          <Sparkles size={28} fill="currentColor" />
+        </div>
+        <div className="absolute -bottom-4 -left-4 text-blue-400 animate-pulse" style={{ animationDelay: '0.6s' }}>
+          <Sparkles size={24} fill="currentColor" />
+        </div>
+        <div className="absolute -bottom-4 -right-4 text-purple-400 animate-pulse" style={{ animationDelay: '0.9s' }}>
+          <Sparkles size={28} fill="currentColor" />
+        </div>
+
+        {/* Trophy icon */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-yellow-400 blur-3xl opacity-40 rounded-full animate-pulse"></div>
+          <div className="relative bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-500 p-6 rounded-full shadow-2xl inline-block animate-bounce">
+            <Trophy size={64} className="text-white drop-shadow-lg" strokeWidth={2.5} />
+          </div>
+        </div>
+
+        {/* Victory text */}
+        <div className="mb-6">
+          <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 mb-2 animate-pulse">
+            VITÓRIA!
+          </h2>
+          <p className="text-gray-600 font-bold text-lg mb-4">
+            Parabéns! 🎉
+          </p>
+
+          {/* Coins display */}
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-4 border-2 border-yellow-300 mb-4">
+            <p className="text-sm font-bold text-gray-600 mb-2">Você ganhou:</p>
+            <div className="flex items-center justify-center gap-2">
+              <Star size={40} className="fill-yellow-400 text-yellow-400 animate-bounce" />
+              <span className="text-5xl font-black text-yellow-600">+{coins}</span>
+            </div>
+            <p className="text-xs font-bold text-gray-500 mt-2">Estrelas da Virtude</p>
+          </div>
+        </div>
+
+        {/* Claim button */}
+        <button
+          onClick={handleClaim}
+          disabled={claimed}
+          className="victory-claim-button w-full bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 text-white font-black text-lg py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {claimed ? '✨ Recebido!' : '🎁 Receber Recompensa'}
+        </button>
+      </div>
+    </div>
+  );
+});
+
+VictoryModal.displayName = 'VictoryModal';
+
+/* ========================================
+   FLOATING AVATAR (Match-3 Style Hero)
+   ======================================== */
+
+const FloatingAvatar = memo(() => {
+  return (
+    <div
+      className="absolute z-50 pointer-events-none"
+      style={{ animation: 'hoverFloat 2s ease-in-out infinite' }}
+    >
+      <div className="relative">
+        {/* Shadow below */}
+        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-3 bg-black/30 rounded-full blur-sm"></div>
+
+        {/* Avatar frame */}
+        <div className="bg-gradient-to-br from-sky-400 to-blue-600 p-1 rounded-2xl shadow-[0_10px_30px_rgba(14,165,233,0.5)] border-4 border-sky-200">
+          <div className="bg-white rounded-xl p-2">
+            <div className="text-4xl">😇</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+FloatingAvatar.displayName = 'FloatingAvatar';
+
+/* ========================================
+   PARALLAX DECORATIONS (Match-3 Style)
+   ======================================== */
+
+const ParallaxDecorations = memo(({ position }) => {
+  const decorations = useMemo(() => {
+    const random = (min, max) => Math.random() * (max - min) + min;
+
+    return [
+      // Islands
+      { type: 'island', emoji: '🏝️', left: random(5, 15), top: position * 0.3, size: 40, delay: 0 },
+      { type: 'island', emoji: '🏝️', left: random(70, 85), top: position * 0.5, size: 35, delay: 0.5 },
+
+      // Rainbows
+      { type: 'rainbow', emoji: '🌈', left: random(10, 20), top: position * 0.4, size: 50, delay: 1 },
+      { type: 'rainbow', emoji: '🌈', left: random(75, 85), top: position * 0.6, size: 45, delay: 1.5 },
+
+      // Stars
+      { type: 'star', emoji: '✨', left: random(15, 25), top: position * 0.2, size: 25, delay: 0.8 },
+      { type: 'star', emoji: '⭐', left: random(75, 85), top: position * 0.35, size: 30, delay: 1.2 },
+    ];
+  }, [position]);
+
+  return (
+    <>
+      {decorations.map((deco, i) => (
+        <div
+          key={i}
+          className="absolute pointer-events-none opacity-40 animate-pulse"
+          style={{
+            left: `${deco.left}%`,
+            top: `${deco.top}px`,
+            fontSize: `${deco.size}px`,
+            animationDelay: `${deco.delay}s`,
+            zIndex: deco.type === 'star' ? 5 : 1
+          }}
+        >
+          {deco.emoji}
+        </div>
+      ))}
+    </>
+  );
+});
+
+ParallaxDecorations.displayName = 'ParallaxDecorations';
+
+/* ========================================
    LAR SCREEN (Pet Home - Tamagotchi System)
    ======================================== */
 
@@ -905,6 +1116,17 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
 
   // Floating feedback texts
   const [floatingTexts, setFloatingTexts] = useState([]);
+
+  // Pet animation states
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationType, setAnimationType] = useState(null);
+
+  // Available pets
+  const petTypes = useMemo(() => [
+    { type: 'ovelhinha', name: 'Ovelhinha', emoji: '🐑', emojiAlt: '🐏' },
+    { type: 'leao', name: 'Leãozinho', emoji: '🦁', emojiAlt: '🐯' },
+    { type: 'pomba', name: 'Pombinha', emoji: '🕊️', emojiAlt: '🦅' }
+  ], []);
 
   // Calculate decay based on time passed (runs once on mount)
   useEffect(() => {
@@ -951,6 +1173,25 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
     }, 2000);
   }, []);
 
+  // Animate action (2-frame sprite animation)
+  const animateAction = useCallback((type) => {
+    setIsAnimating(true);
+    setAnimationType(type);
+    setTimeout(() => {
+      setIsAnimating(false);
+      setAnimationType(null);
+    }, 1500);
+  }, []);
+
+  // Change pet type
+  const changePet = useCallback((newType, newName) => {
+    setPet(prev => ({
+      ...prev,
+      type: newType,
+      name: newName
+    }));
+  }, []);
+
   // Feed pet with fruit
   const feedPet = useCallback((fruit) => {
     if (coins < fruit.cost) {
@@ -965,9 +1206,10 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
       lastUpdate: Date.now()
     }));
 
+    animateAction('eating');
     addFloatingText(`-${fruit.cost} ⭐`, 'text-yellow-500');
     setTimeout(() => addFloatingText(`+${fruit.hunger} 🍽️`, 'text-green-500'), 200);
-  }, [coins, onSpendCoins, addFloatingText]);
+  }, [coins, onSpendCoins, addFloatingText, animateAction]);
 
   // Play with pet
   const playWithPet = useCallback(() => {
@@ -989,9 +1231,10 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
       lastUpdate: Date.now()
     }));
 
+    animateAction('playing');
     addFloatingText('-10 ⭐', 'text-yellow-500');
     setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
-  }, [coins, pet.energy, onSpendCoins, addFloatingText]);
+  }, [coins, pet.energy, onSpendCoins, addFloatingText, animateAction]);
 
   // Pet sleep (free action)
   const petSleep = useCallback(() => {
@@ -1001,8 +1244,9 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
       lastUpdate: Date.now()
     }));
 
+    animateAction('sleeping');
     addFloatingText('+100 ⚡', 'text-blue-500');
-  }, [addFloatingText]);
+  }, [addFloatingText, animateAction]);
 
   // Determine pet mood
   const getPetMood = useCallback(() => {
@@ -1030,6 +1274,30 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
           </p>
         </div>
 
+        {/* Pet Selector */}
+        <div className="mb-6">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Repeat2 size={16} className="text-gray-600" />
+            <p className="text-xs font-bold text-gray-600">Escolha seu amiguinho:</p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            {petTypes.map(petOption => (
+              <button
+                key={petOption.type}
+                onClick={() => changePet(petOption.type, petOption.name)}
+                className={`p-3 rounded-2xl border-2 transition-all ${
+                  pet.type === petOption.type
+                    ? 'bg-gradient-to-br from-pink-200 to-purple-200 border-pink-400 scale-110 shadow-lg'
+                    : 'bg-white/80 border-gray-200 hover:scale-105'
+                }`}
+              >
+                <div className="text-3xl">{petOption.emoji}</div>
+                <p className="text-[10px] font-bold text-gray-600 mt-1">{petOption.name}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Pet Display */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-xl border-2 border-pink-200 relative overflow-hidden">
           {/* Floating texts */}
@@ -1050,8 +1318,28 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
 
           {/* Pet */}
           <div className="text-center mb-4">
-            <div className="text-8xl mb-2 animate-bounce">
-              {pet.type === 'ovelhinha' ? '🐑' : pet.type === 'leao' ? '🦁' : '🕊️'}
+            <div
+              className={`text-8xl mb-2 ${isAnimating ? '' : 'animate-bounce'}`}
+              style={{
+                animation: isAnimating ? 'petBounce 0.3s ease-in-out infinite' : undefined
+              }}
+            >
+              {(() => {
+                const currentPetType = petTypes.find(p => p.type === pet.type);
+                if (!currentPetType) return '🐑';
+
+                // Sprite animation: alternate between main and alt emoji
+                if (isAnimating && animationType === 'eating') {
+                  return <span className="inline-block">{currentPetType.emojiAlt}</span>;
+                }
+                if (isAnimating && animationType === 'playing') {
+                  return <span className="inline-block transform rotate-12">{currentPetType.emoji}</span>;
+                }
+                if (isAnimating && animationType === 'sleeping') {
+                  return '😴';
+                }
+                return currentPetType.emoji;
+              })()}
             </div>
             <div className="text-4xl mb-1">{mood.emoji}</div>
             <p className="font-bold text-gray-700 text-lg">{pet.name}</p>
@@ -1721,6 +2009,9 @@ export default function CheckInApp() {
   const [coins, setCoins] = useState(0);
   const [unlockedStories, setUnlockedStories] = useState([]);
   const [readStories, setReadStories] = useState([]);
+  const [showVictoryModal, setShowVictoryModal] = useState(false);
+  const [victoryCoins, setVictoryCoins] = useState(0);
+  const [flyingStars, setFlyingStars] = useState([]);
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -1764,7 +2055,7 @@ export default function CheckInApp() {
   }, []);
 
   const handleWinGame = useCallback(() => {
-    addCoins(50);
+    const coinsToAdd = 50;
 
     const storyIdToUnlock = currentGameConfig?.story?.id || currentGameConfig?.seasonEvent?.story?.id;
 
@@ -1777,8 +2068,48 @@ export default function CheckInApp() {
         setTimeout(() => alert(`Nova História Desbloqueada!`), 500);
     }
 
-    setTimeout(() => setCurrentGameConfig(null), 1000);
-  }, [addCoins, currentGameConfig, unlockedStories]);
+    // Close game and show victory modal
+    setCurrentGameConfig(null);
+    setVictoryCoins(coinsToAdd);
+    setShowVictoryModal(true);
+  }, [currentGameConfig, unlockedStories]);
+
+  // Handle victory modal claim
+  const handleClaimReward = useCallback(() => {
+    // Get button position for flying star animation
+    const modalButton = document.querySelector('.victory-claim-button');
+    const hudStar = document.querySelector('.hud-star');
+
+    if (modalButton && hudStar) {
+      const buttonRect = modalButton.getBoundingClientRect();
+      const hudRect = hudStar.getBoundingClientRect();
+
+      const startPos = {
+        x: buttonRect.left + buttonRect.width / 2 - 16,
+        y: buttonRect.top + buttonRect.height / 2 - 16
+      };
+
+      const endPos = {
+        x: hudRect.left + hudRect.width / 2 - 16,
+        y: hudRect.top + hudRect.height / 2 - 16
+      };
+
+      // Add flying star
+      const starId = Date.now();
+      setFlyingStars(prev => [...prev, { id: starId, startPos, endPos }]);
+
+      // Remove flying star after animation
+      setTimeout(() => {
+        setFlyingStars(prev => prev.filter(s => s.id !== starId));
+        addCoins(victoryCoins);
+      }, 1000);
+    } else {
+      // Fallback if elements not found
+      addCoins(victoryCoins);
+    }
+
+    setShowVictoryModal(false);
+  }, [victoryCoins, addCoins]);
 
   const handleOpenStory = useCallback((story) => {
       setCurrentStory(story);
@@ -1796,7 +2127,7 @@ export default function CheckInApp() {
       {/* HEADER */}
       <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-30 flex justify-between items-center pointer-events-none">
         <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md px-2 sm:px-3 py-1 rounded-full border border-white/10 shadow-lg">
-           <Star className="fill-yellow-400 text-yellow-400 w-3 h-3 sm:w-4 sm:h-4" />
+           <Star className="hud-star fill-yellow-400 text-yellow-400 w-3 h-3 sm:w-4 sm:h-4" />
            <span className="text-white font-bold text-xs">{coins}</span>
         </div>
         <div className="bg-black/20 backdrop-blur-md px-3 sm:px-4 py-1 rounded-full border border-white/10">
@@ -1846,6 +2177,24 @@ export default function CheckInApp() {
           onClose={() => setCurrentStory(null)}
         />
       )}
+
+      {/* Victory Modal */}
+      {showVictoryModal && (
+        <VictoryModal
+          coins={victoryCoins}
+          onClaim={handleClaimReward}
+        />
+      )}
+
+      {/* Flying Stars */}
+      {flyingStars.map(star => (
+        <FlyingStar
+          key={star.id}
+          startPos={star.startPos}
+          endPos={star.endPos}
+          onComplete={() => {}}
+        />
+      ))}
 
       {/* NAVIGATION */}
       <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 h-14 sm:h-16 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center justify-around z-40 px-2 border border-white/50">

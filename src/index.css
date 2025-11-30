@@ -155,6 +155,59 @@
   }
 }
 
+@keyframes hoverFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes flyToHUD {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(var(--target-x), var(--target-y)) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--target-x), var(--target-y)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(500px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes rotateRays {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes petBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
 /* Performance optimizations */
 .gpu-accelerate {
   transform: translateZ(0);
