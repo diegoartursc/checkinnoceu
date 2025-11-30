@@ -1417,8 +1417,15 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
   const mood = getPetMood();
 
   return (
-    <div className="h-full flex flex-col relative overflow-hidden bg-gradient-to-b from-amber-100 via-green-50 to-sky-100">
+    <div className="h-full flex flex-col relative overflow-hidden">
+      {/* CAMADA 1: Céu (Fundo) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-400 via-sky-300 to-sky-200"></div>
+
+      {/* CAMADA 2: Nuvens (Meio) */}
       <CloudBackground />
+
+      {/* CAMADA 3: Chão de Grama (Frente) */}
+      <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-b from-green-300 to-green-600 rounded-t-[50%] shadow-[0_-15px_40px_rgba(34,197,94,0.3)] z-[5]"></div>
 
       {/* Content */}
       <div className="relative z-10 h-full overflow-y-auto pb-24 pt-16 px-4 custom-scrollbar">
@@ -1475,9 +1482,9 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
           </div>
 
           {/* Pet */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-4 relative">
             <div
-              className={`text-8xl mb-2 ${isAnimating ? '' : 'animate-bounce'}`}
+              className={`text-8xl mb-2 relative z-10 ${isAnimating ? '' : 'animate-bounce'}`}
               style={{
                 animation: isAnimating ? 'petBounce 0.3s ease-in-out infinite' : undefined
               }}
@@ -1499,52 +1506,76 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
                 return currentPetType.emoji;
               })()}
             </div>
+            {/* Sombra oval embaixo do pet */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-32 h-4 bg-black/20 rounded-full blur-md"></div>
+
             <div className="text-4xl mb-1">{mood.emoji}</div>
             <p className="font-bold text-gray-700 text-lg">{pet.name}</p>
             <p className={`text-sm font-bold ${mood.color}`}>{mood.mood}</p>
           </div>
 
-          {/* Status Bars */}
+          {/* Status Bars - HUD 3D Vibrante */}
           <div className="space-y-3">
             {/* Hunger */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span>🍽️ Fome</span>
-                <span>{pet.hunger}%</span>
-              </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-orange-400 to-red-500 transition-all duration-500"
-                  style={{ width: `${pet.hunger}%` }}
-                />
+            <div className="bg-white/50 backdrop-blur-md rounded-full p-3 border-2 border-white shadow-lg">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-gradient-to-br from-orange-400 to-red-500 p-2 rounded-full shadow-md">
+                  <span className="text-white text-sm">🍽️</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-orange-600">Fome</span>
+                    <span className="text-orange-500">{pet.hunger}%</span>
+                  </div>
+                  <div className="h-4 bg-orange-100 rounded-full overflow-hidden border border-orange-200">
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-300 to-orange-500 transition-all duration-500 shadow-inner"
+                      style={{ width: `${pet.hunger}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Happiness */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span>😊 Alegria</span>
-                <span>{pet.happiness}%</span>
-              </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-pink-400 to-purple-500 transition-all duration-500"
-                  style={{ width: `${pet.happiness}%` }}
-                />
+            <div className="bg-white/50 backdrop-blur-md rounded-full p-3 border-2 border-white shadow-lg">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-gradient-to-br from-yellow-400 to-pink-500 p-2 rounded-full shadow-md">
+                  <span className="text-white text-sm">😊</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-yellow-600">Alegria</span>
+                    <span className="text-yellow-500">{pet.happiness}%</span>
+                  </div>
+                  <div className="h-4 bg-yellow-100 rounded-full overflow-hidden border border-yellow-200">
+                    <div
+                      className="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 transition-all duration-500 shadow-inner"
+                      style={{ width: `${pet.happiness}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Energy */}
-            <div>
-              <div className="flex justify-between text-xs font-bold mb-1">
-                <span>⚡ Energia</span>
-                <span>{pet.energy}%</span>
-              </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-blue-400 to-cyan-500 transition-all duration-500"
-                  style={{ width: `${pet.energy}%` }}
-                />
+            <div className="bg-white/50 backdrop-blur-md rounded-full p-3 border-2 border-white shadow-lg">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-gradient-to-br from-blue-400 to-cyan-500 p-2 rounded-full shadow-md">
+                  <span className="text-white text-sm">⚡</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span className="text-blue-600">Energia</span>
+                    <span className="text-blue-500">{pet.energy}%</span>
+                  </div>
+                  <div className="h-4 bg-blue-100 rounded-full overflow-hidden border border-blue-200">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-300 to-blue-500 transition-all duration-500 shadow-inner"
+                      style={{ width: `${pet.energy}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
