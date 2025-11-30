@@ -2465,42 +2465,42 @@ export default function CheckInApp() {
         />
       ))}
 
-      {/* NAVIGATION */}
-      <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 h-14 sm:h-16 bg-gradient-to-b from-white to-gray-50 backdrop-blur-xl rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] flex items-center justify-around z-40 px-2 border-4 border-white/80">
+      {/* NAVIGATION - Game HUD Style */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] flex items-center justify-around z-40 px-4 py-3 border-t-4 border-gray-100">
         <button
           onClick={() => setScreen('checkin')}
-          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl transition-all duration-200 border-b-4 ${
+          className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             screen === 'checkin'
-              ? 'bg-gradient-to-b from-sky-400 to-sky-600 text-white shadow-[0_6px_20px_rgba(56,189,248,0.4)] border-sky-700 -translate-y-1'
-              : 'bg-gradient-to-b from-gray-100 to-gray-200 text-gray-400 border-gray-300 hover:from-gray-200 hover:to-gray-300 active:border-b-0 active:translate-y-1'
+              ? 'bg-gradient-to-b from-orange-400 to-orange-600 text-white shadow-[0_8px_25px_rgba(251,146,60,0.6)] scale-125 -translate-y-6 border-b-4 border-orange-700'
+              : 'text-slate-400 scale-100 hover:scale-110 active:scale-95'
           }`}
         >
-           <Home size={20} strokeWidth={screen === 'checkin' ? 3 : 2.5} className="sm:w-5 sm:h-5" />
-           <span className="text-[9px] font-black mt-1 uppercase">Hoje</span>
+           <Home size={screen === 'checkin' ? 28 : 24} strokeWidth={3} />
+           <span className={`text-[10px] font-black uppercase tracking-widest ${screen === 'checkin' ? 'text-white' : 'text-slate-500'}`}>HOJE</span>
         </button>
-        <div className="w-px h-6 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+
         <button
           onClick={() => setScreen('map')}
-          className={`flex flex-col items-center justify-center min-w-10 sm:min-w-12 h-10 sm:h-12 px-2 rounded-2xl transition-all duration-200 border-b-4 ${
+          className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             screen === 'map'
-              ? 'bg-gradient-to-b from-indigo-400 to-indigo-600 text-white shadow-[0_6px_20px_rgba(99,102,241,0.4)] border-indigo-700 -translate-y-1'
-              : 'bg-gradient-to-b from-gray-100 to-gray-200 text-gray-400 border-gray-300 hover:from-gray-200 hover:to-gray-300 active:border-b-0 active:translate-y-1'
+              ? 'bg-gradient-to-b from-blue-400 to-blue-600 text-white shadow-[0_8px_25px_rgba(59,130,246,0.6)] scale-125 -translate-y-6 border-b-4 border-blue-700'
+              : 'text-slate-400 scale-100 hover:scale-110 active:scale-95'
           }`}
         >
-           <Map size={20} strokeWidth={screen === 'map' ? 3 : 2.5} className="sm:w-5 sm:h-5" />
-           <span className="text-[9px] font-black mt-1 uppercase whitespace-nowrap">Caminho</span>
+           <Map size={screen === 'map' ? 28 : 24} strokeWidth={3} />
+           <span className={`text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${screen === 'map' ? 'text-white' : 'text-slate-500'}`}>MAPA</span>
         </button>
-        <div className="w-px h-6 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+
         <button
           onClick={() => setScreen('lar')}
-          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl transition-all duration-200 border-b-4 ${
+          className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             screen === 'lar'
-              ? 'bg-gradient-to-b from-pink-400 to-pink-600 text-white shadow-[0_6px_20px_rgba(244,114,182,0.4)] border-pink-700 -translate-y-1'
-              : 'bg-gradient-to-b from-gray-100 to-gray-200 text-gray-400 border-gray-300 hover:from-gray-200 hover:to-gray-300 active:border-b-0 active:translate-y-1'
+              ? 'bg-gradient-to-b from-pink-400 to-pink-600 text-white shadow-[0_8px_25px_rgba(244,114,182,0.6)] scale-125 -translate-y-6 border-b-4 border-pink-700'
+              : 'text-slate-400 scale-100 hover:scale-110 active:scale-95'
           }`}
         >
-           <Heart size={20} strokeWidth={screen === 'lar' ? 3 : 2.5} className="sm:w-5 sm:h-5" fill={screen === 'lar' ? 'currentColor' : 'none'} />
-           <span className="text-[9px] font-black mt-1 uppercase">Lar</span>
+           <Heart size={screen === 'lar' ? 28 : 24} strokeWidth={3} fill={screen === 'lar' ? 'currentColor' : 'none'} />
+           <span className={`text-[10px] font-black uppercase tracking-widest ${screen === 'lar' ? 'text-white' : 'text-slate-500'}`}>LAR</span>
         </button>
       </div>
     </div>
