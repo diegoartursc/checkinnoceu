@@ -327,11 +327,11 @@ const CloudBackground = memo(() => (
 
 CloudBackground.displayName = 'CloudBackground';
 
-const Button = memo(({ children, onClick, color = "bg-blue-500", className = "", disabled }) => (
+const Button = memo(({ children, onClick, color = "bg-gradient-to-b from-blue-400 to-blue-600", className = "", disabled }) => (
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`${color} ${className} text-white font-bold py-3 px-6 rounded-2xl shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-1 transition-all transform hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+    className={`${color} ${className} text-white font-black py-4 px-8 rounded-3xl border-b-6 border-opacity-50 shadow-xl active:border-b-0 active:translate-y-2 transition-all transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
   >
     {children}
   </button>
@@ -1036,6 +1036,131 @@ const VictoryModal = memo(({ coins, onClaim, storyUnlocked }) => {
 VictoryModal.displayName = 'VictoryModal';
 
 /* ========================================
+   STREAK BONUS MODAL
+   ======================================== */
+
+const StreakBonusModal = memo(({ streak, bonusAmount, onClose }) => {
+  const [confettiPieces, setConfettiPieces] = useState([]);
+
+  useEffect(() => {
+    // Generate fire-colored confetti
+    const pieces = Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      color: ['bg-orange-400', 'bg-red-400', 'bg-yellow-400', 'bg-amber-400'][Math.floor(Math.random() * 4)]
+    }));
+    setConfettiPieces(pieces);
+  }, []);
+
+  const getMilestoneMessage = () => {
+    if (streak === 7) return 'Uma semana completa!';
+    if (streak === 30) return 'Um mês inteiro!';
+    if (streak === 90) return 'Três meses seguidos!';
+    return 'Continue assim!';
+  };
+
+  return (
+    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+      {/* Rotating fire rays background */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        <div
+          className="w-[200%] h-[200%] bg-gradient-to-r from-orange-400/20 via-transparent to-red-400/20"
+          style={{ animation: 'rotateRays 3s linear infinite' }}
+        />
+      </div>
+
+      {/* Fire Confetti */}
+      {confettiPieces.map(piece => (
+        <div
+          key={piece.id}
+          className={`absolute w-3 h-3 ${piece.color} rounded-sm`}
+          style={{
+            left: `${piece.left}%`,
+            top: '-10px',
+            animation: `confetti 3s ease-out ${piece.delay}s infinite`
+          }}
+        />
+      ))}
+
+      {/* Streak Card */}
+      <div className="bg-gradient-to-b from-orange-50 to-white rounded-3xl p-8 text-center shadow-[0_0_80px_rgba(251,146,60,0.8)] border-4 border-orange-400 max-w-md w-full relative animate-in zoom-in duration-500">
+        {/* Sparkles */}
+        <div className="absolute -top-4 -left-4 text-orange-400 animate-pulse">
+          <Sparkles size={32} fill="currentColor" />
+        </div>
+        <div className="absolute -top-4 -right-4 text-red-400 animate-pulse" style={{ animationDelay: '0.3s' }}>
+          <Sparkles size={28} fill="currentColor" />
+        </div>
+        <div className="absolute -bottom-4 -left-4 text-amber-400 animate-pulse" style={{ animationDelay: '0.6s' }}>
+          <Sparkles size={24} fill="currentColor" />
+        </div>
+        <div className="absolute -bottom-4 -right-4 text-orange-400 animate-pulse" style={{ animationDelay: '0.9s' }}>
+          <Sparkles size={28} fill="currentColor" />
+        </div>
+
+        {/* Fire icon with streak count */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-orange-400 blur-3xl opacity-40 rounded-full animate-pulse"></div>
+          <div className="relative bg-gradient-to-br from-orange-400 via-red-500 to-orange-500 p-6 rounded-full shadow-2xl inline-block">
+            <div className="text-7xl animate-bounce">🔥</div>
+          </div>
+        </div>
+
+        {/* Streak text */}
+        <div className="mb-6">
+          <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 mb-2">
+            {streak} DIAS
+          </h2>
+          <p className="text-gray-600 font-bold text-lg mb-2">
+            Sequência Incrível! 🎉
+          </p>
+          <p className="text-orange-600 font-black text-sm uppercase">
+            {getMilestoneMessage()}
+          </p>
+        </div>
+
+        {/* Calendar visualization - last 7 days */}
+        <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-2xl p-4 border-2 border-orange-300 mb-4">
+          <p className="text-xs font-bold text-gray-600 mb-3">Últimos 7 dias:</p>
+          <div className="flex justify-center gap-2">
+            {Array.from({ length: Math.min(streak, 7) }).map((_, i) => (
+              <div
+                key={i}
+                className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center shadow-lg"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <Check size={20} className="text-white" strokeWidth={3} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bonus stars display */}
+        <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-4 border-2 border-yellow-300 mb-6">
+          <p className="text-sm font-bold text-gray-600 mb-2">🎁 Bônus Especial:</p>
+          <div className="flex items-center justify-center gap-2">
+            <Star size={40} className="fill-yellow-400 text-yellow-400 animate-bounce" />
+            <span className="text-5xl font-black text-yellow-600">+{bonusAmount}</span>
+          </div>
+          <p className="text-xs font-bold text-gray-500 mt-2">Estrelas da Virtude</p>
+        </div>
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="w-full bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 text-white font-black text-lg py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all"
+        >
+          🎯 Continuar Jogando
+        </button>
+      </div>
+    </div>
+  );
+});
+
+StreakBonusModal.displayName = 'StreakBonusModal';
+
+/* ========================================
    FLOATING AVATAR (Match-3 Style Hero)
    ======================================== */
 
@@ -1507,12 +1632,12 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
   if (isCompletedToday) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in z-20 relative">
-        <div className="w-32 h-32 sm:w-40 sm:h-40 bg-green-400 rounded-full flex items-center justify-center mb-6 shadow-[0_0_0_8px_rgba(74,222,128,0.3)] animate-bounce">
+        <div className="w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-b from-green-300 to-green-500 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(74,222,128,0.6)] border-4 border-green-600 animate-bounce">
           <CheckCircle size={64} className="text-white sm:w-20 sm:h-20" />
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 drop-shadow-md">Dia Completado!</h2>
         <p className="text-white/90 text-base sm:text-lg mb-8">Volte amanhã para mais luz!</p>
-        <div className="bg-white/20 p-4 rounded-xl backdrop-blur-md border border-white/30 text-white shadow-lg">
+        <div className="bg-gradient-to-br from-white/30 to-white/10 p-4 rounded-2xl backdrop-blur-md border-2 border-white/40 text-white shadow-xl">
           <p className="text-sm font-bold opacity-75 uppercase">Tesouro de hoje:</p>
           <p className="italic font-serif text-base sm:text-lg mt-2">"{dailyData.verse}"</p>
         </div>
@@ -1537,7 +1662,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
           <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg font-[nunito]">
             Jornada<br/>do Dia {currentDay}
           </h1>
-          <Button onClick={() => setStep(1)} color="bg-orange-500 w-full text-lg sm:text-xl shadow-orange-700">
+          <Button onClick={() => setStep(1)} color="bg-gradient-to-b from-orange-400 to-orange-600 border-orange-700 shadow-[0_8px_30px_rgba(251,146,60,0.4)]" className="w-full text-lg sm:text-xl">
             Começar <Play fill="white" size={20}/>
           </Button>
         </div>
@@ -1553,7 +1678,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
               "{dailyData.message}"
             </p>
           </div>
-          <Button onClick={() => setStep(2)} color="bg-green-500 w-full shadow-green-700">
+          <Button onClick={() => setStep(2)} color="bg-gradient-to-b from-green-400 to-green-600 border-green-700 shadow-[0_8px_30px_rgba(34,197,94,0.4)]" className="w-full">
             Próximo <ArrowRight />
           </Button>
         </div>
@@ -1585,10 +1710,10 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
                    setQuizSelected(opt.id);
                    setIsQuizCorrect(opt.correct);
                  }}
-                 className={`w-full p-3 sm:p-4 rounded-xl font-bold text-left transition-all border-b-4 text-sm sm:text-base ${
+                 className={`w-full p-3 sm:p-4 rounded-2xl font-bold text-left transition-all border-b-4 text-sm sm:text-base ${
                    quizSelected === opt.id
-                     ? (opt.correct ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700')
-                     : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                     ? (opt.correct ? 'bg-gradient-to-b from-green-300 to-green-500 border-green-600 text-white shadow-[0_4px_20px_rgba(34,197,94,0.4)]' : 'bg-gradient-to-b from-red-300 to-red-500 border-red-600 text-white shadow-[0_4px_20px_rgba(239,68,68,0.4)]')
+                     : 'bg-gradient-to-b from-white to-gray-50 border-gray-300 text-gray-700 hover:from-gray-50 hover:to-gray-100 shadow-lg active:border-b-0 active:translate-y-1'
                  }`}
                >
                  <div className="flex items-center justify-between">
@@ -1602,7 +1727,8 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
              <div className="mt-4 animate-in fade-in">
                <Button
                  onClick={onCompleteDay}
-                 color={isQuizCorrect ? "bg-green-500 w-full shadow-green-700" : "bg-gray-400 w-full cursor-not-allowed"}
+                 color={isQuizCorrect ? "bg-gradient-to-b from-green-400 to-green-600 border-green-700 shadow-[0_8px_30px_rgba(34,197,94,0.4)]" : "bg-gradient-to-b from-gray-300 to-gray-500 border-gray-600"}
+                 className="w-full"
                  disabled={!isQuizCorrect}
                >
                  {isQuizCorrect ? "Finalizar" : "Tente de novo"}
@@ -1664,14 +1790,14 @@ const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick
       <div
         onClick={() => specialDate && !isPast && onSpecialClick(specialDate)}
         className={`
-            w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-2
+            w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-[3px]
             ${isCurrentDay
-                ? 'bg-yellow-400 border-white scale-125 sm:scale-150 shadow-[0_0_25px_#facc15] z-20 animate-pulse'
+                ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-600 scale-125 sm:scale-150 shadow-[0_0_25px_rgba(250,204,21,0.8)] z-20 animate-pulse'
                 : isPast
-                    ? 'bg-slate-700/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale'
+                    ? 'bg-gradient-to-b from-slate-700/60 to-slate-800/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale'
                     : specialDate
-                        ? `${neonStyle} cursor-pointer hover:scale-125 shadow-lg`
-                        : 'bg-blue-500 border-blue-300 text-white shadow-lg hover:scale-110'
+                        ? `${neonStyle} cursor-pointer hover:scale-125 shadow-lg border-white/50`
+                        : 'bg-gradient-to-b from-blue-400 to-blue-600 border-blue-700 text-white shadow-[0_4px_15px_rgba(59,130,246,0.5)] hover:scale-110 hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)]'
             }
         `}
       >
@@ -2083,6 +2209,10 @@ export default function CheckInApp() {
   const [victoryCoins, setVictoryCoins] = useState(0);
   const [flyingStars, setFlyingStars] = useState([]);
   const [storyUnlocked, setStoryUnlocked] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [lastCheckInDate, setLastCheckInDate] = useState(null);
+  const [showStreakBonus, setShowStreakBonus] = useState(false);
+  const [streakBonusAmount, setStreakBonusAmount] = useState(0);
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -2094,6 +2224,12 @@ export default function CheckInApp() {
     setUnlockedStories(savedStories);
     const savedRead = JSON.parse(localStorage.getItem('checkin_read_stories') || '[]');
     setReadStories(savedRead);
+
+    // Load streak data
+    const savedStreak = parseInt(localStorage.getItem('checkin_streak') || '0');
+    setStreak(savedStreak);
+    const savedLastCheckIn = localStorage.getItem('checkin_last_date');
+    setLastCheckInDate(savedLastCheckIn);
   }, []);
 
   const handleDayComplete = useCallback(() => {
@@ -2106,8 +2242,44 @@ export default function CheckInApp() {
     setCoins(newCoins);
     localStorage.setItem('checkin_coins', newCoins.toString());
 
+    // Calculate streak
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+    let newStreak = 1;
+    let bonusStars = 0;
+
+    if (lastCheckInDate === yesterday) {
+      // Consecutive day - increment streak
+      newStreak = streak + 1;
+
+      // Check for milestone bonuses
+      if (newStreak === 7) bonusStars = 100;
+      else if (newStreak === 30) bonusStars = 500;
+      else if (newStreak === 90) bonusStars = 2000;
+    } else if (lastCheckInDate !== today) {
+      // Missed a day or first time - reset streak
+      newStreak = 1;
+    } else {
+      // Already checked in today
+      newStreak = streak;
+    }
+
+    setStreak(newStreak);
+    setLastCheckInDate(today);
+    localStorage.setItem('checkin_streak', newStreak.toString());
+    localStorage.setItem('checkin_last_date', today);
+
+    if (bonusStars > 0) {
+      const totalCoinsWithBonus = newCoins + bonusStars;
+      setCoins(totalCoinsWithBonus);
+      localStorage.setItem('checkin_coins', totalCoinsWithBonus.toString());
+      setStreakBonusAmount(bonusStars);
+      setShowStreakBonus(true);
+    }
+
     setTimeout(() => setScreen('map'), 2000);
-  }, [lastCompletedDay, coins]);
+  }, [lastCompletedDay, coins, streak, lastCheckInDate]);
 
   const addCoins = useCallback((amount) => {
     setCoins(prev => {
@@ -2184,6 +2356,10 @@ export default function CheckInApp() {
     setShowVictoryModal(false);
   }, [victoryCoins, addCoins]);
 
+  const handleCloseStreakBonus = useCallback(() => {
+    setShowStreakBonus(false);
+  }, []);
+
   const handleOpenStory = useCallback((story) => {
       setCurrentStory(story);
       if (!readStories.includes(story.id)) {
@@ -2199,9 +2375,19 @@ export default function CheckInApp() {
     <div className="w-full h-screen max-w-md mx-auto bg-slate-900 overflow-hidden relative font-sans shadow-2xl">
       {/* HEADER */}
       <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-30 flex justify-between items-center pointer-events-none">
-        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md px-2 sm:px-3 py-1 rounded-full border border-white/10 shadow-lg">
-           <Star className="hud-star fill-yellow-400 text-yellow-400 w-3 h-3 sm:w-4 sm:h-4" />
-           <span className="text-white font-bold text-xs">{coins}</span>
+        <div className="flex items-center gap-2">
+          {/* Stars */}
+          <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md px-2 sm:px-3 py-1 rounded-full border border-white/10 shadow-lg">
+             <Star className="hud-star fill-yellow-400 text-yellow-400 w-3 h-3 sm:w-4 sm:h-4" />
+             <span className="text-white font-bold text-xs">{coins}</span>
+          </div>
+          {/* Streak */}
+          {streak > 0 && (
+            <div className="flex items-center gap-1 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-md px-2 sm:px-3 py-1 rounded-full border border-orange-400/30 shadow-lg">
+              <span className="text-sm">🔥</span>
+              <span className="text-white font-bold text-xs">{streak}</span>
+            </div>
+          )}
         </div>
         <div className="bg-black/20 backdrop-blur-md px-3 sm:px-4 py-1 rounded-full border border-white/10">
              <span className="text-white font-[nunito] font-black text-xs sm:text-sm tracking-widest uppercase">
@@ -2260,6 +2446,15 @@ export default function CheckInApp() {
         />
       )}
 
+      {/* Streak Bonus Modal */}
+      {showStreakBonus && (
+        <StreakBonusModal
+          streak={streak}
+          bonusAmount={streakBonusAmount}
+          onClose={handleCloseStreakBonus}
+        />
+      )}
+
       {/* Flying Stars */}
       {flyingStars.map(star => (
         <FlyingStar
@@ -2271,37 +2466,37 @@ export default function CheckInApp() {
       ))}
 
       {/* NAVIGATION */}
-      <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 h-14 sm:h-16 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex items-center justify-around z-40 px-2 border border-white/50">
+      <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 h-14 sm:h-16 bg-gradient-to-b from-white to-gray-50 backdrop-blur-xl rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] flex items-center justify-around z-40 px-2 border-4 border-white/80">
         <button
           onClick={() => setScreen('checkin')}
-          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl transition-all duration-300 ${
+          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl transition-all duration-200 border-b-4 ${
             screen === 'checkin'
-              ? 'bg-sky-100 text-sky-600 -translate-y-2 sm:-translate-y-3 shadow-lg scale-110'
-              : 'text-gray-400 hover:bg-gray-50'
+              ? 'bg-gradient-to-b from-sky-400 to-sky-600 text-white shadow-[0_6px_20px_rgba(56,189,248,0.4)] border-sky-700 -translate-y-1'
+              : 'bg-gradient-to-b from-gray-100 to-gray-200 text-gray-400 border-gray-300 hover:from-gray-200 hover:to-gray-300 active:border-b-0 active:translate-y-1'
           }`}
         >
            <Home size={20} strokeWidth={screen === 'checkin' ? 3 : 2.5} className="sm:w-5 sm:h-5" />
            <span className="text-[9px] font-black mt-1 uppercase">Hoje</span>
         </button>
-        <div className="w-px h-6 bg-gray-200"></div>
+        <div className="w-px h-6 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
         <button
           onClick={() => setScreen('map')}
-          className={`flex flex-col items-center justify-center min-w-10 sm:min-w-12 h-10 sm:h-12 px-2 rounded-xl transition-all duration-300 ${
+          className={`flex flex-col items-center justify-center min-w-10 sm:min-w-12 h-10 sm:h-12 px-2 rounded-2xl transition-all duration-200 border-b-4 ${
             screen === 'map'
-              ? 'bg-indigo-100 text-indigo-600 -translate-y-2 sm:-translate-y-3 shadow-lg scale-110'
-              : 'text-gray-400 hover:bg-gray-50'
+              ? 'bg-gradient-to-b from-indigo-400 to-indigo-600 text-white shadow-[0_6px_20px_rgba(99,102,241,0.4)] border-indigo-700 -translate-y-1'
+              : 'bg-gradient-to-b from-gray-100 to-gray-200 text-gray-400 border-gray-300 hover:from-gray-200 hover:to-gray-300 active:border-b-0 active:translate-y-1'
           }`}
         >
            <Map size={20} strokeWidth={screen === 'map' ? 3 : 2.5} className="sm:w-5 sm:h-5" />
            <span className="text-[9px] font-black mt-1 uppercase whitespace-nowrap">Caminho</span>
         </button>
-        <div className="w-px h-6 bg-gray-200"></div>
+        <div className="w-px h-6 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
         <button
           onClick={() => setScreen('lar')}
-          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl transition-all duration-300 ${
+          className={`flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl transition-all duration-200 border-b-4 ${
             screen === 'lar'
-              ? 'bg-pink-100 text-pink-600 -translate-y-2 sm:-translate-y-3 shadow-lg scale-110'
-              : 'text-gray-400 hover:bg-gray-50'
+              ? 'bg-gradient-to-b from-pink-400 to-pink-600 text-white shadow-[0_6px_20px_rgba(244,114,182,0.4)] border-pink-700 -translate-y-1'
+              : 'bg-gradient-to-b from-gray-100 to-gray-200 text-gray-400 border-gray-300 hover:from-gray-200 hover:to-gray-300 active:border-b-0 active:translate-y-1'
           }`}
         >
            <Heart size={20} strokeWidth={screen === 'lar' ? 3 : 2.5} className="sm:w-5 sm:h-5" fill={screen === 'lar' ? 'currentColor' : 'none'} />
