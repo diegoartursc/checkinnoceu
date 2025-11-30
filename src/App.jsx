@@ -1910,7 +1910,192 @@ const calculatePathPosition = (dayIndex, totalDays) => {
   };
 };
 
-// Optimized: Memoize individual day component
+/* ========================================
+   ROAD & SCENERY COMPONENTS
+   ======================================== */
+
+// SVG Road Path - Estrada Sinuosa Larga
+const RoadPath = memo(({ height }) => {
+  // Generate SVG path data for sinuous road
+  const generateRoadPath = () => {
+    const numPoints = Math.ceil(height / 55);
+    let pathData = '';
+
+    for (let i = 0; i <= numPoints; i++) {
+      const y = i * 55;
+      const x = 50 + (Math.sin(i * (Math.PI * 2) / 12) * 25);
+
+      if (i === 0) {
+        pathData += `M ${x} ${y} `;
+      } else {
+        // Smooth curve usando quadratic bezier
+        const prevX = 50 + (Math.sin((i-1) * (Math.PI * 2) / 12) * 25);
+        const controlX = (prevX + x) / 2;
+        const controlY = y - 27.5;
+        pathData += `Q ${controlX} ${controlY}, ${x} ${y} `;
+      }
+    }
+
+    return pathData;
+  };
+
+  return (
+    <svg
+      className="absolute inset-0 pointer-events-none z-[1]"
+      width="100%"
+      height={height}
+      style={{ minHeight: '100%' }}
+    >
+      {/* Estrada - Camada de fundo (mais escura) */}
+      <path
+        d={generateRoadPath()}
+        fill="none"
+        stroke="rgba(139, 195, 74, 0.4)"
+        strokeWidth="80"
+        strokeLinecap="round"
+      />
+      {/* Estrada - Camada principal */}
+      <path
+        d={generateRoadPath()}
+        fill="none"
+        stroke="rgba(205, 220, 57, 0.6)"
+        strokeWidth="65"
+        strokeLinecap="round"
+      />
+      {/* Linha central pontilhada */}
+      <path
+        d={generateRoadPath()}
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.3)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray="10,15"
+      />
+    </svg>
+  );
+});
+
+RoadPath.displayName = 'RoadPath';
+
+// Decorações de Bioma (Props laterais baseados no mês)
+const BiomeDecorations = memo(({ monthName, monthIndex }) => {
+  const getSeasonDecorations = () => {
+    const month = monthIndex; // 0=Jan, 11=Dez
+
+    // Verão (Dez-Mar): Flores e arbustos
+    if (month >= 11 || month <= 2) {
+      return (
+        <>
+          <div className="absolute left-2 top-[10%] text-6xl opacity-40 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>🌺</div>
+          <div className="absolute right-4 top-[15%] text-5xl opacity-40 animate-bounce" style={{ animationDelay: '1s', animationDuration: '3.5s' }}>🌻</div>
+          <div className="absolute left-6 top-[35%] text-4xl opacity-30">🌿</div>
+          <div className="absolute right-2 top-[40%] text-7xl opacity-35">🌴</div>
+          <div className="absolute left-3 top-[60%] text-5xl opacity-40 animate-bounce" style={{ animationDelay: '1.5s', animationDuration: '4s' }}>🌺</div>
+          <div className="absolute right-5 top-[70%] text-6xl opacity-30">🪨</div>
+          <div className="absolute left-4 top-[85%] text-5xl opacity-40">🌻</div>
+        </>
+      );
+    }
+
+    // Outono (Abr-Jun): Folhas laranjas e cogumelos
+    if (month >= 3 && month <= 5) {
+      return (
+        <>
+          <div className="absolute left-2 top-[12%] text-6xl opacity-40">🍂</div>
+          <div className="absolute right-3 top-[18%] text-7xl opacity-35 animate-pulse" style={{ animationDuration: '4s' }}>🍁</div>
+          <div className="absolute left-5 top-[38%] text-5xl opacity-40">🍄</div>
+          <div className="absolute right-2 top-[45%] text-6xl opacity-30">🍂</div>
+          <div className="absolute left-3 top-[65%] text-7xl opacity-35 animate-pulse" style={{ animationDuration: '5s' }}>🍁</div>
+          <div className="absolute right-4 top-[75%] text-5xl opacity-40">🍄</div>
+          <div className="absolute left-2 top-[88%] text-6xl opacity-30">🪨</div>
+        </>
+      );
+    }
+
+    // Inverno (Jul-Set): Neve e pinheiros
+    if (month >= 6 && month <= 8) {
+      return (
+        <>
+          <div className="absolute left-2 top-[10%] text-7xl opacity-40">🌲</div>
+          <div className="absolute right-3 top-[16%] text-4xl opacity-50 animate-pulse" style={{ animationDuration: '3s' }}>❄️</div>
+          <div className="absolute left-4 top-[35%] text-5xl opacity-45 animate-pulse" style={{ animationDuration: '4s' }}>❄️</div>
+          <div className="absolute right-2 top-[42%] text-7xl opacity-35">🌲</div>
+          <div className="absolute left-3 top-[62%] text-6xl opacity-40 animate-pulse" style={{ animationDuration: '5s' }}>❄️</div>
+          <div className="absolute right-4 top-[72%] text-7xl opacity-40">🌲</div>
+          <div className="absolute left-2 top-[86%] text-5xl opacity-50 animate-pulse" style={{ animationDuration: '3.5s' }}>❄️</div>
+        </>
+      );
+    }
+
+    // Primavera (Out-Nov): Flores vibrantes
+    return (
+      <>
+        <div className="absolute left-2 top-[10%] text-6xl opacity-45 animate-bounce" style={{ animationDuration: '3s' }}>🌸</div>
+        <div className="absolute right-3 top-[17%] text-7xl opacity-40 animate-bounce" style={{ animationDuration: '3.5s' }}>🌺</div>
+        <div className="absolute left-5 top-[38%] text-5xl opacity-40">🦋</div>
+        <div className="absolute right-2 top-[44%] text-6xl opacity-35 animate-bounce" style={{ animationDuration: '4s' }}>🌼</div>
+        <div className="absolute left-3 top-[64%] text-7xl opacity-40">🌻</div>
+        <div className="absolute right-4 top-[74%] text-5xl opacity-45">🦋</div>
+        <div className="absolute left-4 top-[87%] text-6xl opacity-40 animate-bounce" style={{ animationDuration: '3.5s' }}>🌸</div>
+      </>
+    );
+  };
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
+      {getSeasonDecorations()}
+    </div>
+  );
+});
+
+BiomeDecorations.displayName = 'BiomeDecorations';
+
+// Itens decorativos no caminho (entre níveis)
+const PathItems = memo(({ dayIndex }) => {
+  const items = useMemo(() => {
+    const decorations = [];
+    const types = ['💰', '💛', '👣', '✨'];
+
+    // Adiciona 1-2 itens aleatórios entre alguns dias
+    if (dayIndex % 3 === 0 && Math.random() > 0.5) {
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      const randomOffset = (Math.random() - 0.5) * 30;
+
+      decorations.push({
+        emoji: randomType,
+        offset: randomOffset,
+        delay: Math.random() * 2
+      });
+    }
+
+    return decorations;
+  }, [dayIndex]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <>
+      {items.map((item, i) => (
+        <div
+          key={i}
+          className="absolute text-2xl opacity-30 animate-pulse pointer-events-none"
+          style={{
+            left: `calc(50% + ${item.offset}px)`,
+            top: '25px',
+            animationDelay: `${item.delay}s`,
+            animationDuration: '3s'
+          }}
+        >
+          {item.emoji}
+        </div>
+      ))}
+    </>
+  );
+});
+
+PathItems.displayName = 'PathItems';
+
+// Optimized: Memoize individual day component with base/shadow
 const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick, monthIndex, style }) => {
   // Calculate if this day is in the past
   const isPast = useMemo(() => {
