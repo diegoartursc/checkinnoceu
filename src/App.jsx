@@ -2159,33 +2159,7 @@ const BiomeDecorations = memo(({ monthName, monthIndex }) => {
 
   return (
     <>
-      {/* Campo Gramado Vibrante de Fundo */}
-      <div className="absolute inset-0 bg-gradient-to-b from-green-600 via-green-500 to-green-600 opacity-95 z-[-1]">
-        {/* Textura de grama com padrão */}
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: `repeating-linear-gradient(
-            90deg,
-            rgba(34, 197, 94, 0.3) 0px,
-            transparent 2px,
-            transparent 4px,
-            rgba(34, 197, 94, 0.3) 6px
-          ),
-          repeating-linear-gradient(
-            0deg,
-            rgba(22, 163, 74, 0.2) 0px,
-            transparent 2px,
-            transparent 4px,
-            rgba(22, 163, 74, 0.2) 6px
-          )`
-        }}></div>
-
-        {/* Detalhes de grama (manchas mais escuras/claras) */}
-        <div className="absolute top-[20%] left-[10%] w-20 h-20 bg-green-700 rounded-full blur-2xl opacity-20"></div>
-        <div className="absolute top-[45%] right-[15%] w-24 h-24 bg-green-400 rounded-full blur-3xl opacity-25"></div>
-        <div className="absolute top-[70%] left-[20%] w-16 h-16 bg-green-700 rounded-full blur-xl opacity-20"></div>
-      </div>
-
-      {/* Props 3D do Bioma com Parallax */}
+      {/* Props 3D do Bioma com Parallax (sem fundo verde - mantém céu azul) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {getSeasonDecorations()}
       </div>
