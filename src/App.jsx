@@ -1171,8 +1171,9 @@ const FloatingAvatar = memo(() => {
       style={{ animation: 'hoverFloat 2s ease-in-out infinite' }}
     >
       <div className="relative">
-        {/* Shadow below */}
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-3 bg-black/30 rounded-full blur-sm"></div>
+        {/* Sombra Projetada Realista sobre a Estrada de Pedras */}
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-14 h-4 bg-black/50 rounded-full blur-md"></div>
+        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-3 bg-black/35 rounded-full blur-sm"></div>
 
         {/* Avatar frame */}
         <div className="bg-gradient-to-br from-sky-400 to-blue-600 p-1 rounded-2xl shadow-[0_10px_30px_rgba(14,165,233,0.5)] border-4 border-sky-200">
@@ -1914,22 +1915,26 @@ const calculatePathPosition = (dayIndex, totalDays) => {
    ROAD & SCENERY COMPONENTS
    ======================================== */
 
-// SVG Road Path - Estrada Sinuosa Larga
+// SVG Road Path - Estrada de Pedras Cobblestone 3D Realista
 const RoadPath = memo(({ height }) => {
-  // Generate SVG path data for sinuous road
-  const generateRoadPath = () => {
+  // Generate SVG path data for sinuous road with perspective
+  const generateRoadPath = (widthMultiplier = 1) => {
     const numPoints = Math.ceil(height / 55);
     let pathData = '';
 
     for (let i = 0; i <= numPoints; i++) {
       const y = i * 55;
-      const x = 50 + (Math.sin(i * (Math.PI * 2) / 12) * 25);
+      // Perspective: wider at bottom (i = 0), narrower at top
+      const perspectiveFactor = 1 - (i / numPoints) * 0.3; // Vai de 1.0 (base) até 0.7 (topo)
+      const amplitude = 25 * perspectiveFactor * widthMultiplier;
+      const x = 50 + (Math.sin(i * (Math.PI * 2) / 12) * amplitude);
 
       if (i === 0) {
         pathData += `M ${x} ${y} `;
       } else {
-        // Smooth curve usando quadratic bezier
-        const prevX = 50 + (Math.sin((i-1) * (Math.PI * 2) / 12) * 25);
+        const prevPerspective = 1 - ((i - 1) / numPoints) * 0.3;
+        const prevAmplitude = 25 * prevPerspective * widthMultiplier;
+        const prevX = 50 + (Math.sin((i-1) * (Math.PI * 2) / 12) * prevAmplitude);
         const controlX = (prevX + x) / 2;
         const controlY = y - 27.5;
         pathData += `Q ${controlX} ${controlY}, ${x} ${y} `;
@@ -1946,30 +1951,101 @@ const RoadPath = memo(({ height }) => {
       height={height}
       style={{ minHeight: '100%' }}
     >
-      {/* Estrada - Camada de fundo (mais escura) */}
+      <defs>
+        {/* Cobblestone Pattern - Textura de Pedras */}
+        <pattern id="cobblestone" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          {/* Pedras individuais com cores variadas */}
+          <rect x="0" y="0" width="18" height="18" fill="#6b7280" rx="3" opacity="0.9" />
+          <rect x="20" y="0" width="18" height="18" fill="#78716c" rx="3" opacity="0.85" />
+          <rect x="0" y="20" width="18" height="18" fill="#737373" rx="3" opacity="0.88" />
+          <rect x="20" y="20" width="18" height="18" fill="#71717a" rx="3" opacity="0.92" />
+
+          {/* Sombras entre pedras (linhas escuras) */}
+          <line x1="19" y1="0" x2="19" y2="40" stroke="#3f3f46" strokeWidth="1.5" opacity="0.7" />
+          <line x1="0" y1="19" x2="40" y2="19" stroke="#3f3f46" strokeWidth="1.5" opacity="0.7" />
+
+          {/* Detalhes de musgo/sujeira */}
+          <circle cx="5" cy="5" r="1.5" fill="#84cc16" opacity="0.3" />
+          <circle cx="25" cy="28" r="1" fill="#84cc16" opacity="0.4" />
+          <circle cx="12" cy="32" r="1.5" fill="#65a30d" opacity="0.25" />
+        </pattern>
+
+        {/* Filter para adicionar textura e relevo */}
+        <filter id="stoneTexture">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" />
+          <feDiffuseLighting in="noise" lightingColor="#d4d4d8" surfaceScale="1.5" result="diffLight">
+            <feDistantLight azimuth="45" elevation="60" />
+          </feDiffuseLighting>
+          <feComposite in="diffLight" in2="SourceGraphic" operator="multiply" />
+        </filter>
+
+        {/* Gradient para profundidade da estrada */}
+        <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#57534e" stopOpacity="0.9" />
+          <stop offset="50%" stopColor="#78716c" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#6b7280" stopOpacity="1" />
+        </linearGradient>
+      </defs>
+
+      {/* CAMADA 1: Borda de Terra/Grama (mais escura) */}
       <path
-        d={generateRoadPath()}
+        d={generateRoadPath(1.15)}
         fill="none"
-        stroke="rgba(139, 195, 74, 0.4)"
-        strokeWidth="80"
+        stroke="#4d7c0f"
+        strokeWidth="95"
         strokeLinecap="round"
+        opacity="0.6"
       />
-      {/* Estrada - Camada principal */}
+
+      {/* CAMADA 2: Borda de Grama */}
       <path
-        d={generateRoadPath()}
+        d={generateRoadPath(1.1)}
         fill="none"
-        stroke="rgba(205, 220, 57, 0.6)"
-        strokeWidth="65"
+        stroke="#65a30d"
+        strokeWidth="88"
         strokeLinecap="round"
+        opacity="0.75"
       />
-      {/* Linha central pontilhada */}
+
+      {/* CAMADA 3: Base da Estrada (sombra) */}
       <path
-        d={generateRoadPath()}
+        d={generateRoadPath(1.0)}
         fill="none"
-        stroke="rgba(255, 255, 255, 0.3)"
+        stroke="#27272a"
+        strokeWidth="78"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+
+      {/* CAMADA 4: Estrada Principal com Textura Cobblestone */}
+      <path
+        d={generateRoadPath(1.0)}
+        fill="none"
+        stroke="url(#cobblestone)"
+        strokeWidth="70"
+        strokeLinecap="round"
+        filter="url(#stoneTexture)"
+      />
+
+      {/* CAMADA 5: Overlay de profundidade */}
+      <path
+        d={generateRoadPath(1.0)}
+        fill="none"
+        stroke="url(#roadGradient)"
+        strokeWidth="70"
+        strokeLinecap="round"
+        opacity="0.3"
+      />
+
+      {/* CAMADA 6: Highlight superior (brilho nas pedras) */}
+      <path
+        d={generateRoadPath(1.0)}
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.15)"
         strokeWidth="2"
         strokeLinecap="round"
-        strokeDasharray="10,15"
+        strokeDasharray="5,10"
+        opacity="0.6"
       />
     </svg>
   );
@@ -1977,37 +2053,56 @@ const RoadPath = memo(({ height }) => {
 
 RoadPath.displayName = 'RoadPath';
 
-// Decorações de Bioma (Props laterais baseados no mês)
+// Campo Gramado + Decorações de Bioma 3D com Parallax
 const BiomeDecorations = memo(({ monthName, monthIndex }) => {
   const getSeasonDecorations = () => {
     const month = monthIndex; // 0=Jan, 11=Dez
 
-    // Verão (Dez-Mar): Flores e arbustos
+    // Verão (Dez-Mar): Flores vibrantes e palmeiras
     if (month >= 11 || month <= 2) {
       return (
         <>
-          <div className="absolute left-2 top-[10%] text-6xl opacity-40 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>🌺</div>
-          <div className="absolute right-4 top-[15%] text-5xl opacity-40 animate-bounce" style={{ animationDelay: '1s', animationDuration: '3.5s' }}>🌻</div>
-          <div className="absolute left-6 top-[35%] text-4xl opacity-30">🌿</div>
-          <div className="absolute right-2 top-[40%] text-7xl opacity-35">🌴</div>
-          <div className="absolute left-3 top-[60%] text-5xl opacity-40 animate-bounce" style={{ animationDelay: '1.5s', animationDuration: '4s' }}>🌺</div>
-          <div className="absolute right-5 top-[70%] text-6xl opacity-30">🪨</div>
-          <div className="absolute left-4 top-[85%] text-5xl opacity-40">🌻</div>
+          {/* Elementos ATRÁS da estrada (z-[0]) */}
+          <div className="absolute left-[-10px] top-[8%] text-7xl opacity-50 z-[0]">🌴</div>
+          <div className="absolute right-[-5px] top-[25%] text-6xl opacity-45 z-[0]">🌴</div>
+          <div className="absolute left-2 top-[50%] text-5xl opacity-40 z-[0]">🌿</div>
+          <div className="absolute right-3 top-[68%] text-7xl opacity-50 z-[0]">🌴</div>
+
+          {/* Elementos NO MEIO (z-[2] - ao lado da estrada) */}
+          <div className="absolute left-4 top-[12%] text-6xl opacity-55 z-[2] drop-shadow-lg">🌺</div>
+          <div className="absolute right-6 top-[20%] text-5xl opacity-60 z-[2] drop-shadow-lg animate-bounce" style={{ animationDuration: '3s' }}>🌻</div>
+          <div className="absolute left-6 top-[38%] text-4xl opacity-50 z-[2]">🪨</div>
+          <div className="absolute right-4 top-[55%] text-6xl opacity-55 z-[2] drop-shadow-lg">🌺</div>
+          <div className="absolute left-5 top-[75%] text-5xl opacity-60 z-[2] drop-shadow-lg animate-bounce" style={{ animationDuration: '3.5s' }}>🌻</div>
+          <div className="absolute right-5 top-[88%] text-4xl opacity-50 z-[2]">🪨</div>
+
+          {/* Elementos NA FRENTE da estrada (z-[15] - profundidade) */}
+          <div className="absolute left-[-5px] top-[32%] text-8xl opacity-70 z-[15] drop-shadow-2xl">🌿</div>
+          <div className="absolute right-[-8px] top-[78%] text-7xl opacity-65 z-[15] drop-shadow-2xl">🌺</div>
         </>
       );
     }
 
-    // Outono (Abr-Jun): Folhas laranjas e cogumelos
+    // Outono (Abr-Jun): Folhas caindo e cogumelos
     if (month >= 3 && month <= 5) {
       return (
         <>
-          <div className="absolute left-2 top-[12%] text-6xl opacity-40">🍂</div>
-          <div className="absolute right-3 top-[18%] text-7xl opacity-35 animate-pulse" style={{ animationDuration: '4s' }}>🍁</div>
-          <div className="absolute left-5 top-[38%] text-5xl opacity-40">🍄</div>
-          <div className="absolute right-2 top-[45%] text-6xl opacity-30">🍂</div>
-          <div className="absolute left-3 top-[65%] text-7xl opacity-35 animate-pulse" style={{ animationDuration: '5s' }}>🍁</div>
-          <div className="absolute right-4 top-[75%] text-5xl opacity-40">🍄</div>
-          <div className="absolute left-2 top-[88%] text-6xl opacity-30">🪨</div>
+          {/* Elementos ATRÁS */}
+          <div className="absolute left-[-8px] top-[10%] text-6xl opacity-45 z-[0]">🌳</div>
+          <div className="absolute right-[-6px] top-[28%] text-7xl opacity-40 z-[0]">🌳</div>
+          <div className="absolute left-2 top-[55%] text-6xl opacity-45 z-[0]">🌳</div>
+
+          {/* Elementos NO MEIO */}
+          <div className="absolute left-5 top-[15%] text-6xl opacity-55 z-[2] drop-shadow-lg animate-pulse" style={{ animationDuration: '4s' }}>🍂</div>
+          <div className="absolute right-4 top-[22%] text-7xl opacity-60 z-[2] drop-shadow-lg">🍁</div>
+          <div className="absolute left-6 top-[40%] text-5xl opacity-50 z-[2]">🍄</div>
+          <div className="absolute right-6 top-[58%] text-6xl opacity-55 z-[2] drop-shadow-lg animate-pulse" style={{ animationDuration: '5s' }}>🍂</div>
+          <div className="absolute left-4 top-[72%] text-5xl opacity-50 z-[2]">🍄</div>
+          <div className="absolute right-3 top-[85%] text-4xl opacity-45 z-[2]">🪨</div>
+
+          {/* Elementos NA FRENTE */}
+          <div className="absolute left-[-6px] top-[35%] text-8xl opacity-65 z-[15] drop-shadow-2xl animate-pulse" style={{ animationDuration: '6s' }}>🍁</div>
+          <div className="absolute right-[-10px] top-[68%] text-7xl opacity-70 z-[15] drop-shadow-2xl">🍂</div>
         </>
       );
     }
@@ -2016,35 +2111,82 @@ const BiomeDecorations = memo(({ monthName, monthIndex }) => {
     if (month >= 6 && month <= 8) {
       return (
         <>
-          <div className="absolute left-2 top-[10%] text-7xl opacity-40">🌲</div>
-          <div className="absolute right-3 top-[16%] text-4xl opacity-50 animate-pulse" style={{ animationDuration: '3s' }}>❄️</div>
-          <div className="absolute left-4 top-[35%] text-5xl opacity-45 animate-pulse" style={{ animationDuration: '4s' }}>❄️</div>
-          <div className="absolute right-2 top-[42%] text-7xl opacity-35">🌲</div>
-          <div className="absolute left-3 top-[62%] text-6xl opacity-40 animate-pulse" style={{ animationDuration: '5s' }}>❄️</div>
-          <div className="absolute right-4 top-[72%] text-7xl opacity-40">🌲</div>
-          <div className="absolute left-2 top-[86%] text-5xl opacity-50 animate-pulse" style={{ animationDuration: '3.5s' }}>❄️</div>
+          {/* Elementos ATRÁS */}
+          <div className="absolute left-[-12px] top-[12%] text-8xl opacity-50 z-[0]">🌲</div>
+          <div className="absolute right-[-10px] top-[30%] text-7xl opacity-45 z-[0]">🌲</div>
+          <div className="absolute left-[-8px] top-[60%] text-8xl opacity-50 z-[0]">🌲</div>
+
+          {/* Elementos NO MEIO */}
+          <div className="absolute left-4 top-[18%] text-4xl opacity-60 z-[2] animate-pulse" style={{ animationDuration: '3s' }}>❄️</div>
+          <div className="absolute right-5 top-[25%] text-5xl opacity-55 z-[2] animate-pulse" style={{ animationDuration: '4s' }}>❄️</div>
+          <div className="absolute left-6 top-[45%] text-6xl opacity-60 z-[2] animate-pulse" style={{ animationDuration: '5s' }}>❄️</div>
+          <div className="absolute right-4 top-[65%] text-4xl opacity-55 z-[2] animate-pulse" style={{ animationDuration: '3.5s' }}>❄️</div>
+          <div className="absolute left-5 top-[82%] text-5xl opacity-60 z-[2] animate-pulse" style={{ animationDuration: '4.5s' }}>❄️</div>
+
+          {/* Elementos NA FRENTE */}
+          <div className="absolute left-[-5px] top-[38%] text-9xl opacity-70 z-[15] drop-shadow-2xl">🌲</div>
+          <div className="absolute right-[-8px] top-[75%] text-8xl opacity-65 z-[15] drop-shadow-2xl">🌲</div>
         </>
       );
     }
 
-    // Primavera (Out-Nov): Flores vibrantes
+    // Primavera (Out-Nov): Flores coloridas e borboletas
     return (
       <>
-        <div className="absolute left-2 top-[10%] text-6xl opacity-45 animate-bounce" style={{ animationDuration: '3s' }}>🌸</div>
-        <div className="absolute right-3 top-[17%] text-7xl opacity-40 animate-bounce" style={{ animationDuration: '3.5s' }}>🌺</div>
-        <div className="absolute left-5 top-[38%] text-5xl opacity-40">🦋</div>
-        <div className="absolute right-2 top-[44%] text-6xl opacity-35 animate-bounce" style={{ animationDuration: '4s' }}>🌼</div>
-        <div className="absolute left-3 top-[64%] text-7xl opacity-40">🌻</div>
-        <div className="absolute right-4 top-[74%] text-5xl opacity-45">🦋</div>
-        <div className="absolute left-4 top-[87%] text-6xl opacity-40 animate-bounce" style={{ animationDuration: '3.5s' }}>🌸</div>
+        {/* Elementos ATRÁS */}
+        <div className="absolute left-[-6px] top-[8%] text-6xl opacity-45 z-[0]">🌳</div>
+        <div className="absolute right-[-8px] top-[26%] text-7xl opacity-40 z-[0]">🌳</div>
+        <div className="absolute left-2 top-[52%] text-6xl opacity-45 z-[0]">🌳</div>
+
+        {/* Elementos NO MEIO */}
+        <div className="absolute left-5 top-[14%] text-6xl opacity-60 z-[2] drop-shadow-lg animate-bounce" style={{ animationDuration: '3s' }}>🌸</div>
+        <div className="absolute right-4 top-[20%] text-7xl opacity-65 z-[2] drop-shadow-lg">🌺</div>
+        <div className="absolute left-6 top-[36%] text-5xl opacity-55 z-[2]">🦋</div>
+        <div className="absolute right-6 top-[48%] text-6xl opacity-60 z-[2] drop-shadow-lg animate-bounce" style={{ animationDuration: '4s' }}>🌼</div>
+        <div className="absolute left-4 top-[66%] text-7xl opacity-65 z-[2] drop-shadow-lg">🌻</div>
+        <div className="absolute right-5 top-[78%] text-5xl opacity-55 z-[2]">🦋</div>
+        <div className="absolute left-6 top-[90%] text-6xl opacity-60 z-[2] drop-shadow-lg animate-bounce" style={{ animationDuration: '3.5s' }}>🌸</div>
+
+        {/* Elementos NA FRENTE */}
+        <div className="absolute left-[-7px] top-[42%] text-8xl opacity-70 z-[15] drop-shadow-2xl">🌺</div>
+        <div className="absolute right-[-10px] top-[84%] text-7xl opacity-65 z-[15] drop-shadow-2xl">🌻</div>
       </>
     );
   };
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
-      {getSeasonDecorations()}
-    </div>
+    <>
+      {/* Campo Gramado Vibrante de Fundo */}
+      <div className="absolute inset-0 bg-gradient-to-b from-green-600 via-green-500 to-green-600 opacity-95 z-[-1]">
+        {/* Textura de grama com padrão */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `repeating-linear-gradient(
+            90deg,
+            rgba(34, 197, 94, 0.3) 0px,
+            transparent 2px,
+            transparent 4px,
+            rgba(34, 197, 94, 0.3) 6px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(22, 163, 74, 0.2) 0px,
+            transparent 2px,
+            transparent 4px,
+            rgba(22, 163, 74, 0.2) 6px
+          )`
+        }}></div>
+
+        {/* Detalhes de grama (manchas mais escuras/claras) */}
+        <div className="absolute top-[20%] left-[10%] w-20 h-20 bg-green-700 rounded-full blur-2xl opacity-20"></div>
+        <div className="absolute top-[45%] right-[15%] w-24 h-24 bg-green-400 rounded-full blur-3xl opacity-25"></div>
+        <div className="absolute top-[70%] left-[20%] w-16 h-16 bg-green-700 rounded-full blur-xl opacity-20"></div>
+      </div>
+
+      {/* Props 3D do Bioma com Parallax */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {getSeasonDecorations()}
+      </div>
+    </>
   );
 });
 
@@ -2113,11 +2255,23 @@ const DayNode = memo(({ dayNum, month, isCurrentDay, specialDate, onSpecialClick
   const SpecialIcon = specialDate?.icon;
 
   return (
-    <div className="absolute flex justify-center z-10" style={style}>
+    <div className="absolute flex flex-col items-center z-10" style={style}>
+      {/* Sombra Projetada Realista (projetada sobre a estrada) */}
+      <div className="absolute top-[32px] sm:top-[42px] w-12 h-3 bg-black/40 rounded-full blur-[3px] opacity-60"></div>
+
+      {/* Base Circular de Pedra (ancora o nó na estrada) */}
+      <div className={`absolute top-[28px] sm:top-[36px] w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-stone-400 via-stone-500 to-stone-600 border-2 border-stone-700 opacity-80 shadow-inner ${
+        isCurrentDay ? 'scale-110' : ''
+      }`}>
+        {/* Textura de pedra na base */}
+        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.2),transparent_50%)]"></div>
+      </div>
+
+      {/* Botão do Dia (Level Node) */}
       <div
         onClick={() => specialDate && !isPast && onSpecialClick(specialDate)}
         className={`
-            w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-[3px]
+            relative w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-[3px]
             ${isCurrentDay
                 ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-600 scale-125 sm:scale-150 shadow-[0_0_25px_rgba(250,204,21,0.8)] z-20 animate-pulse'
                 : isPast
