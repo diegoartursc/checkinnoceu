@@ -2153,19 +2153,45 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
       style={{ minHeight: '100%' }}
     >
       <defs>
-        {/* Cobblestone Texture Pattern */}
-        <pattern id="roadTexture" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-          <rect x="0" y="0" width="18" height="18" fill="#6b7280" rx="3" opacity="0.9" />
-          <rect x="20" y="0" width="18" height="18" fill="#78716c" rx="3" opacity="0.85" />
-          <rect x="0" y="20" width="18" height="18" fill="#737373" rx="3" opacity="0.88" />
-          <rect x="20" y="20" width="18" height="18" fill="#71717a" rx="3" opacity="0.92" />
+        {/* Enhanced Cobblestone Texture Pattern - Realista */}
+        <pattern id="roadTexture" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+          {/* Pedra 1 - Tom mais claro */}
+          <rect x="2" y="2" width="24" height="24" fill="#8b8680" rx="4" opacity="0.95">
+            <animate attributeName="opacity" values="0.95;0.92;0.95" dur="5s" repeatCount="indefinite" />
+          </rect>
+          <rect x="3" y="3" width="10" height="10" fill="#a8a29e" rx="2" opacity="0.3" />
 
-          <line x1="19" y1="0" x2="19" y2="40" stroke="#3f3f46" strokeWidth="1.5" opacity="0.7" />
-          <line x1="0" y1="19" x2="40" y2="19" stroke="#3f3f46" strokeWidth="1.5" opacity="0.7" />
+          {/* Pedra 2 - Tom médio */}
+          <rect x="31" y="2" width="26" height="24" fill="#6b7280" rx="4" opacity="0.9" />
+          <path d="M 35 8 Q 40 10, 45 8" stroke="#52525b" strokeWidth="1" fill="none" opacity="0.5" />
 
-          <circle cx="5" cy="5" r="1.5" fill="#84cc16" opacity="0.3" />
-          <circle cx="25" cy="28" r="1" fill="#84cc16" opacity="0.4" />
-          <circle cx="12" cy="32" r="1.5" fill="#65a30d" opacity="0.25" />
+          {/* Pedra 3 - Tom escuro */}
+          <rect x="2" y="31" width="24" height="26" fill="#57534e" rx="4" opacity="0.93" />
+          <circle cx="10" cy="40" r="2" fill="#3f3f46" opacity="0.4" />
+
+          {/* Pedra 4 - Tom marrom */}
+          <rect x="31" y="31" width="26" height="26" fill="#78716c" rx="4" opacity="0.88" />
+          <rect x="38" y="38" width="8" height="8" fill="#a8a29e" rx="1" opacity="0.25" />
+
+          {/* Linhas de separação (argamassa/terra) */}
+          <line x1="28" y1="0" x2="28" y2="60" stroke="#3f3f46" strokeWidth="3" opacity="0.5" />
+          <line x1="0" y1="28" x2="60" y2="28" stroke="#3f3f46" strokeWidth="3" opacity="0.5" />
+
+          {/* Rachaduras nas pedras */}
+          <path d="M 8 6 L 12 10" stroke="#27272a" strokeWidth="0.8" opacity="0.4" />
+          <path d="M 40 35 Q 42 38, 44 40" stroke="#27272a" strokeWidth="0.8" opacity="0.3" />
+          <path d="M 6 45 L 10 50" stroke="#27272a" strokeWidth="0.7" opacity="0.35" />
+
+          {/* Musgo e sujeira (detalhes verdes/marrons) */}
+          <circle cx="7" cy="8" r="1.5" fill="#84cc16" opacity="0.35" />
+          <circle cx="50" cy="12" r="1.2" fill="#65a30d" opacity="0.3" />
+          <circle cx="15" cy="48" r="1.8" fill="#78716c" opacity="0.25" />
+          <circle cx="45" cy="50" r="1" fill="#84cc16" opacity="0.4" />
+
+          {/* Variações de cor (highlights) */}
+          <ellipse cx="12" cy="12" rx="3" ry="2" fill="#d6d3d1" opacity="0.15" />
+          <ellipse cx="42" cy="18" rx="4" ry="2.5" fill="#e7e5e4" opacity="0.12" />
+          <ellipse cx="18" cy="42" rx="2.5" ry="2" fill="#fafaf9" opacity="0.1" />
         </pattern>
 
         <filter id="roadRelief">
@@ -2413,6 +2439,83 @@ const PathItems = memo(({ dayIndex }) => {
 });
 
 PathItems.displayName = 'PathItems';
+
+// MapDecorations - Props decorativos procedurais ao longo do caminho
+const MapDecorations = memo(({ dayIndex, totalDays, pathPosition }) => {
+  // Gerador de número pseudoaleatório baseado em seed (determinístico)
+  const seededRandom = useCallback((seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }, []);
+
+  // Decidir se este dia tem decoração e qual tipo
+  const decoration = useMemo(() => {
+    const seed = dayIndex * 123.456;
+    const chance = seededRandom(seed);
+
+    // 40% de chance de ter decoração
+    if (chance < 0.4) return null;
+
+    // Tipo de decoração baseado em posição
+    const typeChance = seededRandom(seed + 1);
+    const side = seededRandom(seed + 2) > 0.5 ? 'left' : 'right';
+    const offset = 60 + seededRandom(seed + 3) * 40; // 60-100px do centro
+
+    let element = null;
+    let size = 'text-3xl';
+    let yOffset = 0;
+
+    if (typeChance < 0.25) {
+      // Árvores
+      const trees = ['🌲', '🌳', '🌴', '🎄'];
+      element = trees[Math.floor(seededRandom(seed + 4) * trees.length)];
+      size = 'text-4xl sm:text-5xl';
+      yOffset = -10;
+    } else if (typeChance < 0.5) {
+      // Flores
+      const flowers = ['🌸', '🌺', '🌻', '🌷', '🌹', '💐'];
+      element = flowers[Math.floor(seededRandom(seed + 5) * flowers.length)];
+      size = 'text-2xl sm:text-3xl';
+      yOffset = 5;
+    } else if (typeChance < 0.75) {
+      // Arbustos e plantas
+      const plants = ['🌿', '🍀', '🌱', '🪴'];
+      element = plants[Math.floor(seededRandom(seed + 6) * plants.length)];
+      size = 'text-2xl sm:text-3xl';
+      yOffset = 0;
+    } else {
+      // Pedras e elementos naturais
+      const rocks = ['🪨', '⛰️', '🏔️'];
+      element = rocks[Math.floor(seededRandom(seed + 7) * rocks.length)];
+      size = 'text-3xl sm:text-4xl';
+      yOffset = -5;
+    }
+
+    return { element, size, side, offset, yOffset };
+  }, [dayIndex, seededRandom]);
+
+  if (!decoration) return null;
+
+  const style = {
+    left: decoration.side === 'left'
+      ? `calc(${pathPosition.left} - ${decoration.offset}px)`
+      : `calc(${pathPosition.left} + ${decoration.offset}px)`,
+    top: `${parseInt(pathPosition.top) + decoration.yOffset}px`,
+    transform: 'translateX(-50%)',
+    zIndex: decoration.side === 'left' ? 1 : 3 // Left = behind path, Right = in front
+  };
+
+  return (
+    <div
+      className={`absolute ${decoration.size} pointer-events-none opacity-70 transition-all duration-300 hover:scale-110 hover:opacity-100`}
+      style={style}
+    >
+      {decoration.element}
+    </div>
+  );
+});
+
+MapDecorations.displayName = 'MapDecorations';
 
 // Optimized: Memoize individual day component with bloqueio progression system
 const DayNode = memo(({
@@ -2884,6 +2987,12 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                       <div className="absolute" style={pathPosition}>
                         <PathItems dayIndex={dayIndex} />
                       </div>
+                      {/* MapDecorations - Props naturais ao longo do caminho */}
+                      <MapDecorations
+                        dayIndex={dayIndex}
+                        totalDays={month.days}
+                        pathPosition={pathPosition}
+                      />
                       {isCurrentDay && (
                         <div
                           className="absolute z-50"
@@ -3171,8 +3280,13 @@ export default function CheckInApp() {
         <div className="w-8 sm:w-12"></div>
       </div>
 
-      <div className="h-full z-10 relative bg-slate-900">
-        {screen === 'checkin' && (
+      <div className="h-full z-10 relative bg-slate-900 overflow-hidden">
+        {/* CheckIn Screen com transição */}
+        <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+          screen === 'checkin'
+            ? 'translate-x-0 opacity-100'
+            : 'translate-x-[-100%] opacity-0 pointer-events-none'
+        }`}>
           <div className="absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 z-0">
              <CloudBackground />
              <div className="relative z-10 h-full pt-14 sm:pt-16 pb-20">
@@ -3183,8 +3297,16 @@ export default function CheckInApp() {
                 />
              </div>
           </div>
-        )}
-        {screen === 'map' && (
+        </div>
+
+        {/* Map Screen com transição */}
+        <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+          screen === 'map'
+            ? 'translate-x-0 opacity-100'
+            : screen === 'checkin'
+              ? 'translate-x-[100%] opacity-0 pointer-events-none'
+              : 'translate-x-[-100%] opacity-0 pointer-events-none'
+        }`}>
           <MapScreen
             lastCompletedDay={lastCompletedDay}
             onOpenGame={setCurrentGameConfig}
@@ -3194,8 +3316,16 @@ export default function CheckInApp() {
             onDayClick={handleDayClick}
             completedDays={completedDays}
           />
-        )}
-        {screen === 'lar' && <LarScreen coins={coins} onSpendCoins={spendCoins} />}
+        </div>
+
+        {/* Lar Screen com transição */}
+        <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+          screen === 'lar'
+            ? 'translate-x-0 opacity-100'
+            : 'translate-x-[100%] opacity-0 pointer-events-none'
+        }`}>
+          <LarScreen coins={coins} onSpendCoins={spendCoins} />
+        </div>
       </div>
 
       {currentGameConfig && (
