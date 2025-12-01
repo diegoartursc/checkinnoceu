@@ -2164,21 +2164,21 @@ const MorningPrayerScreen = memo(({ onComplete }) => {
         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-r from-transparent via-yellow-300 to-transparent animate-spin-slow" />
       </div>
 
-      <div className="relative z-10 max-w-md w-full">
+      <div className="relative z-10 max-w-md w-full px-4">
         {/* Ícone do sol */}
-        <div className="text-center mb-6">
-          <div className="inline-block text-8xl animate-bounce-slow mb-4">
+        <div className="text-center mb-4 sm:mb-6">
+          <div className="inline-block text-6xl sm:text-8xl animate-bounce-slow mb-3 sm:mb-4">
             {prayer.icon}
           </div>
-          <h1 className="text-3xl font-black text-orange-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-orange-900 mb-2">
             {prayer.title}
           </h1>
-          <div className="h-1 w-20 bg-gradient-to-r from-orange-400 to-yellow-400 mx-auto rounded-full" />
+          <div className="h-1 w-16 sm:w-20 bg-gradient-to-r from-orange-400 to-yellow-400 mx-auto rounded-full" />
         </div>
 
         {/* Caixa da oração */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-4 border-orange-200 mb-8">
-          <p className="text-gray-800 text-lg leading-relaxed font-medium text-center">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-orange-200 mb-6 sm:mb-8">
+          <p className="text-gray-800 text-base sm:text-lg leading-relaxed font-medium text-center">
             {prayer.text}
           </p>
         </div>
@@ -2249,34 +2249,34 @@ const GratitudeScreen = memo(({ onComplete }) => {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-purple-50 to-blue-50" />
 
-      <div className="relative z-10 flex-1 flex flex-col max-w-2xl mx-auto w-full">
+      <div className="relative z-10 flex-1 flex flex-col max-w-2xl mx-auto w-full px-4">
         {/* Header */}
-        <div className="text-center mb-6 pt-4">
-          <div className="text-6xl mb-3">🙏</div>
-          <h1 className="text-3xl font-black text-purple-900 mb-2">
+        <div className="text-center mb-4 sm:mb-6 pt-4">
+          <div className="text-5xl sm:text-6xl mb-3">🙏</div>
+          <h1 className="text-2xl sm:text-3xl font-black text-purple-900 mb-2">
             Momento de Gratidão
           </h1>
-          <p className="text-purple-700 font-medium">
+          <p className="text-sm sm:text-base text-purple-700 font-medium">
             Pelo que você é grato hoje?
           </p>
         </div>
 
         {/* Grid de opções */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
           {gratitudeOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
               className={`
-                bg-white rounded-2xl p-4 border-4 transition-all duration-200
+                bg-white rounded-2xl p-3 sm:p-4 border-4 transition-all duration-200
                 ${selected === option.id
                   ? 'border-purple-500 scale-105 shadow-[0_0_20px_rgba(168,85,247,0.4)]'
                   : 'border-purple-200 hover:border-purple-300 hover:scale-102'
                 }
               `}
             >
-              <div className="text-4xl mb-2">{option.emoji}</div>
-              <div className="text-xs font-bold text-gray-700">{option.text}</div>
+              <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">{option.emoji}</div>
+              <div className="text-[10px] sm:text-xs font-bold text-gray-700">{option.text}</div>
             </button>
           ))}
         </div>
@@ -2343,19 +2343,19 @@ const GoodActionScreen = memo(({ onComplete }) => {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-green-100 via-emerald-50 to-teal-50" />
 
-      <div className="relative z-10 max-w-md w-full">
+      <div className="relative z-10 max-w-md w-full px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-7xl mb-4 animate-bounce">{currentMission.icon}</div>
-          <h1 className="text-3xl font-black text-green-900 mb-3">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="text-5xl sm:text-7xl mb-3 sm:mb-4 animate-bounce">{currentMission.icon}</div>
+          <h1 className="text-2xl sm:text-3xl font-black text-green-900 mb-2 sm:mb-3">
             Boa Ação do Dia
           </h1>
-          <div className="h-1 w-24 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full mb-4" />
+          <div className="h-1 w-20 sm:w-24 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full mb-3 sm:mb-4" />
         </div>
 
         {/* Missão */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-4 border-green-200 mb-8">
-          <p className="text-gray-800 text-xl font-bold text-center leading-relaxed">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-green-200 mb-6 sm:mb-8">
+          <p className="text-gray-800 text-lg sm:text-xl font-bold text-center leading-relaxed">
             {currentMission.text}
           </p>
         </div>
@@ -2434,21 +2434,21 @@ const EveningPrayerScreen = memo(({ onComplete }) => {
         ))}
       </div>
 
-      <div className="relative z-10 max-w-md w-full">
+      <div className="relative z-10 max-w-md w-full px-4">
         {/* Ícone da lua */}
-        <div className="text-center mb-6">
-          <div className="inline-block text-8xl animate-bounce-slow mb-4">
+        <div className="text-center mb-4 sm:mb-6">
+          <div className="inline-block text-6xl sm:text-8xl animate-bounce-slow mb-3 sm:mb-4">
             {prayer.icon}
           </div>
-          <h1 className="text-3xl font-black text-yellow-100 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-yellow-100 mb-2">
             {prayer.title}
           </h1>
-          <div className="h-1 w-20 bg-gradient-to-r from-purple-400 to-blue-400 mx-auto rounded-full" />
+          <div className="h-1 w-16 sm:w-20 bg-gradient-to-r from-purple-400 to-blue-400 mx-auto rounded-full" />
         </div>
 
         {/* Caixa da oração */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-4 border-purple-300/30 mb-8">
-          <p className="text-white text-lg leading-relaxed font-medium text-center">
+        <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-purple-300/30 mb-6 sm:mb-8">
+          <p className="text-white text-base sm:text-lg leading-relaxed font-medium text-center">
             {prayer.text}
           </p>
         </div>
@@ -4035,7 +4035,7 @@ export default function CheckInApp() {
   // If devotional not complete, show devotional flow
   if (!hasCompletedDevotional) {
     return (
-      <div className="w-full h-screen max-w-md mx-auto bg-slate-900 overflow-hidden relative font-sans shadow-2xl">
+      <div className="w-full min-h-screen max-w-md mx-auto overflow-hidden relative font-sans shadow-2xl">
         {devotionalStep === 'prayer' && (
           <MorningPrayerScreen onComplete={handlePrayerComplete} />
         )}
