@@ -3674,12 +3674,12 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                       <div className="absolute" style={pathPosition}>
                         <PathItems dayIndex={dayIndex} />
                       </div>
-                      {/* MapDecorations - Props naturais ao longo do caminho */}
-                      <MapDecorations
+                      {/* MapDecorations REMOVIDAS - mais limpo */}
+                      {/* <MapDecorations
                         dayIndex={dayIndex}
                         totalDays={month.days}
                         pathPosition={pathPosition}
-                      />
+                      /> */}
                       {isCurrentDay && (
                         <div
                           className="absolute z-50"
