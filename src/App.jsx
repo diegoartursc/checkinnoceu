@@ -1825,25 +1825,23 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
           </p>
         </div>
 
-        {/* Pet Display com Habitat - STICKY NO TOPO */}
-        <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md rounded-3xl p-4 mb-4 shadow-xl border-2 border-pink-200 relative overflow-hidden">
-          {/* Decoração de Habitat Natural */}
-          {getHabitatDecoration()}
-
-          {/* Botão de Trocar Pet */}
+        {/* Pet Display - DIORAMA 3D */}
+        <div className="relative z-20 mb-6">
+          {/* Botão de Trocar Pet - Arcade Style */}
           <button
             onClick={() => setShowPetSelector(true)}
-            className="absolute top-2 right-2 bg-gradient-to-b from-purple-400 to-purple-600 text-white p-1.5 rounded-full shadow-lg border-b-4 border-purple-700 hover:scale-110 active:border-b-0 active:translate-y-1 transition-all z-30"
+            className="absolute top-2 right-2 w-10 h-10 bg-gradient-to-b from-purple-400 to-purple-600 text-white rounded-full shadow-[0_4px_0_0_rgb(107,33,168)] border-2 border-purple-300 hover:scale-110 active:shadow-[0_2px_0_0_rgb(107,33,168)] active:translate-y-0.5 transition-all z-30"
             title="Trocar amiguinho"
           >
-            <Repeat2 size={16} strokeWidth={3} />
+            <Repeat2 size={18} strokeWidth={3} className="mx-auto" />
           </button>
+
           {/* Floating texts */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30">
             {floatingTexts.map((ft, index) => (
               <div
                 key={ft.id}
-                className={`absolute font-black text-xl ${ft.color}`}
+                className={`absolute font-black text-2xl ${ft.color} drop-shadow-lg`}
                 style={{
                   animation: 'floatUp 2s ease-out forwards',
                   left: `${(index % 3 - 1) * 30}px`
@@ -1854,10 +1852,11 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             ))}
           </div>
 
-          {/* Pet - TAMANHO REDUZIDO MAS VISÍVEL */}
-          <div className="text-center mb-2 relative">
+          {/* Pet - COM SOMBRA E ANIMAÇÃO IDLE */}
+          <div className="text-center relative pt-8">
+            {/* Pet emoji com animação de respiração */}
             <div
-              className={`text-6xl mb-1 relative z-10 ${isAnimating ? '' : 'animate-bounce'}`}
+              className={`text-7xl relative z-10 inline-block ${!isAnimating && 'animate-[bounce_3s_ease-in-out_infinite]'}`}
               style={{
                 animation: isAnimating ? 'petBounce 0.3s ease-in-out infinite' : undefined
               }}
@@ -1866,7 +1865,6 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
                 const currentPetType = petTypes.find(p => p.type === pet.type);
                 if (!currentPetType) return '🐑';
 
-                // Sprite animation: alternate between main and alt emoji
                 if (isAnimating && animationType === 'eating') {
                   return <span className="inline-block">{currentPetType.emojiAlt}</span>;
                 }
@@ -1879,16 +1877,22 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
                 return currentPetType.emoji;
               })()}
             </div>
-            {/* Sombra oval embaixo do pet */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-24 h-3 bg-black/20 rounded-full blur-md"></div>
 
-            <div className="text-2xl mb-0.5">{mood.emoji}</div>
-            <p className="font-bold text-gray-700 text-sm">{pet.name}</p>
-            <p className={`text-xs font-bold ${mood.color}`}>{mood.mood}</p>
+            {/* Sombra oval difusa ANCORADA NO CHÃO */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-6 bg-black/30 rounded-full blur-lg"></div>
+
+            {/* Mood badge - estilo joia */}
+            <div className="flex items-center justify-center gap-2 mt-4 mb-2">
+              <div className="text-3xl drop-shadow-lg">{mood.emoji}</div>
+              <div className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-lg border-2 border-white">
+                <p className="font-black text-sm text-gray-700">{pet.name}</p>
+                <p className={`text-xs font-bold ${mood.color}`}>{mood.mood}</p>
+              </div>
+            </div>
           </div>
 
-          {/* Status Bars - COMPACTAS */}
-          <div className="space-y-1.5">
+          {/* Status Bars - HUD 3D VIBRANTE */}
+          <div className="space-y-2 px-4 mt-6">
             {/* Hunger */}
             <div className="bg-white/50 backdrop-blur-md rounded-full p-2 border border-white shadow-md">
               <div className="flex items-center gap-2">
@@ -1954,74 +1958,91 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
           </div>
         </div>
 
-        {/* Frutos do Espírito Section - COMPACTO */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-black text-sm text-gray-700">🍎 Frutos</h2>
-            <p className="text-[8px] text-gray-500 font-bold">Gálatas 5:22</p>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {fruits.map(fruit => (
+        {/* Painel de Ações - ESTILO ARCADE 3D */}
+        <div className="bg-gradient-to-b from-amber-100/80 to-amber-200/80 backdrop-blur-md rounded-3xl p-4 shadow-[0_8px_0_0_rgb(180,83,9)] border-4 border-amber-300 mb-4">
+          <h2 className="font-black text-center text-amber-900 text-lg mb-3 drop-shadow">🎮 Cuidar do Amiguinho</h2>
+
+          {/* Botões de Ação GRANDES E 3D */}
+          <div className="space-y-3">
+            {/* Alimentar */}
+            {fruits.slice(0, 1).map(fruit => (
               <button
                 key={fruit.id}
                 onClick={() => feedPet(fruit)}
                 disabled={coins < fruit.cost}
-                className={`bg-gradient-to-b from-white to-green-50 rounded-2xl p-2 shadow-md border-b-4 transition-all ${
+                className={`w-full bg-gradient-to-b from-red-400 to-red-600 rounded-2xl p-4 shadow-[0_6px_0_0_rgb(153,27,27)] border-t-4 border-red-300 transition-all ${
                   coins < fruit.cost
-                    ? 'opacity-50 cursor-not-allowed border-gray-300'
-                    : 'border-green-400 hover:scale-105 active:border-b-0 active:translate-y-1'
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:scale-105 active:shadow-[0_2px_0_0_rgb(153,27,27)] active:translate-y-1'
                 }`}
               >
-                <div className="text-2xl mb-1">{fruit.emoji}</div>
-                <p className="font-bold text-[9px] text-gray-700 mb-0.5 leading-tight">{fruit.name}</p>
-                <div className="flex items-center justify-center gap-0.5 text-[9px]">
-                  <Star size={8} className="fill-yellow-400 text-yellow-400" />
-                  <span className="font-bold">{fruit.cost}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="text-5xl">{fruit.emoji}</div>
+                    <div className="text-left">
+                      <p className="font-black text-white text-lg">Alimentar</p>
+                      <p className="text-xs text-red-100">+{fruit.hunger} Fome</p>
+                    </div>
+                  </div>
+                  <div className="bg-yellow-400 rounded-full px-3 py-1 shadow-lg border-2 border-yellow-300">
+                    <div className="flex items-center gap-1">
+                      <Star size={14} className="fill-yellow-600 text-yellow-600" />
+                      <span className="font-black text-yellow-900">{fruit.cost}</span>
+                    </div>
+                  </div>
                 </div>
               </button>
             ))}
-          </div>
-        </div>
 
-        {/* Activities Section - COMPACTO */}
-        <div className="mb-3">
-          <h2 className="font-black text-sm text-gray-700 mb-2">🎯 Atividades</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {/* Play */}
+            {/* Brincar */}
             <button
               onClick={playWithPet}
               disabled={coins < 10 || pet.energy < 10}
-              className={`bg-gradient-to-b from-white to-pink-50 rounded-2xl p-3 shadow-md border-b-4 transition-all ${
+              className={`w-full bg-gradient-to-b from-pink-400 to-pink-600 rounded-2xl p-4 shadow-[0_6px_0_0_rgb(157,23,77)] border-t-4 border-pink-300 transition-all ${
                 coins < 10 || pet.energy < 10
-                  ? 'opacity-50 cursor-not-allowed border-gray-300'
-                  : 'border-pink-400 hover:scale-105 active:border-b-0 active:translate-y-1'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105 active:shadow-[0_2px_0_0_rgb(157,23,77)] active:translate-y-1'
               }`}
             >
-              <div className="text-3xl mb-1">🎾</div>
-              <p className="font-bold text-[10px] text-gray-700 mb-0.5">Brincar</p>
-              <div className="flex items-center justify-center gap-0.5 text-[9px] mb-0.5">
-                <Star size={10} className="fill-yellow-400 text-yellow-400" />
-                <span className="font-bold">10</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-5xl">🎾</div>
+                  <div className="text-left">
+                    <p className="font-black text-white text-lg">Brincar</p>
+                    <p className="text-xs text-pink-100">+30 Alegria</p>
+                  </div>
+                </div>
+                <div className="bg-yellow-400 rounded-full px-3 py-1 shadow-lg border-2 border-yellow-300">
+                  <div className="flex items-center gap-1">
+                    <Star size={14} className="fill-yellow-600 text-yellow-600" />
+                    <span className="font-black text-yellow-900">10</span>
+                  </div>
+                </div>
               </div>
-              <p className="text-[10px] text-pink-600 font-bold">+30 Alegria | -10 Energia</p>
             </button>
 
-            {/* Sleep */}
+            {/* Dormir */}
             <button
               onClick={petSleep}
               disabled={pet.energy === 100}
-              className={`bg-gradient-to-b from-white to-blue-50 rounded-2xl p-3 shadow-md border-b-4 transition-all ${
+              className={`w-full bg-gradient-to-b from-blue-400 to-blue-600 rounded-2xl p-4 shadow-[0_6px_0_0_rgb(30,58,138)] border-t-4 border-blue-300 transition-all ${
                 pet.energy === 100
-                  ? 'opacity-50 cursor-not-allowed border-gray-300'
-                  : 'border-blue-400 hover:scale-105 active:border-b-0 active:translate-y-1'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105 active:shadow-[0_2px_0_0_rgb(30,58,138)] active:translate-y-1'
               }`}
             >
-              <div className="text-3xl mb-1">😴</div>
-              <p className="font-bold text-[10px] text-gray-700 mb-0.5">Dormir</p>
-              <div className="flex items-center justify-center gap-0.5 text-[9px] mb-0.5">
-                <span className="font-bold text-green-600">Grátis!</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-5xl">😴</div>
+                  <div className="text-left">
+                    <p className="font-black text-white text-lg">Dormir</p>
+                    <p className="text-xs text-blue-100">Restaura Energia</p>
+                  </div>
+                </div>
+                <div className="bg-green-400 rounded-full px-3 py-1 shadow-lg border-2 border-green-300">
+                  <span className="font-black text-green-900 text-sm">GRÁTIS</span>
+                </div>
               </div>
-              <p className="text-[10px] text-blue-600 font-bold">Restaura</p>
             </button>
           </div>
         </div>
