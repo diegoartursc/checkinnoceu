@@ -1825,25 +1825,25 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
           </p>
         </div>
 
-        {/* Pet Display com Habitat */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-xl border-2 border-pink-200 relative overflow-hidden">
+        {/* Pet Display com Habitat - STICKY NO TOPO */}
+        <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md rounded-3xl p-4 mb-4 shadow-xl border-2 border-pink-200 relative overflow-hidden">
           {/* Decoração de Habitat Natural */}
           {getHabitatDecoration()}
 
           {/* Botão de Trocar Pet */}
           <button
             onClick={() => setShowPetSelector(true)}
-            className="absolute top-3 right-3 bg-gradient-to-b from-purple-400 to-purple-600 text-white p-2 rounded-full shadow-lg border-b-4 border-purple-700 hover:scale-110 active:border-b-0 active:translate-y-1 transition-all z-30"
+            className="absolute top-2 right-2 bg-gradient-to-b from-purple-400 to-purple-600 text-white p-1.5 rounded-full shadow-lg border-b-4 border-purple-700 hover:scale-110 active:border-b-0 active:translate-y-1 transition-all z-30"
             title="Trocar amiguinho"
           >
-            <Repeat2 size={20} strokeWidth={3} />
+            <Repeat2 size={16} strokeWidth={3} />
           </button>
           {/* Floating texts */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20">
             {floatingTexts.map((ft, index) => (
               <div
                 key={ft.id}
-                className={`absolute font-black text-2xl ${ft.color}`}
+                className={`absolute font-black text-xl ${ft.color}`}
                 style={{
                   animation: 'floatUp 2s ease-out forwards',
                   left: `${(index % 3 - 1) * 30}px`
@@ -1854,10 +1854,10 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             ))}
           </div>
 
-          {/* Pet */}
-          <div className="text-center mb-4 relative">
+          {/* Pet - TAMANHO REDUZIDO MAS VISÍVEL */}
+          <div className="text-center mb-2 relative">
             <div
-              className={`text-8xl mb-2 relative z-10 ${isAnimating ? '' : 'animate-bounce'}`}
+              className={`text-6xl mb-1 relative z-10 ${isAnimating ? '' : 'animate-bounce'}`}
               style={{
                 animation: isAnimating ? 'petBounce 0.3s ease-in-out infinite' : undefined
               }}
@@ -1880,29 +1880,29 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
               })()}
             </div>
             {/* Sombra oval embaixo do pet */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-32 h-4 bg-black/20 rounded-full blur-md"></div>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-24 h-3 bg-black/20 rounded-full blur-md"></div>
 
-            <div className="text-4xl mb-1">{mood.emoji}</div>
-            <p className="font-bold text-gray-700 text-lg">{pet.name}</p>
-            <p className={`text-sm font-bold ${mood.color}`}>{mood.mood}</p>
+            <div className="text-2xl mb-0.5">{mood.emoji}</div>
+            <p className="font-bold text-gray-700 text-sm">{pet.name}</p>
+            <p className={`text-xs font-bold ${mood.color}`}>{mood.mood}</p>
           </div>
 
-          {/* Status Bars - HUD 3D Vibrante */}
-          <div className="space-y-3">
+          {/* Status Bars - COMPACTAS */}
+          <div className="space-y-1.5">
             {/* Hunger */}
-            <div className="bg-white/50 backdrop-blur-md rounded-full p-3 border-2 border-white shadow-lg">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-gradient-to-br from-orange-400 to-red-500 p-2 rounded-full shadow-md">
-                  <span className="text-white text-sm">🍽️</span>
+            <div className="bg-white/50 backdrop-blur-md rounded-full p-2 border border-white shadow-md">
+              <div className="flex items-center gap-2">
+                <div className="bg-gradient-to-br from-orange-400 to-red-500 p-1 rounded-full shadow-sm">
+                  <span className="text-white text-[10px]">🍽️</span>
                 </div>
                 <div className="flex-1">
-                  <div className="flex justify-between text-xs font-bold mb-1">
+                  <div className="flex justify-between text-[10px] font-bold mb-0.5">
                     <span className="text-orange-600">Fome</span>
                     <span className="text-orange-500">{pet.hunger}%</span>
                   </div>
-                  <div className="h-4 bg-orange-100 rounded-full overflow-hidden border border-orange-200">
+                  <div className="h-2 bg-orange-100 rounded-full overflow-hidden border border-orange-200">
                     <div
-                      className="h-full bg-gradient-to-r from-orange-300 to-orange-500 transition-all duration-500 shadow-inner"
+                      className="h-full bg-gradient-to-r from-orange-300 to-orange-500 transition-all duration-500"
                       style={{ width: `${pet.hunger}%` }}
                     />
                   </div>
@@ -1911,19 +1911,19 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             </div>
 
             {/* Happiness */}
-            <div className="bg-white/50 backdrop-blur-md rounded-full p-3 border-2 border-white shadow-lg">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-gradient-to-br from-yellow-400 to-pink-500 p-2 rounded-full shadow-md">
-                  <span className="text-white text-sm">😊</span>
+            <div className="bg-white/50 backdrop-blur-md rounded-full p-2 border border-white shadow-md">
+              <div className="flex items-center gap-2">
+                <div className="bg-gradient-to-br from-yellow-400 to-pink-500 p-1 rounded-full shadow-sm">
+                  <span className="text-white text-[10px]">😊</span>
                 </div>
                 <div className="flex-1">
-                  <div className="flex justify-between text-xs font-bold mb-1">
+                  <div className="flex justify-between text-[10px] font-bold mb-0.5">
                     <span className="text-yellow-600">Alegria</span>
                     <span className="text-yellow-500">{pet.happiness}%</span>
                   </div>
-                  <div className="h-4 bg-yellow-100 rounded-full overflow-hidden border border-yellow-200">
+                  <div className="h-2 bg-yellow-100 rounded-full overflow-hidden border border-yellow-200">
                     <div
-                      className="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 transition-all duration-500 shadow-inner"
+                      className="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 transition-all duration-500"
                       style={{ width: `${pet.happiness}%` }}
                     />
                   </div>
@@ -1932,19 +1932,19 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             </div>
 
             {/* Energy */}
-            <div className="bg-white/50 backdrop-blur-md rounded-full p-3 border-2 border-white shadow-lg">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-gradient-to-br from-blue-400 to-cyan-500 p-2 rounded-full shadow-md">
-                  <span className="text-white text-sm">⚡</span>
+            <div className="bg-white/50 backdrop-blur-md rounded-full p-2 border border-white shadow-md">
+              <div className="flex items-center gap-2">
+                <div className="bg-gradient-to-br from-blue-400 to-cyan-500 p-1 rounded-full shadow-sm">
+                  <span className="text-white text-[10px]">⚡</span>
                 </div>
                 <div className="flex-1">
-                  <div className="flex justify-between text-xs font-bold mb-1">
+                  <div className="flex justify-between text-[10px] font-bold mb-0.5">
                     <span className="text-blue-600">Energia</span>
                     <span className="text-blue-500">{pet.energy}%</span>
                   </div>
-                  <div className="h-4 bg-blue-100 rounded-full overflow-hidden border border-blue-200">
+                  <div className="h-2 bg-blue-100 rounded-full overflow-hidden border border-blue-200">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-300 to-blue-500 transition-all duration-500 shadow-inner"
+                      className="h-full bg-gradient-to-r from-blue-300 to-blue-500 transition-all duration-500"
                       style={{ width: `${pet.energy}%` }}
                     />
                   </div>
@@ -1954,54 +1954,53 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
           </div>
         </div>
 
-        {/* Frutos do Espírito Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-black text-lg text-gray-700">🍎 Frutos do Espírito</h2>
-            <p className="text-[10px] text-gray-500 font-bold">Gálatas 5:22</p>
+        {/* Frutos do Espírito Section - COMPACTO */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-black text-sm text-gray-700">🍎 Frutos</h2>
+            <p className="text-[8px] text-gray-500 font-bold">Gálatas 5:22</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {fruits.map(fruit => (
               <button
                 key={fruit.id}
                 onClick={() => feedPet(fruit)}
                 disabled={coins < fruit.cost}
-                className={`bg-gradient-to-b from-white to-green-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 transition-all ${
+                className={`bg-gradient-to-b from-white to-green-50 rounded-2xl p-2 shadow-md border-b-4 transition-all ${
                   coins < fruit.cost
                     ? 'opacity-50 cursor-not-allowed border-gray-300'
-                    : 'border-green-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(34,197,94,0.3)] active:border-b-0 active:translate-y-1'
+                    : 'border-green-400 hover:scale-105 active:border-b-0 active:translate-y-1'
                 }`}
               >
-                <div className="text-4xl mb-2">{fruit.emoji}</div>
-                <p className="font-bold text-xs text-gray-700 mb-1">{fruit.name}</p>
-                <div className="flex items-center justify-center gap-1 text-xs mb-1">
-                  <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                <div className="text-2xl mb-1">{fruit.emoji}</div>
+                <p className="font-bold text-[9px] text-gray-700 mb-0.5 leading-tight">{fruit.name}</p>
+                <div className="flex items-center justify-center gap-0.5 text-[9px]">
+                  <Star size={8} className="fill-yellow-400 text-yellow-400" />
                   <span className="font-bold">{fruit.cost}</span>
                 </div>
-                <p className="text-[10px] text-green-600 font-bold">+{fruit.hunger} Fome</p>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Activities Section */}
-        <div className="mb-6">
-          <h2 className="font-black text-lg text-gray-700 mb-3">🎯 Atividades</h2>
-          <div className="grid grid-cols-2 gap-3">
+        {/* Activities Section - COMPACTO */}
+        <div className="mb-3">
+          <h2 className="font-black text-sm text-gray-700 mb-2">🎯 Atividades</h2>
+          <div className="grid grid-cols-2 gap-2">
             {/* Play */}
             <button
               onClick={playWithPet}
               disabled={coins < 10 || pet.energy < 10}
-              className={`bg-gradient-to-b from-white to-pink-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 transition-all ${
+              className={`bg-gradient-to-b from-white to-pink-50 rounded-2xl p-3 shadow-md border-b-4 transition-all ${
                 coins < 10 || pet.energy < 10
                   ? 'opacity-50 cursor-not-allowed border-gray-300'
-                  : 'border-pink-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(244,114,182,0.3)] active:border-b-0 active:translate-y-1'
+                  : 'border-pink-400 hover:scale-105 active:border-b-0 active:translate-y-1'
               }`}
             >
-              <div className="text-4xl mb-2">🎾</div>
-              <p className="font-bold text-xs text-gray-700 mb-1">Brincar</p>
-              <div className="flex items-center justify-center gap-1 text-xs mb-1">
-                <Star size={12} className="fill-yellow-400 text-yellow-400" />
+              <div className="text-3xl mb-1">🎾</div>
+              <p className="font-bold text-[10px] text-gray-700 mb-0.5">Brincar</p>
+              <div className="flex items-center justify-center gap-0.5 text-[9px] mb-0.5">
+                <Star size={10} className="fill-yellow-400 text-yellow-400" />
                 <span className="font-bold">10</span>
               </div>
               <p className="text-[10px] text-pink-600 font-bold">+30 Alegria | -10 Energia</p>
@@ -2011,59 +2010,57 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             <button
               onClick={petSleep}
               disabled={pet.energy === 100}
-              className={`bg-gradient-to-b from-white to-blue-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 transition-all ${
+              className={`bg-gradient-to-b from-white to-blue-50 rounded-2xl p-3 shadow-md border-b-4 transition-all ${
                 pet.energy === 100
                   ? 'opacity-50 cursor-not-allowed border-gray-300'
-                  : 'border-blue-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(59,130,246,0.3)] active:border-b-0 active:translate-y-1'
+                  : 'border-blue-400 hover:scale-105 active:border-b-0 active:translate-y-1'
               }`}
             >
-              <div className="text-4xl mb-2">😴</div>
-              <p className="font-bold text-xs text-gray-700 mb-1">Dormir</p>
-              <div className="flex items-center justify-center gap-1 text-xs mb-1">
+              <div className="text-3xl mb-1">😴</div>
+              <p className="font-bold text-[10px] text-gray-700 mb-0.5">Dormir</p>
+              <div className="flex items-center justify-center gap-0.5 text-[9px] mb-0.5">
                 <span className="font-bold text-green-600">Grátis!</span>
               </div>
-              <p className="text-[10px] text-blue-600 font-bold">Restaura Energia</p>
+              <p className="text-[10px] text-blue-600 font-bold">Restaura</p>
             </button>
           </div>
         </div>
 
-        {/* Prayer Section */}
-        <div className="mb-6">
-          <h2 className="font-black text-lg text-gray-700 mb-3">🙏 Momentos de Oração</h2>
-          <div className="grid grid-cols-2 gap-3">
+        {/* Prayer Section - COMPACTO */}
+        <div className="mb-3">
+          <h2 className="font-black text-sm text-gray-700 mb-2">🙏 Oração</h2>
+          <div className="grid grid-cols-2 gap-2">
             {/* Evening Prayer */}
             <button
               onClick={onOpenEveningPrayer}
-              className="bg-gradient-to-b from-white to-indigo-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 border-indigo-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(99,102,241,0.3)] active:border-b-0 active:translate-y-1 transition-all"
+              className="bg-gradient-to-b from-white to-indigo-50 rounded-2xl p-3 shadow-md border-b-4 border-indigo-400 hover:scale-105 active:border-b-0 active:translate-y-1 transition-all"
             >
-              <div className="text-4xl mb-2">🌙</div>
-              <p className="font-bold text-xs text-gray-700 mb-1">Oração da Noite</p>
-              <div className="flex items-center justify-center gap-1 text-xs mb-1">
-                <Star size={12} className="fill-yellow-400 text-yellow-400" />
+              <div className="text-3xl mb-1">🌙</div>
+              <p className="font-bold text-[10px] text-gray-700 mb-0.5">Noite</p>
+              <div className="flex items-center justify-center gap-0.5 text-[9px]">
+                <Star size={8} className="fill-yellow-400 text-yellow-400" />
                 <span className="font-bold text-green-600">+5</span>
               </div>
-              <p className="text-[10px] text-indigo-600 font-bold">Paz antes de dormir</p>
             </button>
 
             {/* Monthly Letter */}
             <button
               onClick={onOpenMonthlyLetter}
-              className="bg-gradient-to-b from-white to-amber-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 border-amber-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(251,191,36,0.3)] active:border-b-0 active:translate-y-1 transition-all"
+              className="bg-gradient-to-b from-white to-amber-50 rounded-2xl p-3 shadow-md border-b-4 border-amber-400 hover:scale-105 active:border-b-0 active:translate-y-1 transition-all"
             >
-              <div className="text-4xl mb-2">💌</div>
-              <p className="font-bold text-xs text-gray-700 mb-1">Cartinha de Jesus</p>
-              <div className="flex items-center justify-center gap-1 text-xs mb-1">
+              <div className="text-3xl mb-1">💌</div>
+              <p className="font-bold text-[10px] text-gray-700 mb-0.5">Cartinha</p>
+              <div className="flex items-center justify-center gap-0.5 text-[9px]">
                 <span className="font-bold text-amber-600">Mensal</span>
               </div>
-              <p className="text-[10px] text-amber-600 font-bold">Mensagem especial</p>
             </button>
           </div>
         </div>
 
-        {/* Info Box */}
-        <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border-2 border-purple-200">
-          <p className="text-xs text-gray-700 text-center font-medium leading-relaxed">
-            💡 <strong>Dica Espiritual:</strong> Pratique as virtudes nos jogos para ganhar Estrelas e cultivar os Frutos do Espírito no seu amiguinho!
+        {/* Info Box - COMPACTO */}
+        <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-3 border-2 border-purple-200">
+          <p className="text-[10px] text-gray-700 text-center font-medium leading-tight">
+            💡 <strong>Dica:</strong> Pratique virtudes para cultivar os Frutos do Espírito!
           </p>
         </div>
       </div>
@@ -4219,7 +4216,7 @@ export default function CheckInApp() {
           }`}
         >
            <Map size={screen === 'map' ? 28 : 24} strokeWidth={3} />
-           <span className={`text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${screen === 'map' ? 'text-white' : 'text-slate-500'}`}>MAPA</span>
+           <span className={`text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${screen === 'map' ? 'text-white' : 'text-slate-500'}`}>CAMINHO</span>
         </button>
 
         <button
