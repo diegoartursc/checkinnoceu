@@ -1969,10 +1969,10 @@ const MorningPrayerScreen = memo(({ onComplete }) => {
         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-r from-transparent via-yellow-300 to-transparent animate-spin-slow" />
       </div>
 
-      <div className="relative z-10 max-w-md w-full px-4">
+      <div className="relative z-10 max-w-md w-full my-auto">
         {/* Ícone do sol */}
-        <div className="text-center mb-4 sm:mb-6">
-          <div className="inline-block text-6xl sm:text-8xl animate-bounce-slow mb-3 sm:mb-4">
+        <div className="text-center mb-6">
+          <div className="inline-block text-6xl sm:text-8xl animate-bounce-slow mb-4">
             {prayer.icon}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-orange-900 mb-2">
@@ -2054,9 +2054,9 @@ const GratitudeScreen = memo(({ onComplete }) => {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-purple-50 to-blue-50" />
 
-      <div className="relative z-10 flex-1 flex flex-col max-w-2xl mx-auto w-full px-4">
+      <div className="relative z-10 flex-1 flex flex-col max-w-2xl mx-auto w-full min-h-full">
         {/* Header */}
-        <div className="text-center mb-4 sm:mb-6 pt-4">
+        <div className="text-center mb-6 pt-4">
           <div className="text-5xl sm:text-6xl mb-3">🙏</div>
           <h1 className="text-2xl sm:text-3xl font-black text-purple-900 mb-2">
             Momento de Gratidão
@@ -2080,8 +2080,8 @@ const GratitudeScreen = memo(({ onComplete }) => {
                 }
               `}
             >
-              <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">{option.emoji}</div>
-              <div className="text-[10px] sm:text-xs font-bold text-gray-700">{option.text}</div>
+              <div className="text-3xl sm:text-4xl mb-2">{option.emoji}</div>
+              <div className="text-[10px] sm:text-xs font-bold text-gray-700 leading-tight">{option.text}</div>
             </button>
           ))}
         </div>
