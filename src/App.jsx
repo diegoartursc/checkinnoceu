@@ -353,18 +353,128 @@ const getDayOfYear = () => {
 };
 
 const getDailyContent = (dayNumber) => {
-  return {
-    day: dayNumber,
-    message: "Jesus te ama e cuida de você em todos os momentos.",
-    verse: "João 3:16",
-    quiz: {
+  // Seeded random for deterministic generation
+  const random = (seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
+  // Bible verses pool
+  const verses = [
+    "João 3:16 - Porque Deus amou o mundo de tal maneira...",
+    "Salmos 23:1 - O Senhor é o meu pastor, nada me faltará",
+    "Provérbios 3:5 - Confie no Senhor de todo o seu coração",
+    "Filipenses 4:13 - Tudo posso naquele que me fortalece",
+    "Mateus 5:16 - Assim brilhe a vossa luz diante dos homens",
+    "Salmos 119:105 - Lâmpada para os meus pés é a tua palavra",
+    "Jeremias 29:11 - Eu sei os planos que tenho para você",
+    "Romanos 8:28 - Todas as coisas cooperam para o bem",
+    "Isaías 40:31 - Os que esperam no Senhor renovam as forças",
+    "1 João 4:8 - Deus é amor",
+    "Gálatas 5:22 - O fruto do Espírito é amor, alegria, paz...",
+    "Efésios 4:32 - Sejam bondosos uns com os outros",
+    "Colossenses 3:13 - Perdoem-se mutuamente",
+    "1 Tessalonicenses 5:16 - Alegrem-se sempre",
+    "Hebreus 13:5 - Nunca o deixarei, nunca o abandonarei"
+  ];
+
+  // Messages pool (themes)
+  const messages = [
+    "Jesus te ama e cuida de você em todos os momentos.",
+    "Você é especial e muito amado por Deus!",
+    "Cada dia é uma nova oportunidade de fazer o bem.",
+    "Compartilhe amor e alegria com todos ao seu redor.",
+    "Seja gentil, pois todos estão lutando suas batalhas.",
+    "A bondade é a linguagem que todos entendem.",
+    "Seu sorriso pode iluminar o dia de alguém.",
+    "Agradeça pelas pequenas bênçãos de cada dia.",
+    "Deus tem planos maravilhosos para você!",
+    "Seja corajoso, Deus está sempre com você.",
+    "A oração nos aproxima do coração de Deus.",
+    "Perdoar é libertar seu coração para amar.",
+    "Cada ato de bondade multiplica a luz no mundo.",
+    "Você pode fazer a diferença hoje!",
+    "O amor de Deus nunca falha, nunca desiste."
+  ];
+
+  // Quiz questions pool
+  const quizzes = [
+    {
       question: "O que devemos fazer todos os dias?",
       options: [
         { id: 'a', text: "Reclamar", correct: false },
         { id: 'b', text: "Agradecer e Orar", correct: true },
         { id: 'c', text: "Ficar bravo", correct: false }
       ]
+    },
+    {
+      question: "Como devemos tratar os outros?",
+      options: [
+        { id: 'a', text: "Com amor e bondade", correct: true },
+        { id: 'b', text: "Ignorar todos", correct: false },
+        { id: 'c', text: "Apenas os amigos", correct: false }
+      ]
+    },
+    {
+      question: "O que Jesus nos ensinou?",
+      options: [
+        { id: 'a', text: "Amar uns aos outros", correct: true },
+        { id: 'b', text: "Pensar só em nós", correct: false },
+        { id: 'c', text: "Guardar tudo", correct: false }
+      ]
+    },
+    {
+      question: "Quando devemos ajudar alguém?",
+      options: [
+        { id: 'a', text: "Nunca", correct: false },
+        { id: 'b', text: "Sempre que possível", correct: true },
+        { id: 'c', text: "Só se ganhar algo", correct: false }
+      ]
+    },
+    {
+      question: "O que é mais importante?",
+      options: [
+        { id: 'a', text: "Ter muitos brinquedos", correct: false },
+        { id: 'b', text: "Ter um coração bondoso", correct: true },
+        { id: 'c', text: "Ser o melhor sempre", correct: false }
+      ]
+    },
+    {
+      question: "Como devemos orar?",
+      options: [
+        { id: 'a', text: "Com sinceridade", correct: true },
+        { id: 'b', text: "Só quando triste", correct: false },
+        { id: 'c', text: "Nunca orar", correct: false }
+      ]
+    },
+    {
+      question: "O que significa perdoar?",
+      options: [
+        { id: 'a', text: "Guardar mágoa", correct: false },
+        { id: 'b', text: "Libertar o coração", correct: true },
+        { id: 'c', text: "Fingir que nada aconteceu", correct: false }
+      ]
+    },
+    {
+      question: "Qual fruto do Espírito?",
+      options: [
+        { id: 'a', text: "Raiva", correct: false },
+        { id: 'b', text: "Alegria", correct: true },
+        { id: 'c', text: "Tristeza", correct: false }
+      ]
     }
+  ];
+
+  // Select content based on day (deterministic)
+  const verseIndex = Math.floor(random(dayNumber * 7) * verses.length);
+  const messageIndex = Math.floor(random(dayNumber * 13) * messages.length);
+  const quizIndex = Math.floor(random(dayNumber * 19) * quizzes.length);
+
+  return {
+    day: dayNumber,
+    message: messages[messageIndex],
+    verse: verses[verseIndex],
+    quiz: quizzes[quizIndex]
   };
 };
 
@@ -1438,7 +1548,7 @@ ParallaxDecorations.displayName = 'ParallaxDecorations';
    LAR SCREEN (Pet Home - Tamagotchi System)
    ======================================== */
 
-const LarScreen = memo(({ coins, onSpendCoins }) => {
+const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
   // Pet state with localStorage persistence
   const [pet, setPet] = useState(() => {
     const saved = localStorage.getItem('checkin_pet');
@@ -1656,11 +1766,39 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
 
   // Determine pet mood
   const getPetMood = useCallback(() => {
-    const avg = (pet.hunger + pet.happiness + pet.energy) / 3;
-    if (avg > 70) return { emoji: '😊', mood: 'Muito Feliz!', color: 'text-green-500' };
-    if (avg > 40) return { emoji: '😐', mood: 'Ok', color: 'text-yellow-600' };
-    return { emoji: '😢', mood: 'Precisa de cuidados!', color: 'text-red-500' };
-  }, [pet.hunger, pet.happiness, pet.energy]);
+    const { hunger, happiness, energy } = pet;
+    const avg = (hunger + happiness + energy) / 3;
+
+    // Check for critical states first (specific emotions)
+    if (energy < 20) {
+      return { emoji: '😴', mood: 'Muito Cansado', color: 'text-blue-600' };
+    }
+    if (hunger < 20) {
+      return { emoji: '😫', mood: 'Com Fome!', color: 'text-orange-600' };
+    }
+    if (happiness < 20) {
+      return { emoji: '😢', mood: 'Triste', color: 'text-gray-600' };
+    }
+
+    // Check if multiple stats are low (angry/upset)
+    const lowStats = [hunger < 40, happiness < 40, energy < 40].filter(Boolean).length;
+    if (lowStats >= 2) {
+      return { emoji: '😠', mood: 'Chateado', color: 'text-red-600' };
+    }
+
+    // Check overall mood based on average
+    if (avg > 80) {
+      return { emoji: '😊', mood: 'Muito Feliz!', color: 'text-green-500' };
+    }
+    if (avg > 60) {
+      return { emoji: '😌', mood: 'Contente', color: 'text-green-600' };
+    }
+    if (avg > 40) {
+      return { emoji: '😐', mood: 'Normal', color: 'text-yellow-600' };
+    }
+
+    return { emoji: '😟', mood: 'Precisa de Carinho', color: 'text-orange-500' };
+  }, [pet]);
 
   const mood = getPetMood();
 
@@ -1889,6 +2027,39 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
           </div>
         </div>
 
+        {/* Prayer Section */}
+        <div className="mb-6">
+          <h2 className="font-black text-lg text-gray-700 mb-3">🙏 Momentos de Oração</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Evening Prayer */}
+            <button
+              onClick={onOpenEveningPrayer}
+              className="bg-gradient-to-b from-white to-indigo-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 border-indigo-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(99,102,241,0.3)] active:border-b-0 active:translate-y-1 transition-all"
+            >
+              <div className="text-4xl mb-2">🌙</div>
+              <p className="font-bold text-xs text-gray-700 mb-1">Oração da Noite</p>
+              <div className="flex items-center justify-center gap-1 text-xs mb-1">
+                <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                <span className="font-bold text-green-600">+5</span>
+              </div>
+              <p className="text-[10px] text-indigo-600 font-bold">Paz antes de dormir</p>
+            </button>
+
+            {/* Monthly Letter */}
+            <button
+              onClick={onOpenMonthlyLetter}
+              className="bg-gradient-to-b from-white to-amber-50 backdrop-blur-sm rounded-3xl p-4 shadow-lg border-b-4 border-amber-400 hover:scale-105 hover:shadow-[0_8px_30px_rgba(251,191,36,0.3)] active:border-b-0 active:translate-y-1 transition-all"
+            >
+              <div className="text-4xl mb-2">💌</div>
+              <p className="font-bold text-xs text-gray-700 mb-1">Cartinha de Jesus</p>
+              <div className="flex items-center justify-center gap-1 text-xs mb-1">
+                <span className="font-bold text-amber-600">Mensal</span>
+              </div>
+              <p className="text-[10px] text-amber-600 font-bold">Mensagem especial</p>
+            </button>
+          </div>
+        </div>
+
         {/* Info Box */}
         <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-4 border-2 border-purple-200">
           <p className="text-xs text-gray-700 text-center font-medium leading-relaxed">
@@ -1960,6 +2131,525 @@ const LarScreen = memo(({ coins, onSpendCoins }) => {
 });
 
 LarScreen.displayName = 'LarScreen';
+
+/* ========================================
+   DEVOTIONAL SCREENS (Fluxo Devocional)
+   ======================================== */
+
+// Oração da Manhã - Primeira tela ao abrir o app
+const MorningPrayerScreen = memo(({ onComplete }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const prayer = {
+    title: "Oração da Manhã",
+    text: "Bom dia, Jesus! Obrigado por mais um dia de vida. Obrigado pela minha família, pelos meus amigos e por tudo de bom que vou viver hoje. Me ajuda a ser uma criança boa, a compartilhar, a ser gentil e a fazer o bem. Amém! 🙏",
+    icon: "☀️"
+  };
+
+  const handlePlayAudio = () => {
+    setIsPlaying(true);
+    // Simula áudio tocando
+    setTimeout(() => {
+      setIsPlaying(false);
+    }, 3000);
+  };
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background com gradiente suave */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-100 via-orange-50 to-yellow-50" />
+
+      {/* Raios de sol animados */}
+      <div className="absolute inset-0 overflow-hidden opacity-20">
+        <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-r from-transparent via-yellow-300 to-transparent animate-spin-slow" />
+      </div>
+
+      <div className="relative z-10 max-w-md w-full">
+        {/* Ícone do sol */}
+        <div className="text-center mb-6">
+          <div className="inline-block text-8xl animate-bounce-slow mb-4">
+            {prayer.icon}
+          </div>
+          <h1 className="text-3xl font-black text-orange-900 mb-2">
+            {prayer.title}
+          </h1>
+          <div className="h-1 w-20 bg-gradient-to-r from-orange-400 to-yellow-400 mx-auto rounded-full" />
+        </div>
+
+        {/* Caixa da oração */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-4 border-orange-200 mb-8">
+          <p className="text-gray-800 text-lg leading-relaxed font-medium text-center">
+            {prayer.text}
+          </p>
+        </div>
+
+        {/* Botões */}
+        <div className="flex flex-col gap-4">
+          <Button
+            variant="warning"
+            size="lg"
+            onClick={handlePlayAudio}
+            icon={Music}
+            disabled={isPlaying}
+            className="w-full"
+          >
+            {isPlaying ? 'Tocando...' : 'Ouvir Oração 🎵'}
+          </Button>
+
+          <Button
+            variant="success"
+            size="lg"
+            onClick={onComplete}
+            icon={ArrowRight}
+            className="w-full"
+          >
+            Continuar ✨
+          </Button>
+        </div>
+
+        {/* Mensagem suave */}
+        <p className="text-center text-orange-700 text-sm mt-6 font-medium">
+          💛 Começar o dia com oração traz luz para o coração
+        </p>
+      </div>
+    </div>
+  );
+});
+
+MorningPrayerScreen.displayName = 'MorningPrayerScreen';
+
+// Momento de Gratidão
+const GratitudeScreen = memo(({ onComplete }) => {
+  const [selected, setSelected] = useState(null);
+  const [customText, setCustomText] = useState('');
+
+  const gratitudeOptions = [
+    { id: 1, emoji: '👨‍👩‍👧‍👦', text: 'Minha Família' },
+    { id: 2, emoji: '👫', text: 'Meus Amigos' },
+    { id: 3, emoji: '🎮', text: 'Poder Brincar' },
+    { id: 4, emoji: '❤️', text: 'Saúde' },
+    { id: 5, emoji: '🏠', text: 'Minha Casa' },
+    { id: 6, emoji: '🍎', text: 'Comida Gostosa' },
+    { id: 7, emoji: '📚', text: 'Aprender' },
+    { id: 8, emoji: '🌞', text: 'Dia Bonito' },
+  ];
+
+  const handleSelect = (id) => {
+    setSelected(id);
+  };
+
+  const handleSubmit = () => {
+    if (selected || customText) {
+      onComplete();
+    }
+  };
+
+  return (
+    <div className="h-full flex flex-col p-6 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-purple-50 to-blue-50" />
+
+      <div className="relative z-10 flex-1 flex flex-col max-w-2xl mx-auto w-full">
+        {/* Header */}
+        <div className="text-center mb-6 pt-4">
+          <div className="text-6xl mb-3">🙏</div>
+          <h1 className="text-3xl font-black text-purple-900 mb-2">
+            Momento de Gratidão
+          </h1>
+          <p className="text-purple-700 font-medium">
+            Pelo que você é grato hoje?
+          </p>
+        </div>
+
+        {/* Grid de opções */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {gratitudeOptions.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => handleSelect(option.id)}
+              className={`
+                bg-white rounded-2xl p-4 border-4 transition-all duration-200
+                ${selected === option.id
+                  ? 'border-purple-500 scale-105 shadow-[0_0_20px_rgba(168,85,247,0.4)]'
+                  : 'border-purple-200 hover:border-purple-300 hover:scale-102'
+                }
+              `}
+            >
+              <div className="text-4xl mb-2">{option.emoji}</div>
+              <div className="text-xs font-bold text-gray-700">{option.text}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* Ou escrever */}
+        <div className="mb-6">
+          <p className="text-center text-purple-700 font-bold mb-3">Ou escreva:</p>
+          <input
+            type="text"
+            value={customText}
+            onChange={(e) => setCustomText(e.target.value)}
+            placeholder="Digite aqui..."
+            className="w-full px-4 py-3 rounded-2xl border-4 border-purple-200 text-center font-medium focus:border-purple-500 focus:outline-none"
+          />
+        </div>
+
+        {/* Botão */}
+        <Button
+          variant="success"
+          size="lg"
+          onClick={handleSubmit}
+          disabled={!selected && !customText}
+          icon={Heart}
+          className="w-full"
+        >
+          Continuar com Gratidão 💜
+        </Button>
+      </div>
+    </div>
+  );
+});
+
+GratitudeScreen.displayName = 'GratitudeScreen';
+
+// Boa Ação do Dia
+const GoodActionScreen = memo(({ onComplete }) => {
+  const [currentMission, setCurrentMission] = useState(null);
+  const [completed, setCompleted] = useState(false);
+
+  const missions = useMemo(() => [
+    { id: 1, icon: '🤝', text: 'Ajude sua família em alguma tarefa', value: 'ajudar' },
+    { id: 2, icon: '👋', text: 'Dê bom dia para alguém especial', value: 'saudar' },
+    { id: 3, icon: '🎁', text: 'Compartilhe um brinquedo ou lanche', value: 'compartilhar' },
+    { id: 4, icon: '😊', text: 'Faça alguém sorrir hoje', value: 'alegrar' },
+    { id: 5, icon: '🙌', text: 'Agradeça por algo que recebeu', value: 'agradecer' },
+    { id: 6, icon: '🤗', text: 'Convide alguém para brincar junto', value: 'incluir' },
+  ], []);
+
+  useEffect(() => {
+    // Seleciona missão aleatória
+    const randomMission = missions[Math.floor(Math.random() * missions.length)];
+    setCurrentMission(randomMission);
+  }, [missions]);
+
+  const handleMarkComplete = () => {
+    setCompleted(true);
+    setTimeout(onComplete, 1500);
+  };
+
+  if (!currentMission) return null;
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-green-100 via-emerald-50 to-teal-50" />
+
+      <div className="relative z-10 max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="text-7xl mb-4 animate-bounce">{currentMission.icon}</div>
+          <h1 className="text-3xl font-black text-green-900 mb-3">
+            Boa Ação do Dia
+          </h1>
+          <div className="h-1 w-24 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full mb-4" />
+        </div>
+
+        {/* Missão */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-4 border-green-200 mb-8">
+          <p className="text-gray-800 text-xl font-bold text-center leading-relaxed">
+            {currentMission.text}
+          </p>
+        </div>
+
+        {/* Status */}
+        {!completed ? (
+          <>
+            <Button
+              variant="success"
+              size="lg"
+              onClick={handleMarkComplete}
+              icon={CheckCircle}
+              className="w-full mb-4"
+            >
+              Marcar como Feita ✅
+            </Button>
+            <p className="text-center text-green-700 text-sm font-medium">
+              💚 Fazer o bem ilumina o mundo!
+            </p>
+          </>
+        ) : (
+          <div className="text-center animate-in zoom-in duration-500">
+            <div className="text-8xl mb-4">⭐</div>
+            <h2 className="text-2xl font-black text-green-600 mb-2">
+              Parabéns!
+            </h2>
+            <p className="text-green-700">
+              Você ganhou +10 de Luz! ✨
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
+GoodActionScreen.displayName = 'GoodActionScreen';
+
+// Oração da Noite - Antes de dormir
+const EveningPrayerScreen = memo(({ onComplete }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const prayer = {
+    title: "Oração da Noite",
+    text: "Boa noite, Jesus! Obrigado por este dia maravilhoso. Obrigado por ter cuidado de mim e da minha família. Perdoa se eu fiz algo errado hoje. Me dá um sono tranquilo e me protege enquanto eu durmo. Que amanhã seja um dia cheio de alegria e amor. Amém! 🌙",
+    icon: "🌙"
+  };
+
+  const handlePlayAudio = () => {
+    setIsPlaying(true);
+    setTimeout(() => {
+      setIsPlaying(false);
+    }, 3000);
+  };
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background noturno com gradiente */}
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-900 via-purple-800 to-blue-900" />
+
+      {/* Estrelas piscando */}
+      <div className="absolute inset-0 overflow-hidden opacity-60">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute bg-white rounded-full animate-pulse"
+            style={{
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${Math.random() * 3 + 2}s`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 max-w-md w-full">
+        {/* Ícone da lua */}
+        <div className="text-center mb-6">
+          <div className="inline-block text-8xl animate-bounce-slow mb-4">
+            {prayer.icon}
+          </div>
+          <h1 className="text-3xl font-black text-yellow-100 mb-2">
+            {prayer.title}
+          </h1>
+          <div className="h-1 w-20 bg-gradient-to-r from-purple-400 to-blue-400 mx-auto rounded-full" />
+        </div>
+
+        {/* Caixa da oração */}
+        <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-4 border-purple-300/30 mb-8">
+          <p className="text-white text-lg leading-relaxed font-medium text-center">
+            {prayer.text}
+          </p>
+        </div>
+
+        {/* Botões */}
+        <div className="flex flex-col gap-4">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handlePlayAudio}
+            icon={Music}
+            disabled={isPlaying}
+            className="w-full"
+          >
+            {isPlaying ? 'Tocando...' : 'Ouvir Oração 🎵'}
+          </Button>
+
+          <Button
+            variant="success"
+            size="lg"
+            onClick={onComplete}
+            icon={ArrowRight}
+            className="w-full"
+          >
+            Finalizar e Descansar 💤
+          </Button>
+        </div>
+
+        {/* Mensagem suave */}
+        <p className="text-center text-purple-200 text-sm mt-6 font-medium">
+          ⭐ Terminar o dia com oração traz paz para o sono
+        </p>
+      </div>
+    </div>
+  );
+});
+
+EveningPrayerScreen.displayName = 'EveningPrayerScreen';
+
+// Cartinha de Jesus - Mensal
+const MonthlyLetterScreen = memo(({ monthNumber, onClose }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const letters = useMemo(() => [
+    {
+      month: 1,
+      title: "Janeiro - Novos Começos",
+      emoji: "🌱",
+      message: "Querida criança, que alegria começar este ano novo com você! Assim como plantamos sementes no jardim, você está plantando sementes de amor e bondade em seu coração. Continue sendo luz para o mundo! Eu estou sempre com você. Com carinho, Jesus 💚"
+    },
+    {
+      month: 2,
+      title: "Fevereiro - Amor",
+      emoji: "❤️",
+      message: "Criança especial, neste mês do amor, quero que saiba que você é muito amada! Cada sorriso seu alegra o céu. Continue espalhando amor por onde passar, ajudando seus amigos e sendo gentil. Você faz o mundo melhor! Com muito amor, Jesus 💖"
+    },
+    {
+      month: 3,
+      title: "Março - Coragem",
+      emoji: "🦁",
+      message: "Minha criança corajosa, você tem sido tão valente! Mesmo quando as coisas parecem difíceis, você não desiste. Lembre-se: eu dei a você um coração forte e cheio de luz. Continue firme, pequeno guerreiro da luz! Com orgulho, Jesus 💪"
+    },
+    {
+      month: 4,
+      title: "Abril - Gratidão",
+      emoji: "🙏",
+      message: "Querida criança, tenho visto como você agradece pelas pequenas coisas. Que coração grato o seu! A gratidão faz nossa vida brilhar como o sol. Continue sendo grato e verá como tudo fica mais bonito. Muito obrigado por ser você! Com gratidão, Jesus 🌻"
+    },
+    {
+      month: 5,
+      title: "Maio - Generosidade",
+      emoji: "🎁",
+      message: "Criança generosa, como é lindo ver você compartilhando! Quando dividimos o que temos, multiplicamos a alegria. Você tem um coração tão grande quanto o céu! Continue sendo generoso, que isso traz muita luz para sua vida. Com admiração, Jesus 💝"
+    },
+    {
+      month: 6,
+      title: "Junho - Alegria",
+      emoji: "😊",
+      message: "Minha criança alegre, seu sorriso ilumina o mundo! A alegria que está em você é um presente especial. Continue rindo, brincando e fazendo outros sorrirem também. Sua felicidade é música para meus ouvidos! Com alegria, Jesus 🎵"
+    },
+    {
+      month: 7,
+      title: "Julho - Perdão",
+      emoji: "🕊️",
+      message: "Querida criança, que coração bondoso você tem! Perdoar não é fácil, mas você tem feito isso com muito amor. Quando perdoamos, nossa alma fica leve como uma pena. Continue sendo essa criança do bem! Com ternura, Jesus 🤍"
+    },
+    {
+      month: 8,
+      title: "Agosto - Paciência",
+      emoji: "🌸",
+      message: "Criança paciente, você está aprendendo a esperar com calma! Assim como a flor leva tempo para crescer, você também está crescendo em sabedoria. Continue sendo paciente, que as melhores coisas valem a espera. Com paciência, Jesus 🌺"
+    },
+    {
+      month: 9,
+      title: "Setembro - Sabedoria",
+      emoji: "📖",
+      message: "Minha criança sábia, como você tem aprendido tanto! Cada dia você fica mais inteligente e bondoso. A verdadeira sabedoria vem do coração. Continue aprendendo e crescendo! Com sabedoria, Jesus 🦉"
+    },
+    {
+      month: 10,
+      title: "Outubro - Fé",
+      emoji: "⭐",
+      message: "Querida criança, sua fé ilumina como uma estrela! Mesmo quando não pode me ver, você acredita em mim. Isso é tão especial! Continue confiando, que eu nunca deixo você sozinho. Com fé, Jesus ✨"
+    },
+    {
+      month: 11,
+      title: "Novembro - Amizade",
+      emoji: "👫",
+      message: "Criança amiga, você tem sido um(a) amigo(a) maravilhoso(a)! Cuidar dos amigos, brincar junto, ajudar quando precisam... você faz tudo com amor! Continue sendo essa luz para seus amigos. Com amizade, Jesus 🤗"
+    },
+    {
+      month: 12,
+      title: "Dezembro - Esperança",
+      emoji: "🎄",
+      message: "Minha criança querida, que ano incrível você teve! Cresceu tanto em amor, bondade e fé! Este mês celebramos a esperança e a luz que você trouxe ao mundo. Estou muito orgulhoso de você! Continue brilhando sempre! Com todo meu amor, Jesus 🌟"
+    }
+  ], []);
+
+  const currentLetter = letters[monthNumber - 1] || letters[0];
+
+  const handlePlayAudio = () => {
+    setIsPlaying(true);
+    setTimeout(() => {
+      setIsPlaying(false);
+    }, 5000);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl max-w-lg w-full p-8 shadow-2xl border-4 border-yellow-300 relative animate-in zoom-in slide-in-from-bottom-4">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-all shadow-lg"
+        >
+          ✕
+        </button>
+
+        {/* Letter content */}
+        <div className="text-center mb-6">
+          <div className="text-7xl mb-4 animate-bounce-slow">
+            {currentLetter.emoji}
+          </div>
+          <h2 className="text-2xl font-black text-orange-900 mb-2">
+            Cartinha de Jesus 💌
+          </h2>
+          <h3 className="text-lg font-bold text-orange-700">
+            {currentLetter.title}
+          </h3>
+          <div className="h-1 w-24 bg-gradient-to-r from-orange-400 to-yellow-400 mx-auto rounded-full mt-2" />
+        </div>
+
+        {/* Letter paper */}
+        <div className="bg-white rounded-2xl p-6 shadow-inner border-2 border-yellow-200 mb-6 relative">
+          {/* Paper lines decoration */}
+          <div className="absolute inset-0 opacity-5 pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="border-b border-gray-300" style={{ marginTop: `${i * 40}px` }} />
+            ))}
+          </div>
+
+          <p className="text-gray-800 text-base leading-relaxed font-medium relative z-10 text-left">
+            {currentLetter.message}
+          </p>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col gap-3">
+          <Button
+            variant="warning"
+            size="md"
+            onClick={handlePlayAudio}
+            icon={Music}
+            disabled={isPlaying}
+            className="w-full"
+          >
+            {isPlaying ? 'Tocando...' : 'Ouvir Cartinha 🎵'}
+          </Button>
+
+          <Button
+            variant="success"
+            size="md"
+            onClick={onClose}
+            icon={Heart}
+            className="w-full"
+          >
+            Guardar no Coração 💝
+          </Button>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 text-4xl opacity-20 pointer-events-none">✨</div>
+        <div className="absolute top-0 right-0 text-4xl opacity-20 pointer-events-none">✨</div>
+        <div className="absolute bottom-0 left-0 text-4xl opacity-20 pointer-events-none">💛</div>
+        <div className="absolute bottom-0 right-0 text-4xl opacity-20 pointer-events-none">💛</div>
+      </div>
+    </div>
+  );
+});
+
+MonthlyLetterScreen.displayName = 'MonthlyLetterScreen';
 
 /* ========================================
    CHECK-IN SCREEN (Optimized)
@@ -3053,6 +3743,14 @@ export default function CheckInApp() {
   const [dailyModal, setDailyModal] = useState(null); // { dayNumber, monthData }
   const [completedDays, setCompletedDays] = useState({}); // { dayIndex: stars (0-3) }
 
+  // Devotional flow state
+  const [devotionalStep, setDevotionalStep] = useState('prayer'); // prayer, gratitude, action, complete
+  const [hasCompletedDevotional, setHasCompletedDevotional] = useState(false);
+
+  // Evening prayer and monthly letter state
+  const [showEveningPrayer, setShowEveningPrayer] = useState(false);
+  const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
+
   // Load saved data from localStorage
   useEffect(() => {
     const savedDay = parseInt(localStorage.getItem('checkin_day') || '330');
@@ -3073,6 +3771,20 @@ export default function CheckInApp() {
     // Load completed days data
     const savedCompletedDays = JSON.parse(localStorage.getItem('checkin_completed_days') || '{}');
     setCompletedDays(savedCompletedDays);
+
+    // Check if devotional was completed today
+    const today = new Date().toDateString();
+    const savedDevotionalDate = localStorage.getItem('devotional_date');
+    const savedDevotionalComplete = localStorage.getItem('devotional_complete');
+
+    if (savedDevotionalDate === today && savedDevotionalComplete === 'true') {
+      setHasCompletedDevotional(true);
+    } else {
+      // New day - reset devotional flow
+      setHasCompletedDevotional(false);
+      setDevotionalStep('prayer');
+      localStorage.removeItem('devotional_complete');
+    }
   }, []);
 
   const handleDayComplete = useCallback(() => {
@@ -3254,6 +3966,89 @@ export default function CheckInApp() {
     setShowVictoryModal(true);
   }, [dailyModal, addCoins]);
 
+  // Devotional flow handlers
+  const handlePrayerComplete = useCallback(() => {
+    setDevotionalStep('gratitude');
+  }, []);
+
+  const handleGratitudeComplete = useCallback(() => {
+    setDevotionalStep('action');
+  }, []);
+
+  const handleActionComplete = useCallback(() => {
+    // Mark devotional as complete for today
+    const today = new Date().toDateString();
+    localStorage.setItem('devotional_date', today);
+    localStorage.setItem('devotional_complete', 'true');
+    setHasCompletedDevotional(true);
+    setDevotionalStep('complete');
+
+    // Add coins reward for completing devotional
+    addCoins(10);
+
+    // Boost pet happiness for completing devotional
+    const savedPet = localStorage.getItem('checkin_pet');
+    if (savedPet) {
+      const petData = JSON.parse(savedPet);
+      const updatedPet = {
+        ...petData,
+        happiness: Math.min(100, petData.happiness + 20),
+        lastUpdate: Date.now()
+      };
+      localStorage.setItem('checkin_pet', JSON.stringify(updatedPet));
+    }
+  }, [addCoins]);
+
+  // Evening Prayer handlers
+  const handleOpenEveningPrayer = useCallback(() => {
+    setShowEveningPrayer(true);
+  }, []);
+
+  const handleCloseEveningPrayer = useCallback(() => {
+    setShowEveningPrayer(false);
+    // Add small reward for evening prayer
+    addCoins(5);
+
+    // Boost pet energy and happiness for evening prayer
+    const savedPet = localStorage.getItem('checkin_pet');
+    if (savedPet) {
+      const petData = JSON.parse(savedPet);
+      const updatedPet = {
+        ...petData,
+        energy: Math.min(100, petData.energy + 15),
+        happiness: Math.min(100, petData.happiness + 10),
+        lastUpdate: Date.now()
+      };
+      localStorage.setItem('checkin_pet', JSON.stringify(updatedPet));
+    }
+  }, [addCoins]);
+
+  // Monthly Letter handlers
+  const handleOpenMonthlyLetter = useCallback(() => {
+    setShowMonthlyLetter(true);
+  }, []);
+
+  const handleCloseMonthlyLetter = useCallback(() => {
+    setShowMonthlyLetter(false);
+  }, []);
+
+  // If devotional not complete, show devotional flow
+  if (!hasCompletedDevotional) {
+    return (
+      <div className="w-full h-screen max-w-md mx-auto bg-slate-900 overflow-hidden relative font-sans shadow-2xl">
+        {devotionalStep === 'prayer' && (
+          <MorningPrayerScreen onComplete={handlePrayerComplete} />
+        )}
+        {devotionalStep === 'gratitude' && (
+          <GratitudeScreen onComplete={handleGratitudeComplete} />
+        )}
+        {devotionalStep === 'action' && (
+          <GoodActionScreen onComplete={handleActionComplete} />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-screen max-w-md mx-auto bg-slate-900 overflow-hidden relative font-sans shadow-2xl">
       {/* HEADER */}
@@ -3324,7 +4119,12 @@ export default function CheckInApp() {
             ? 'translate-x-0 opacity-100'
             : 'translate-x-[100%] opacity-0 pointer-events-none'
         }`}>
-          <LarScreen coins={coins} onSpendCoins={spendCoins} />
+          <LarScreen
+            coins={coins}
+            onSpendCoins={spendCoins}
+            onOpenEveningPrayer={handleOpenEveningPrayer}
+            onOpenMonthlyLetter={handleOpenMonthlyLetter}
+          />
         </div>
       </div>
 
@@ -3380,6 +4180,21 @@ export default function CheckInApp() {
           onComplete={() => {}}
         />
       ))}
+
+      {/* Evening Prayer Overlay */}
+      {showEveningPrayer && (
+        <div className="absolute inset-0 z-50">
+          <EveningPrayerScreen onComplete={handleCloseEveningPrayer} />
+        </div>
+      )}
+
+      {/* Monthly Letter Overlay */}
+      {showMonthlyLetter && (
+        <MonthlyLetterScreen
+          monthNumber={new Date().getMonth() + 1}
+          onClose={handleCloseMonthlyLetter}
+        />
+      )}
 
       {/* NAVIGATION - Game HUD Style */}
       <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] flex items-center justify-around z-40 px-4 py-3 border-t-4 border-gray-100">
