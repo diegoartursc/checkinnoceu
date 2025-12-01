@@ -3304,8 +3304,10 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
           const isDecorLeft = Math.random() > 0.5;
           const isStoryLeft = !isDecorLeft;
           const MonthIcon = month.icon;
-          const isMonthStoryUnlocked = unlockedStories.includes(month.story.id);
-          const isMonthStoryRead = readStories.includes(month.story.id);
+          // Check if month is unlocked based on lastCompletedDay
+          const firstDayOfMonth = calculateDayIndexInYear(monthIndex, 1);
+          const lastDayOfMonth = calculateDayIndexInYear(monthIndex, month.days);
+          const isMonthStoryUnlocked = lastCompletedDay >= lastDayOfMonth;
 
           return (
             <div key={month.name} className="w-full mb-8 relative flex flex-col items-center">
@@ -3319,8 +3321,6 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
 
               {month.seasonEvent && (() => {
                  const season = month.seasonEvent;
-                 const isSeasonStoryUnlocked = unlockedStories.includes(season.story.id);
-                 const isSeasonStoryRead = readStories.includes(season.story.id);
 
                  return (
                      <div className="relative z-30 w-full flex flex-col items-center justify-center mb-8 mt-4 animate-in zoom-in duration-500">
@@ -3337,11 +3337,6 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                                 }
                             }}
                         />
-                        {isSeasonStoryUnlocked && !isSeasonStoryRead && (
-                             <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 text-[8px] font-black px-2 py-0.5 rounded-full shadow-sm animate-bounce whitespace-nowrap z-40">
-                               HISTÓRIA DESBLOQUEADA!
-                             </div>
-                        )}
 
                         {!isMonthStoryUnlocked && (
                              <div className="absolute top-0 right-10 bg-gray-800/80 rounded-full p-2 z-40 shadow-lg">
@@ -3659,24 +3654,12 @@ export default function CheckInApp() {
   const handleWinGame = useCallback(() => {
     const coinsToAdd = 50;
 
-    const storyIdToUnlock = currentGameConfig?.story?.id || currentGameConfig?.seasonEvent?.story?.id;
-    let hasUnlockedStory = false;
-
-    if (storyIdToUnlock && !unlockedStories.includes(storyIdToUnlock)) {
-        setUnlockedStories(prev => {
-          const newStories = [...prev, storyIdToUnlock];
-          localStorage.setItem('checkin_stories', JSON.stringify(newStories));
-          return newStories;
-        });
-        hasUnlockedStory = true;
-    }
-
     // Close game and show victory modal
     setCurrentGameConfig(null);
     setVictoryCoins(coinsToAdd);
-    setStoryUnlocked(hasUnlockedStory);
+    setStoryUnlocked(false); // Stories removed
     setShowVictoryModal(true);
-  }, [currentGameConfig, unlockedStories]);
+  }, [currentGameConfig]);
 
   // Handle victory modal claim
   const handleClaimReward = useCallback(() => {
