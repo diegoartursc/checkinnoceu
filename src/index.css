@@ -15,7 +15,7 @@
   }
 
   #root {
-    @apply w-full h-screen overflow-hidden;
+    @apply w-full h-[100dvh] overflow-hidden;
   }
 }
 
