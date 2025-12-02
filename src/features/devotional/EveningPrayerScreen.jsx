@@ -1,7 +1,8 @@
-import React, { useState, memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Music, ArrowRight } from 'lucide-react';
-import { Button } from '../ui';
+import Button from '../../components/ui/Button';
 
+// Oração da Noite - Antes de dormir
 const EveningPrayerScreen = memo(({ onComplete }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -25,20 +26,29 @@ const EveningPrayerScreen = memo(({ onComplete }) => {
 
       {/* Estrelas piscando */}
       <div className="absolute inset-0 overflow-hidden opacity-60">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full animate-pulse"
-            style={{
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${Math.random() * 3 + 2}s`
-            }}
-          />
-        ))}
+        {[...Array(30)].map((_, i) => {
+            // Use index for pseudo-randomness to avoid re-renders
+            const size = (i % 3) + 1;
+            const top = ((i * 13) % 100);
+            const left = ((i * 7) % 100);
+            const delay = (i % 5) * 0.5;
+            const duration = (i % 4) + 2;
+
+            return (
+              <div
+                key={i}
+                className="absolute bg-white rounded-full animate-pulse"
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  top: `${top}%`,
+                  left: `${left}%`,
+                  animationDelay: `${delay}s`,
+                  animationDuration: `${duration}s`
+                }}
+              />
+            );
+        })}
       </div>
 
       <div className="relative z-10 max-w-md w-full px-4">

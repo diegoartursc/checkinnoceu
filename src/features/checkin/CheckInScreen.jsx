@@ -1,8 +1,8 @@
-import React, { useState, useMemo, memo } from 'react';
-import { Sun, Play, ArrowRight, CheckCircle, X } from 'lucide-react';
-import { getDailyContent } from '../utils/contentGenerator';
-import { Button } from '../components/ui';
-import { CatcherGame } from '../components/games';
+import React, { memo, useState, useMemo } from 'react';
+import { Play, ArrowRight, Sun, CheckCircle, X } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import CatcherGame from '../../components/games/CatcherGame';
+import { getDailyContent } from '../../utils/contentGenerator';
 
 const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => {
   const [step, setStep] = useState(0);
@@ -44,7 +44,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
           <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg font-[nunito]">
             Jornada<br/>do Dia {currentDay}
           </h1>
-          <Button onClick={() => setStep(1)} variant="warning" className="w-full text-lg sm:text-xl shadow-[0_8px_30px_rgba(251,146,60,0.4)]">
+          <Button onClick={() => setStep(1)} className="w-full text-lg sm:text-xl bg-gradient-to-b from-orange-400 to-orange-600 border-orange-700 shadow-[0_8px_30px_rgba(251,146,60,0.4)]">
             Começar <Play fill="white" size={20}/>
           </Button>
         </div>
@@ -60,7 +60,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
               "{dailyData.message}"
             </p>
           </div>
-          <Button onClick={() => setStep(2)} variant="success" className="w-full shadow-[0_8px_30px_rgba(34,197,94,0.4)]">
+          <Button onClick={() => setStep(2)} className="w-full bg-gradient-to-b from-green-400 to-green-600 border-green-700 shadow-[0_8px_30px_rgba(34,197,94,0.4)]">
             Próximo <ArrowRight />
           </Button>
         </div>
@@ -109,8 +109,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
              <div className="mt-4 animate-in fade-in">
                <Button
                  onClick={onCompleteDay}
-                 variant={isQuizCorrect ? "success" : "secondary"}
-                 className="w-full shadow-[0_8px_30px_rgba(34,197,94,0.4)]"
+                 className={`w-full ${isQuizCorrect ? "bg-gradient-to-b from-green-400 to-green-600 border-green-700 shadow-[0_8px_30px_rgba(34,197,94,0.4)]" : "bg-gradient-to-b from-gray-300 to-gray-500 border-gray-600"}`}
                  disabled={!isQuizCorrect}
                >
                  {isQuizCorrect ? "Finalizar" : "Tente de novo"}

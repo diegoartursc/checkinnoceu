@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Cloud, Star, Repeat2 } from 'lucide-react';
+import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
+import { Cloud, Repeat2, Star } from 'lucide-react';
 
 const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
   // Pet state with localStorage persistence
@@ -35,54 +35,11 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     { type: 'pomba', name: 'Pombinha', emoji: '🕊️', emojiAlt: '🦅' }
   ], []);
 
-  // Get habitat decoration based on pet type
-  const getHabitatDecoration = useCallback(() => {
-    switch (pet.type) {
-      case 'ovelhinha':
-        // Campo/Fazenda
-        return (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
-            <div className="text-6xl absolute top-2 left-4">🌾</div>
-            <div className="text-5xl absolute top-8 right-6">🌻</div>
-            <div className="text-4xl absolute bottom-4 left-8">🌾</div>
-            <div className="text-5xl absolute bottom-2 right-4">🌾</div>
-            <div className="text-3xl absolute top-1/2 left-2">🌻</div>
-            <div className="text-3xl absolute top-1/3 right-2">🌼</div>
-          </div>
-        );
-      case 'leao':
-        // Savana
-        return (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
-            <div className="text-6xl absolute top-4 left-6">🌴</div>
-            <div className="text-5xl absolute top-2 right-8">☀️</div>
-            <div className="text-4xl absolute bottom-6 left-4">🌿</div>
-            <div className="text-5xl absolute bottom-2 right-6">🌴</div>
-            <div className="text-3xl absolute top-1/2 left-12">🍃</div>
-            <div className="text-4xl absolute top-1/3 right-4">🌿</div>
-          </div>
-        );
-      case 'pomba':
-        // Céu
-        return (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
-            <div className="text-6xl absolute top-4 left-8">☁️</div>
-            <div className="text-5xl absolute top-12 right-6">☁️</div>
-            <div className="text-4xl absolute bottom-8 left-6">☁️</div>
-            <div className="text-5xl absolute bottom-4 right-8">☁️</div>
-            <div className="text-6xl absolute top-1/2 left-4">⭐</div>
-            <div className="text-4xl absolute top-1/3 right-12">✨</div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  }, [pet.type]);
-
   // Calculate decay based on time passed (runs once on mount)
   useEffect(() => {
     const now = Date.now();
-    const hoursPassed = (now - pet.lastUpdate) / (1000 * 60 * 60);
+    const lastUpdate = pet.lastUpdate || now;
+    const hoursPassed = (now - lastUpdate) / (1000 * 60 * 60);
 
     // Decay if more than 0.1 hours passed (6 minutes - for testing)
     if (hoursPassed > 0.1) {
@@ -98,6 +55,8 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
         lastUpdate: now
       }));
     }
+    // We only want to run this once on mount, but we need to suppress the warning correctly
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save to localStorage whenever pet state changes

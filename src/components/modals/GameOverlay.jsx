@@ -1,19 +1,14 @@
-import React, { useMemo, memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { X } from 'lucide-react';
-import { GAME_TYPES } from '../../constants/gameTypes';
-import {
-  MemoryGame,
-  CatcherGame,
-  QuizGame,
-  HarvestGame,
-  WarmupGame,
-  SequenceGame,
-  RevealGame
-} from '../games';
+import { GAME_TYPES } from '../../config/gameConfig';
+import MemoryGame from '../games/MemoryGame';
+import CatcherGame from '../games/CatcherGame';
+import QuizGame from '../games/QuizGame';
+import HarvestGame from '../games/HarvestGame';
+import WarmupGame from '../games/WarmupGame';
+import SequenceGame from '../games/SequenceGame';
+import RevealGame from '../games/RevealGame';
 
-/**
- * Game Overlay - Displays a game modal
- */
 const GameOverlay = memo(({ config, onClose, onWin }) => {
   const GameComponent = useMemo(() => {
     switch(config.gameType) {

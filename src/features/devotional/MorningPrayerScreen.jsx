@@ -1,7 +1,8 @@
-import React, { useState, memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Music, ArrowRight } from 'lucide-react';
-import { Button } from '../ui';
+import Button from '../../components/ui/Button';
 
+// Oração da Manhã - Primeira tela ao abrir o app
 const MorningPrayerScreen = memo(({ onComplete }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 

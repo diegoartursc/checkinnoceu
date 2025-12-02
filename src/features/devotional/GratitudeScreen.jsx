@@ -1,7 +1,8 @@
-import React, { useState, memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Heart } from 'lucide-react';
-import { Button } from '../ui';
+import Button from '../../components/ui/Button';
 
+// Momento de Gratidão
 const GratitudeScreen = memo(({ onComplete }) => {
   const [selected, setSelected] = useState(null);
   const [customText, setCustomText] = useState('');

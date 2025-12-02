@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo, memo } from 'react';
+import React, { memo, useState, useEffect, useMemo } from 'react';
 import { CheckCircle } from 'lucide-react';
-import { Button } from '../ui';
+import Button from '../../components/ui/Button';
 
+// Boa Ação do Dia
 const GoodActionScreen = memo(({ onComplete }) => {
   const [currentMission, setCurrentMission] = useState(null);
   const [completed, setCompleted] = useState(false);
@@ -17,9 +18,13 @@ const GoodActionScreen = memo(({ onComplete }) => {
 
   useEffect(() => {
     // Seleciona missão aleatória
-    const randomMission = missions[Math.floor(Math.random() * missions.length)];
-    setCurrentMission(randomMission);
-  }, [missions]);
+    const today = new Date().getDate();
+    // Deterministic based on date to avoid flicker, or random on mount
+    // Since this is "Good Action of the DAY", using date is better
+    const missionIndex = today % missions.length;
+    setCurrentMission(missions[missionIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleMarkComplete = () => {
     setCompleted(true);

@@ -1,7 +1,8 @@
-import React, { useState, useMemo, memo } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import { Music, Heart } from 'lucide-react';
-import { Button } from '../ui';
+import Button from '../../components/ui/Button';
 
+// Cartinha de Jesus - Mensal
 const MonthlyLetterScreen = memo(({ monthNumber, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 

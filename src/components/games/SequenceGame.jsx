@@ -11,15 +11,6 @@ const SequenceGame = memo(({ data, onWin }) => {
     const [status, setStatus] = useState('watch');
     const hasWonRef = useRef(false);
 
-    useEffect(() => {
-        if (status === 'watch' && !hasWonRef.current) {
-            const newStep = Math.floor(Math.random() * 4);
-            const newSeq = [...sequence, newStep];
-            setSequence(newSeq);
-            playSequence(newSeq);
-        }
-    }, [round, status]);
-
     const playSequence = async (seq) => {
         setPlayerSeq([]);
         for (let i = 0; i < seq.length; i++) {
@@ -30,6 +21,16 @@ const SequenceGame = memo(({ data, onWin }) => {
         }
         setStatus('play');
     };
+
+    useEffect(() => {
+        if (status === 'watch' && !hasWonRef.current) {
+            const newStep = Math.floor(Math.random() * 4);
+            const newSeq = [...sequence, newStep];
+            setSequence(newSeq);
+            playSequence(newSeq);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [round, status]);
 
     const handleTap = useCallback((index) => {
         if (status !== 'play') return;

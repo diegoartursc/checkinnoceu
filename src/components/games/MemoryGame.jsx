@@ -13,7 +13,8 @@ const MemoryGame = memo(({ data, onWin }) => {
       .sort(() => Math.random() - 0.5)
       .map((emoji, index) => ({ id: index, content: emoji }));
     setCards(shuffled);
-  }, [data.items]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCardClick = useCallback((id) => {
     if (flipped.length === 2 || matched.includes(id) || flipped.includes(id)) return;
