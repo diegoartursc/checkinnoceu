@@ -196,14 +196,6 @@ Button.displayName = 'Button';
    UTILITY FUNCTIONS
    ======================================== */
 
-const getDayOfYear = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  return Math.floor(diff / oneDay);
-};
-
 const getDailyContent = (dayNumber) => {
   // Seeded random for deterministic generation
   const random = (seed) => {
@@ -388,16 +380,13 @@ SeasonButton.displayName = 'SeasonButton';
    ======================================== */
 
 const MemoryGame = memo(({ data, onWin }) => {
-  const [cards, setCards] = useState([]);
-  const [flipped, setFlipped] = useState([]);
-  const [matched, setMatched] = useState([]);
-
-  useEffect(() => {
-    const shuffled = [...data.items]
+  const [cards] = useState(() => {
+    return [...data.items]
       .sort(() => Math.random() - 0.5)
       .map((emoji, index) => ({ id: index, content: emoji }));
-    setCards(shuffled);
-  }, [data.items]);
+  });
+  const [flipped, setFlipped] = useState([]);
+  const [matched, setMatched] = useState([]);
 
   const handleCardClick = useCallback((id) => {
     if (flipped.length === 2 || matched.includes(id) || flipped.includes(id)) return;
@@ -663,23 +652,14 @@ const WarmupGame = memo(({ data, onWin }) => {
 WarmupGame.displayName = 'WarmupGame';
 
 const SequenceGame = memo(({ data, onWin }) => {
-    const [sequence, setSequence] = useState([]);
+    const [sequence, setSequence] = useState(() => [Math.floor(Math.random() * 4)]);
     const [playerSeq, setPlayerSeq] = useState([]);
     const [playingIdx, setPlayingIdx] = useState(null);
     const [round, setRound] = useState(1);
     const [status, setStatus] = useState('watch');
     const hasWonRef = useRef(false);
 
-    useEffect(() => {
-        if (status === 'watch' && !hasWonRef.current) {
-            const newStep = Math.floor(Math.random() * 4);
-            const newSeq = [...sequence, newStep];
-            setSequence(newSeq);
-            playSequence(newSeq);
-        }
-    }, [round, status]);
-
-    const playSequence = async (seq) => {
+    const playSequence = useCallback(async (seq) => {
         setPlayerSeq([]);
         for (let i = 0; i < seq.length; i++) {
             await new Promise(r => setTimeout(r, 500));
@@ -688,7 +668,16 @@ const SequenceGame = memo(({ data, onWin }) => {
             setPlayingIdx(null);
         }
         setStatus('play');
-    };
+    }, []);
+
+    useEffect(() => {
+        if (status === 'watch' && !hasWonRef.current) {
+            const timer = setTimeout(() => {
+                playSequence(sequence);
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [status, sequence, playSequence]);
 
     const handleTap = useCallback((index) => {
         if (status !== 'play') return;
@@ -700,7 +689,7 @@ const SequenceGame = memo(({ data, onWin }) => {
 
         if (sequence[newPlayerSeq.length - 1] !== index) {
             alert("Ops! Tente de novo.");
-            setSequence([]);
+            setSequence([Math.floor(Math.random() * 4)]);
             setRound(1);
             setStatus('watch');
             return;
@@ -714,6 +703,8 @@ const SequenceGame = memo(({ data, onWin }) => {
                 }
             } else {
                 setRound(r => r + 1);
+                const newStep = Math.floor(Math.random() * 4);
+                setSequence(prev => [...prev, newStep]);
                 setStatus('watch');
             }
         }
@@ -827,7 +818,7 @@ const GameOverlay = memo(({ config, onClose, onWin }) => {
           </button>
         </div>
         <div className="p-2 sm:p-4 h-80 sm:h-96 relative bg-slate-50 overflow-hidden">
-           {GameComponent && <GameComponent data={config.gameData} onWin={onWin} />}
+           {GameComponent && <GameComponent key={config.gameData.title} data={config.gameData} onWin={onWin} />}
         </div>
       </div>
     </div>
@@ -1081,19 +1072,13 @@ DailyModal.displayName = 'DailyModal';
    ======================================== */
 
 const VictoryModal = memo(({ coins, onClaim, storyUnlocked }) => {
-  const [confettiPieces, setConfettiPieces] = useState([]);
-  const [claimed, setClaimed] = useState(false);
-
-  useEffect(() => {
-    // Generate confetti
-    const pieces = Array.from({ length: 30 }, (_, i) => ({
+  const [confettiPieces] = useState(() => Array.from({ length: 30 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 0.5,
       color: ['bg-yellow-400', 'bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400'][Math.floor(Math.random() * 5)]
-    }));
-    setConfettiPieces(pieces);
-  }, []);
+    })));
+  const [claimed, setClaimed] = useState(false);
 
   const handleClaim = () => {
     setClaimed(true);
@@ -1202,18 +1187,12 @@ VictoryModal.displayName = 'VictoryModal';
    ======================================== */
 
 const StreakBonusModal = memo(({ streak, bonusAmount, onClose }) => {
-  const [confettiPieces, setConfettiPieces] = useState([]);
-
-  useEffect(() => {
-    // Generate fire-colored confetti
-    const pieces = Array.from({ length: 40 }, (_, i) => ({
+  const [confettiPieces] = useState(() => Array.from({ length: 40 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 0.5,
       color: ['bg-orange-400', 'bg-red-400', 'bg-yellow-400', 'bg-amber-400'][Math.floor(Math.random() * 4)]
-    }));
-    setConfettiPieces(pieces);
-  }, []);
+    })));
 
   const getMilestoneMessage = () => {
     if (streak === 7) return 'Uma semana completa!';
@@ -1356,20 +1335,26 @@ FloatingAvatar.displayName = 'FloatingAvatar';
 
 const ParallaxDecorations = memo(({ position }) => {
   const decorations = useMemo(() => {
-    const random = (min, max) => Math.random() * (max - min) + min;
+    // Deterministic random using seed
+    const seed = 42;
+    const rng = (offset) => {
+        const x = Math.sin(seed + offset) * 10000;
+        return x - Math.floor(x);
+    };
+    const random = (offset, min, max) => rng(offset) * (max - min) + min;
 
     return [
       // Islands
-      { type: 'island', emoji: '🏝️', left: random(5, 15), top: position * 0.3, size: 40, delay: 0 },
-      { type: 'island', emoji: '🏝️', left: random(70, 85), top: position * 0.5, size: 35, delay: 0.5 },
+      { type: 'island', emoji: '🏝️', left: random(1, 5, 15), top: position * 0.3, size: 40, delay: 0 },
+      { type: 'island', emoji: '🏝️', left: random(2, 70, 85), top: position * 0.5, size: 35, delay: 0.5 },
 
       // Rainbows
-      { type: 'rainbow', emoji: '🌈', left: random(10, 20), top: position * 0.4, size: 50, delay: 1 },
-      { type: 'rainbow', emoji: '🌈', left: random(75, 85), top: position * 0.6, size: 45, delay: 1.5 },
+      { type: 'rainbow', emoji: '🌈', left: random(3, 10, 20), top: position * 0.4, size: 50, delay: 1 },
+      { type: 'rainbow', emoji: '🌈', left: random(4, 75, 85), top: position * 0.6, size: 45, delay: 1.5 },
 
       // Stars
-      { type: 'star', emoji: '✨', left: random(15, 25), top: position * 0.2, size: 25, delay: 0.8 },
-      { type: 'star', emoji: '⭐', left: random(75, 85), top: position * 0.35, size: 30, delay: 1.2 },
+      { type: 'star', emoji: '✨', left: random(5, 15, 25), top: position * 0.2, size: 25, delay: 0.8 },
+      { type: 'star', emoji: '⭐', left: random(6, 75, 85), top: position * 0.35, size: 30, delay: 1.2 },
     ];
   }, [position]);
 
@@ -1404,17 +1389,40 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
   // Pet state with localStorage persistence
   const [pet, setPet] = useState(() => {
     const saved = localStorage.getItem('checkin_pet');
+    let initialPet;
     if (saved) {
-      return JSON.parse(saved);
+      initialPet = JSON.parse(saved);
+    } else {
+      initialPet = {
+        type: 'ovelhinha',
+        name: 'Ovelhinha',
+        hunger: 100,
+        happiness: 100,
+        energy: 100,
+        lastUpdate: Date.now()
+      };
     }
-    return {
-      type: 'ovelhinha',
-      name: 'Ovelhinha',
-      hunger: 100,
-      happiness: 100,
-      energy: 100,
-      lastUpdate: Date.now()
-    };
+
+    // Apply decay logic here in initializer
+    const now = Date.now();
+    const hoursPassed = (now - initialPet.lastUpdate) / (1000 * 60 * 60);
+
+    // Decay if more than 0.1 hours passed (6 minutes - for testing)
+    if (hoursPassed > 0.1) {
+      const hungerDecay = Math.floor(hoursPassed * 5);
+      const happinessDecay = Math.floor(hoursPassed * 3);
+      const energyDecay = Math.floor(hoursPassed * 4);
+
+      initialPet = {
+        ...initialPet,
+        hunger: Math.max(0, initialPet.hunger - hungerDecay),
+        happiness: Math.max(0, initialPet.happiness - happinessDecay),
+        energy: Math.max(0, initialPet.energy - energyDecay),
+        lastUpdate: now
+      };
+    }
+
+    return initialPet;
   });
 
   // Floating feedback texts
@@ -1434,69 +1442,11 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     { type: 'pomba', name: 'Pombinha', emoji: '🕊️', emojiAlt: '🦅' }
   ], []);
 
-  // Get habitat decoration based on pet type
-  const getHabitatDecoration = useCallback(() => {
-    switch (pet.type) {
-      case 'ovelhinha':
-        // Campo/Fazenda
-        return (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
-            <div className="text-6xl absolute top-2 left-4">🌾</div>
-            <div className="text-5xl absolute top-8 right-6">🌻</div>
-            <div className="text-4xl absolute bottom-4 left-8">🌾</div>
-            <div className="text-5xl absolute bottom-2 right-4">🌾</div>
-            <div className="text-3xl absolute top-1/2 left-2">🌻</div>
-            <div className="text-3xl absolute top-1/3 right-2">🌼</div>
-          </div>
-        );
-      case 'leao':
-        // Savana
-        return (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
-            <div className="text-6xl absolute top-4 left-6">🌴</div>
-            <div className="text-5xl absolute top-2 right-8">☀️</div>
-            <div className="text-4xl absolute bottom-6 left-4">🌿</div>
-            <div className="text-5xl absolute bottom-2 right-6">🌴</div>
-            <div className="text-3xl absolute top-1/2 left-12">🍃</div>
-            <div className="text-4xl absolute top-1/3 right-4">🌿</div>
-          </div>
-        );
-      case 'pomba':
-        // Céu
-        return (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-30 pointer-events-none">
-            <div className="text-6xl absolute top-4 left-8">☁️</div>
-            <div className="text-5xl absolute top-12 right-6">☁️</div>
-            <div className="text-4xl absolute bottom-8 left-6">☁️</div>
-            <div className="text-5xl absolute bottom-4 right-8">☁️</div>
-            <div className="text-6xl absolute top-1/2 left-4">⭐</div>
-            <div className="text-4xl absolute top-1/3 right-12">✨</div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  }, [pet.type]);
+  // getHabitatDecoration removed as unused
 
   // Calculate decay based on time passed (runs once on mount)
   useEffect(() => {
-    const now = Date.now();
-    const hoursPassed = (now - pet.lastUpdate) / (1000 * 60 * 60);
-
-    // Decay if more than 0.1 hours passed (6 minutes - for testing)
-    if (hoursPassed > 0.1) {
-      const hungerDecay = Math.floor(hoursPassed * 5);
-      const happinessDecay = Math.floor(hoursPassed * 3);
-      const energyDecay = Math.floor(hoursPassed * 4);
-
-      setPet(prev => ({
-        ...prev,
-        hunger: Math.max(0, prev.hunger - hungerDecay),
-        happiness: Math.max(0, prev.happiness - happinessDecay),
-        energy: Math.max(0, prev.energy - energyDecay),
-        lastUpdate: now
-      }));
-    }
+    // Only check decay if it hasn't been updated recently to avoid render loop issues or state mismatch
   }, []);
 
   // Save to localStorage whenever pet state changes
@@ -2118,9 +2068,6 @@ GratitudeScreen.displayName = 'GratitudeScreen';
 
 // Boa Ação do Dia
 const GoodActionScreen = memo(({ onComplete }) => {
-  const [currentMission, setCurrentMission] = useState(null);
-  const [completed, setCompleted] = useState(false);
-
   const missions = useMemo(() => [
     { id: 1, icon: '🤝', text: 'Ajude sua família em alguma tarefa', value: 'ajudar' },
     { id: 2, icon: '👋', text: 'Dê bom dia para alguém especial', value: 'saudar' },
@@ -2130,11 +2077,11 @@ const GoodActionScreen = memo(({ onComplete }) => {
     { id: 6, icon: '🤗', text: 'Convide alguém para brincar junto', value: 'incluir' },
   ], []);
 
-  useEffect(() => {
-    // Seleciona missão aleatória
-    const randomMission = missions[Math.floor(Math.random() * missions.length)];
-    setCurrentMission(randomMission);
-  }, [missions]);
+  const [currentMission] = useState(() => {
+      // Seleciona missão aleatória
+      return missions[Math.floor(Math.random() * missions.length)];
+  });
+  const [completed, setCompleted] = useState(false);
 
   const handleMarkComplete = () => {
     setCompleted(true);
@@ -2223,20 +2170,29 @@ const EveningPrayerScreen = memo(({ onComplete }) => {
 
       {/* Estrelas piscando */}
       <div className="absolute inset-0 overflow-hidden opacity-60">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full animate-pulse"
-            style={{
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${Math.random() * 3 + 2}s`
-            }}
-          />
-        ))}
+        {[...Array(30)].map((_, i) => {
+            // Deterministic position based on index to avoid hydration mismatch and impurities
+            const r1 = (i * 1337) % 100;
+            const r2 = (i * 7331) % 100;
+            const r3 = (i * 42) % 3 + 1;
+            const r4 = (i * 17) % 2;
+            const r5 = (i * 99) % 3 + 2;
+
+            return (
+              <div
+                key={i}
+                className="absolute bg-white rounded-full animate-pulse"
+                style={{
+                  width: `${r3}px`,
+                  height: `${r3}px`,
+                  top: `${r1}%`,
+                  left: `${r2}%`,
+                  animationDelay: `${r4}s`,
+                  animationDuration: `${r5}s`
+                }}
+              />
+            );
+        })}
       </div>
 
       <div className="relative z-10 max-w-md w-full px-4">
@@ -2586,7 +2542,7 @@ CheckInScreen.displayName = 'CheckInScreen';
    ======================================== */
 
 // Calculate sinuous path position (Match-3 style)
-const calculatePathPosition = (dayIndex, totalDays) => {
+const calculatePathPosition = (dayIndex) => {
   // Vertical spacing between days
   const verticalSpacing = 55;
   const top = dayIndex * verticalSpacing;
@@ -2778,7 +2734,7 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
 DynamicRoadPath.displayName = 'DynamicRoadPath';
 
 // Campo Gramado + Decorações de Bioma 3D com Parallax
-const BiomeDecorations = memo(({ monthName, monthIndex }) => {
+const BiomeDecorations = memo(({ monthIndex }) => {
   const getSeasonDecorations = () => {
     const month = monthIndex; // 0=Jan, 11=Dez
 
@@ -2896,15 +2852,22 @@ const PathItems = memo(({ dayIndex }) => {
     const decorations = [];
     const types = ['💰', '💛', '👣', '✨'];
 
+    // Deterministic random
+    const seed = dayIndex * 999;
+    const rng = (offset) => {
+        const x = Math.sin(seed + offset) * 10000;
+        return x - Math.floor(x);
+    };
+
     // Adiciona 1-2 itens aleatórios entre alguns dias
-    if (dayIndex % 3 === 0 && Math.random() > 0.5) {
-      const randomType = types[Math.floor(Math.random() * types.length)];
-      const randomOffset = (Math.random() - 0.5) * 30;
+    if (dayIndex % 3 === 0 && rng(0) > 0.5) {
+      const randomType = types[Math.floor(rng(1) * types.length)];
+      const randomOffset = (rng(2) - 0.5) * 30;
 
       decorations.push({
         emoji: randomType,
         offset: randomOffset,
-        delay: Math.random() * 2
+        delay: rng(3) * 2
       });
     }
 
@@ -2936,7 +2899,7 @@ const PathItems = memo(({ dayIndex }) => {
 PathItems.displayName = 'PathItems';
 
 // MapDecorations - Props decorativos procedurais ao longo do caminho
-const MapDecorations = memo(({ dayIndex, totalDays, pathPosition }) => {
+const MapDecorations = memo(({ dayIndex, pathPosition }) => {
   // Gerador de número pseudoaleatório baseado em seed (determinístico)
   const seededRandom = useCallback((seed) => {
     const x = Math.sin(seed) * 10000;
@@ -3019,7 +2982,6 @@ const DayNode = memo(({
   isCurrentDay,
   specialDate,
   onSpecialClick,
-  monthIndex,
   style,
   dayIndexInYear,
   lastCompletedDay,
@@ -3099,7 +3061,7 @@ const DayNode = memo(({
 
 DayNode.displayName = 'DayNode';
 
-const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedStories, readStories, onDayClick, completedDays = {} }) => {
+const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDays = {} }) => {
   const containerRef = useRef(null);
   const currentDayRef = useRef(null);
   const [activeDecoration, setActiveDecoration] = useState(null);
@@ -3235,12 +3197,10 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
         {reversedMonths.map((month, reverseIndex) => {
           // Calculate real month index (0-11) for date comparison
           const monthIndex = 11 - reverseIndex; // Dezembro=11, Janeiro=0
-          const daysInThisMonth = useMemo(() => Array.from({ length: 31 }, (_, i) => 31 - i), []);
-          const isDecorLeft = Math.random() > 0.5;
-          const isStoryLeft = !isDecorLeft;
+          // Deterministic value for decoration position based on month index
+          const isDecorLeft = (monthIndex % 2) === 0;
           const MonthIcon = month.icon;
           // Check if month is unlocked based on lastCompletedDay
-          const firstDayOfMonth = calculateDayIndexInYear(monthIndex, 1);
           const lastDayOfMonth = calculateDayIndexInYear(monthIndex, month.days);
           const isMonthStoryUnlocked = lastCompletedDay >= lastDayOfMonth;
 
@@ -3381,7 +3341,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onOpenStory, unlockedSto
                 })()}
 
                 {/* BiomeDecorations - Decorações Sazonais */}
-                <BiomeDecorations monthName={month.name} monthIndex={monthIndex} />
+                <BiomeDecorations monthIndex={monthIndex} />
 
                 {/* Sinuous path of days */}
                 {Array.from({ length: month.days }, (_, i) => {
@@ -3459,65 +3419,52 @@ MapScreen.displayName = 'MapScreen';
 
 export default function CheckInApp() {
   const [screen, setScreen] = useState('checkin');
-  const [lastCompletedDay, setLastCompletedDay] = useState(330);
+  const [lastCompletedDay, setLastCompletedDay] = useState(() => parseInt(localStorage.getItem('checkin_day') || '330'));
   const [isCompletedToday, setIsCompletedToday] = useState(false);
   const [currentGameConfig, setCurrentGameConfig] = useState(null);
   const [currentStory, setCurrentStory] = useState(null);
-  const [coins, setCoins] = useState(0);
-  const [unlockedStories, setUnlockedStories] = useState([]);
-  const [readStories, setReadStories] = useState([]);
+  const [coins, setCoins] = useState(() => parseInt(localStorage.getItem('checkin_coins') || '0'));
+  // Unused unlockedStories and setUnlockedStories removed
+  // readStories also removed as it was only used in handleOpenStory
   const [showVictoryModal, setShowVictoryModal] = useState(false);
   const [victoryCoins, setVictoryCoins] = useState(0);
   const [flyingStars, setFlyingStars] = useState([]);
   const [storyUnlocked, setStoryUnlocked] = useState(false);
-  const [streak, setStreak] = useState(0);
-  const [lastCheckInDate, setLastCheckInDate] = useState(null);
+  const [streak, setStreak] = useState(() => parseInt(localStorage.getItem('checkin_streak') || '0'));
+  const [lastCheckInDate, setLastCheckInDate] = useState(() => localStorage.getItem('checkin_last_date'));
   const [showStreakBonus, setShowStreakBonus] = useState(false);
   const [streakBonusAmount, setStreakBonusAmount] = useState(0);
   const [dailyModal, setDailyModal] = useState(null); // { dayNumber, monthData }
-  const [completedDays, setCompletedDays] = useState({}); // { dayIndex: stars (0-3) }
+  const [completedDays, setCompletedDays] = useState(() => JSON.parse(localStorage.getItem('checkin_completed_days') || '{}'));
 
   // Devotional flow state
   const [devotionalStep, setDevotionalStep] = useState('prayer'); // prayer, gratitude, action, complete
-  const [hasCompletedDevotional, setHasCompletedDevotional] = useState(false);
+  const [hasCompletedDevotional, setHasCompletedDevotional] = useState(() => {
+    const today = new Date().toDateString();
+    const savedDevotionalDate = localStorage.getItem('devotional_date');
+    const savedDevotionalComplete = localStorage.getItem('devotional_complete');
+    return savedDevotionalDate === today && savedDevotionalComplete === 'true';
+  });
 
   // Evening prayer and monthly letter state
   const [showEveningPrayer, setShowEveningPrayer] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
 
-  // Load saved data from localStorage
+  // Check if it's a new day to reset devotional flow
   useEffect(() => {
-    const savedDay = parseInt(localStorage.getItem('checkin_day') || '330');
-    setLastCompletedDay(savedDay);
-    const savedCoins = parseInt(localStorage.getItem('checkin_coins') || '0');
-    setCoins(savedCoins);
-    const savedStories = JSON.parse(localStorage.getItem('checkin_stories') || '[]');
-    setUnlockedStories(savedStories);
-    const savedRead = JSON.parse(localStorage.getItem('checkin_read_stories') || '[]');
-    setReadStories(savedRead);
-
-    // Load streak data
-    const savedStreak = parseInt(localStorage.getItem('checkin_streak') || '0');
-    setStreak(savedStreak);
-    const savedLastCheckIn = localStorage.getItem('checkin_last_date');
-    setLastCheckInDate(savedLastCheckIn);
-
-    // Load completed days data
-    const savedCompletedDays = JSON.parse(localStorage.getItem('checkin_completed_days') || '{}');
-    setCompletedDays(savedCompletedDays);
-
-    // Check if devotional was completed today
     const today = new Date().toDateString();
     const savedDevotionalDate = localStorage.getItem('devotional_date');
-    const savedDevotionalComplete = localStorage.getItem('devotional_complete');
 
-    if (savedDevotionalDate === today && savedDevotionalComplete === 'true') {
-      setHasCompletedDevotional(true);
-    } else {
-      // New day - reset devotional flow
-      setHasCompletedDevotional(false);
-      setDevotionalStep('prayer');
-      localStorage.removeItem('devotional_complete');
+    if (savedDevotionalDate !== today) {
+       // Reset devotional state if date changed (and it wasn't caught by initializer)
+       // Initializer handles initial load, but this handles date change while app is open/reload
+       // Though if app reloads, initializer runs.
+       // If app stays open, we might need a timer, but for now we just rely on initialization or re-render.
+       // The original code reset things in useEffect.
+       // Since we initialized hasCompletedDevotional correctly, we just need to ensure we clean up if needed.
+       // Actually, we don't need to force reset if the date in localStorage is old, because our initializer
+       // checked `savedDevotionalDate === today`. If it wasn't equal, it returned false.
+       // So we just need to clean up the stale key if we want, but it's not strictly necessary for logic correctness.
     }
   }, []);
 
@@ -3594,7 +3541,7 @@ export default function CheckInApp() {
     setVictoryCoins(coinsToAdd);
     setStoryUnlocked(false); // Stories removed
     setShowVictoryModal(true);
-  }, [currentGameConfig]);
+  }, []);
 
   // Handle victory modal claim
   const handleClaimReward = useCallback(() => {
@@ -3636,17 +3583,6 @@ export default function CheckInApp() {
   const handleCloseStreakBonus = useCallback(() => {
     setShowStreakBonus(false);
   }, []);
-
-  const handleOpenStory = useCallback((story) => {
-      setCurrentStory(story);
-      if (!readStories.includes(story.id)) {
-          setReadStories(prev => {
-            const newRead = [...prev, story.id];
-            localStorage.setItem('checkin_read_stories', JSON.stringify(newRead));
-            return newRead;
-          });
-      }
-  }, [readStories]);
 
   // Daily Modal handlers
   const handleDayClick = useCallback((dayIndexInYear, monthData) => {
@@ -3827,9 +3763,6 @@ export default function CheckInApp() {
           <MapScreen
             lastCompletedDay={lastCompletedDay}
             onOpenGame={setCurrentGameConfig}
-            onOpenStory={handleOpenStory}
-            unlockedStories={unlockedStories}
-            readStories={readStories}
             onDayClick={handleDayClick}
             completedDays={completedDays}
           />
