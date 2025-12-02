@@ -1,11 +1,9 @@
 import React, { memo } from 'react';
 import { Star } from 'lucide-react';
-import { useUser } from '../contexts/UserContext';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useAppState } from '../context/AppStateContext';
 
 const HUD = memo(() => {
-    const { coins, streak } = useUser();
-    const { screen } = useNavigation();
+    const { coins, streak, screen } = useAppState();
 
     return (
         <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-30 flex justify-between items-center pointer-events-none">

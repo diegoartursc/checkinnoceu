@@ -1,15 +1,15 @@
 import React, { memo, useRef, useState, useLayoutEffect, useCallback, useMemo } from 'react';
 import { Star, Cloud, Lock, Play, Trophy, CheckCircle, Clock } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import SeasonButton from '../../components/ui/SeasonButton';
-import DayNode from './DayNode';
-import DynamicRoadPath from './DynamicRoadPath';
-import BiomeDecorations from './BiomeDecorations';
-import PathItems from './PathItems';
-import FloatingAvatar from './FloatingAvatar';
-import ParallaxDecorations from './ParallaxDecorations';
-import { MONTHS_CONFIG } from '../../config/gameConfig';
-import { calculatePathPosition, calculateDayIndexInYear } from '../../utils/mapUtils';
+import Button from '../components/ui/Button';
+import SeasonButton from '../components/ui/SeasonButton';
+import DayNode from '../components/map/DayNode';
+import DynamicRoadPath from '../components/map/DynamicRoadPath';
+import BiomeDecorations from '../components/map/BiomeDecorations';
+import PathItems from '../components/map/PathItems';
+import FloatingAvatar from '../components/map/FloatingAvatar';
+import ParallaxDecorations from '../components/map/ParallaxDecorations';
+import { MONTHS_CONFIG } from '../config/gameConfig';
+import { calculatePathPosition, calculateDayIndexInYear } from '../utils/mapUtils';
 
 const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDays = {} }) => {
   const containerRef = useRef(null);

@@ -10,17 +10,21 @@ import {
     getDevotionalDate, setDevotionalDate as saveDevotionalDate
 } from '../services/storage';
 
-const UserContext = createContext();
+const AppStateContext = createContext();
 
-export const useUser = () => {
-    const context = useContext(UserContext);
+export const useAppState = () => {
+    const context = useContext(AppStateContext);
     if (!context) {
-        throw new Error('useUser must be used within UserProvider');
+        throw new Error('useAppState must be used within AppStateProvider');
     }
     return context;
 };
 
-export const UserProvider = ({ children }) => {
+export const AppStateProvider = ({ children }) => {
+    // --- Navigation State ---
+    const [screen, setScreen] = useState('checkin'); // checkin, map, lar
+
+    // --- User Progress State ---
     const [coins, setCoins] = useState(() => getCoins());
     const [lastCompletedDay, setLastCompletedDay] = useState(() => getLastCompletedDay());
     const [streak, setStreak] = useState(() => getStreak());
@@ -32,6 +36,20 @@ export const UserProvider = ({ children }) => {
         const savedDate = getDevotionalDate();
         return savedDate === today && getDevotionalComplete();
     });
+
+    // --- UI/Game State (formerly in AppContent) ---
+    const [devotionalStep, setDevotionalStep] = useState('prayer'); // prayer, gratitude, action
+    const [currentGameConfig, setCurrentGameConfig] = useState(null);
+    const [currentStory, setCurrentStory] = useState(null);
+    const [showVictoryModal, setShowVictoryModal] = useState(false);
+    const [victoryCoins, setVictoryCoins] = useState(0);
+    const [flyingStars, setFlyingStars] = useState([]);
+    const [storyUnlocked, setStoryUnlocked] = useState(false);
+    const [showStreakBonus, setShowStreakBonus] = useState(false);
+    const [streakBonusAmount, setStreakBonusAmount] = useState(0);
+    const [dailyModal, setDailyModal] = useState(null);
+    const [showEveningPrayer, setShowEveningPrayer] = useState(false);
+    const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
 
     // Initial persistence check
     useEffect(() => {
@@ -122,6 +140,11 @@ export const UserProvider = ({ children }) => {
     }, [addCoins, pet.happiness, updatePet]);
 
     const value = {
+        // Navigation
+        screen,
+        setScreen,
+
+        // User Data
         coins,
         addCoins,
         spendCoins,
@@ -132,12 +155,26 @@ export const UserProvider = ({ children }) => {
         updatePet,
         completedDays,
         devotionalComplete,
-        completeDevotional
+        completeDevotional,
+
+        // UI State
+        devotionalStep, setDevotionalStep,
+        currentGameConfig, setCurrentGameConfig,
+        currentStory, setCurrentStory,
+        showVictoryModal, setShowVictoryModal,
+        victoryCoins, setVictoryCoins,
+        flyingStars, setFlyingStars,
+        storyUnlocked, setStoryUnlocked,
+        showStreakBonus, setShowStreakBonus,
+        streakBonusAmount, setStreakBonusAmount,
+        dailyModal, setDailyModal,
+        showEveningPrayer, setShowEveningPrayer,
+        showMonthlyLetter, setShowMonthlyLetter
     };
 
     return (
-        <UserContext.Provider value={value}>
+        <AppStateContext.Provider value={value}>
             {children}
-        </UserContext.Provider>
+        </AppStateContext.Provider>
     );
 };

@@ -1,58 +1,53 @@
-import React, { memo, useState, useCallback, useEffect } from 'react';
-import { useUser } from './contexts/UserContext';
-import { useNavigation } from './contexts/NavigationContext';
-import MainLayout from './layouts/MainLayout';
-import CloudBackground from './components/ui/CloudBackground';
-import CheckInScreen from './features/checkin/CheckInScreen';
-import MapScreen from './features/map/MapScreen';
-import LarScreen from './features/pet/LarScreen';
-import MorningPrayerScreen from './features/devotional/MorningPrayerScreen';
-import GratitudeScreen from './features/devotional/GratitudeScreen';
-import GoodActionScreen from './features/devotional/GoodActionScreen';
-import EveningPrayerScreen from './features/devotional/EveningPrayerScreen';
-import MonthlyLetterScreen from './features/devotional/MonthlyLetterScreen';
-import GameOverlay from './components/modals/GameOverlay';
-import StoryOverlay from './components/modals/StoryOverlay';
-import VictoryModal from './components/modals/VictoryModal';
-import StreakBonusModal from './components/modals/StreakBonusModal';
-import DailyModal from './components/modals/DailyModal';
-import FlyingStar from './components/ui/FlyingStar';
+import React, { memo } from 'react';
+import { useAppState } from '../context/AppStateContext';
+import { useNavigation } from '../hooks/useNavigation';
+import MainLayout from '../layouts/MainLayout';
+import CloudBackground from '../components/ui/CloudBackground';
+import CheckInScreen from '../screens/CheckInScreen';
+import MapScreen from '../screens/MapScreen';
+import LarScreen from '../screens/LarScreen';
+import MorningPrayerScreen from '../screens/devotional/MorningPrayerScreen';
+import GratitudeScreen from '../screens/devotional/GratitudeScreen';
+import GoodActionScreen from '../screens/devotional/GoodActionScreen';
+import EveningPrayerScreen from '../screens/devotional/EveningPrayerScreen';
+import MonthlyLetterScreen from '../screens/devotional/MonthlyLetterScreen';
+import GameOverlay from '../components/modals/GameOverlay';
+import StoryOverlay from '../components/modals/StoryOverlay';
+import VictoryModal from '../components/modals/VictoryModal';
+import StreakBonusModal from '../components/modals/StreakBonusModal';
+import DailyModal from '../components/modals/DailyModal';
+import FlyingStar from '../components/ui/FlyingStar';
 
-const AppContent = memo(() => {
+const CheckInApp = memo(() => {
   const {
+    // State
     coins, addCoins, spendCoins,
     lastCompletedDay, completeDay,
     streak, pet, updatePet, completedDays,
-    devotionalComplete, completeDevotional
-  } = useUser();
-  const { screen, navigate } = useNavigation();
+    devotionalComplete, completeDevotional,
 
-  // Local UI states
-  const [devotionalStep, setDevotionalStep] = useState('prayer'); // prayer, gratitude, action
-  const [currentGameConfig, setCurrentGameConfig] = useState(null);
-  const [currentStory, setCurrentStory] = useState(null);
-  const [showVictoryModal, setShowVictoryModal] = useState(false);
-  const [victoryCoins, setVictoryCoins] = useState(0);
-  const [flyingStars, setFlyingStars] = useState([]);
-  const [storyUnlocked, setStoryUnlocked] = useState(false);
-  const [showStreakBonus, setShowStreakBonus] = useState(false);
-  const [streakBonusAmount] = useState(0);
-  const [dailyModal, setDailyModal] = useState(null);
-  const [showEveningPrayer, setShowEveningPrayer] = useState(false);
-  const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
+    // UI State
+    devotionalStep, setDevotionalStep,
+    currentGameConfig, setCurrentGameConfig,
+    currentStory, setCurrentStory,
+    showVictoryModal, setShowVictoryModal,
+    victoryCoins, setVictoryCoins,
+    flyingStars, setFlyingStars,
+    storyUnlocked, setStoryUnlocked,
+    showStreakBonus, setShowStreakBonus,
+    streakBonusAmount,
+    dailyModal, setDailyModal,
+    showEveningPrayer, setShowEveningPrayer,
+    showMonthlyLetter, setShowMonthlyLetter
+  } = useAppState();
+
+  const { screen, navigate } = useNavigation();
 
   // Check if today is completed
   const isCompletedToday = completedDays[lastCompletedDay + 1] !== undefined && lastCompletedDay + 1 > 0;
 
-  // Streak Bonus Check (Effect)
-  useEffect(() => {
-    // This logic was previously inside handleDayComplete
-    // We might need to move this to UserContext or keep it here if it triggers UI
-    // For now, let's keep the UI trigger here but the logic is partly in Context
-  }, [streak]);
-
   // Handlers
-  const handleDayComplete = useCallback(() => {
+  const handleDayComplete = () => {
     // Context handles logic
     completeDay(lastCompletedDay + 1);
 
@@ -60,22 +55,18 @@ const AppContent = memo(() => {
     const coinsReward = 10;
     addCoins(coinsReward);
 
-    // Check for streak bonus (simplified simulation for now)
-    // In a real app, completeDay would return info about streak changes
-    // Here we can check streak in useEffect or trust the context
-
     setTimeout(() => navigate('map'), 2000);
-  }, [lastCompletedDay, completeDay, addCoins, navigate]);
+  };
 
-  const handleWinGame = useCallback(() => {
+  const handleWinGame = () => {
     const coinsToAdd = 50;
     setCurrentGameConfig(null);
     setVictoryCoins(coinsToAdd);
     setStoryUnlocked(false);
     setShowVictoryModal(true);
-  }, []);
+  };
 
-  const handleClaimReward = useCallback(() => {
+  const handleClaimReward = () => {
     const modalButton = document.querySelector('.victory-claim-button');
     const hudStar = document.querySelector('.hud-star');
 
@@ -101,28 +92,28 @@ const AppContent = memo(() => {
       addCoins(victoryCoins);
     }
     setShowVictoryModal(false);
-  }, [victoryCoins, addCoins]);
+  };
 
   // Devotional Flow
-  const handlePrayerComplete = useCallback(() => setDevotionalStep('gratitude'), []);
-  const handleGratitudeComplete = useCallback(() => setDevotionalStep('action'), []);
-  const handleActionComplete = useCallback(() => {
+  const handlePrayerComplete = () => setDevotionalStep('gratitude');
+  const handleGratitudeComplete = () => setDevotionalStep('action');
+  const handleActionComplete = () => {
     completeDevotional();
-  }, [completeDevotional]);
+  };
 
   // Daily Modal
-  const handleDayClick = useCallback((dayIndexInYear, monthData) => {
+  const handleDayClick = (dayIndexInYear, monthData) => {
       setDailyModal({ dayNumber: dayIndexInYear + 1, monthData });
-  }, []);
+  };
 
-  const handleDailyComplete = useCallback(() => {
+  const handleDailyComplete = () => {
       if (!dailyModal) return;
       completeDay(dailyModal.dayNumber - 1);
       const reward = 30;
       setVictoryCoins(reward);
       setShowVictoryModal(true);
       setDailyModal(null);
-  }, [dailyModal, completeDay]);
+  };
 
 
   // Devotional Check
@@ -183,6 +174,6 @@ const AppContent = memo(() => {
   );
 });
 
-AppContent.displayName = 'AppContent';
+CheckInApp.displayName = 'CheckInApp';
 
-export default AppContent;
+export default CheckInApp;

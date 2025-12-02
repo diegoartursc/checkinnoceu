@@ -1,8 +1,8 @@
 import React, { memo, useState, useMemo } from 'react';
 import { Play, ArrowRight, Sun, CheckCircle, X } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import CatcherGame from '../../components/games/CatcherGame';
-import { getDailyContent } from '../../utils/contentGenerator';
+import Button from '../components/ui/Button';
+import CatcherGame from '../components/games/CatcherGame';
+import { getDailyContent } from '../utils/contentGenerator';
 
 const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => {
   const [step, setStep] = useState(0);

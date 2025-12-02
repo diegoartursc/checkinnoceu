@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Home, Map, Heart } from 'lucide-react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigation } from '../hooks/useNavigation';
 
 const BottomNav = memo(() => {
     const { screen, navigate } = useNavigation();

@@ -1,16 +1,13 @@
 import React from 'react';
-import { UserProvider } from './contexts/UserContext';
-import { NavigationProvider } from './contexts/NavigationContext';
-import AppContent from './AppContent';
+import { AppStateProvider } from './context/AppStateContext';
+import CheckInApp from './app/CheckInApp';
 import './App.css';
 
 function App() {
   return (
-    <UserProvider>
-      <NavigationProvider>
-        <AppContent />
-      </NavigationProvider>
-    </UserProvider>
+    <AppStateProvider>
+      <CheckInApp />
+    </AppStateProvider>
   );
 }
 
