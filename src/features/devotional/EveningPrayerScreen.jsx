@@ -20,7 +20,7 @@ const EveningPrayerScreen = memo(({ onComplete }) => {
   };
 
   return (
-    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-y-auto">
       {/* Background noturno com gradiente */}
       <div className="absolute inset-0 bg-gradient-to-b from-indigo-900 via-purple-800 to-blue-900" />
 

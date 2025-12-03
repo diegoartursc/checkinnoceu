@@ -34,7 +34,7 @@ const GoodActionScreen = memo(({ onComplete }) => {
   if (!currentMission) return null;
 
   return (
-    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="h-full flex flex-col items-center justify-center p-6 relative overflow-y-auto">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-green-100 via-emerald-50 to-teal-50" />
 
