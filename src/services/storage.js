@@ -153,19 +153,35 @@ export const setReadStories = (stories) => {
 export const getPetState = () => {
   const value = localStorage.getItem(STORAGE_KEYS.PET);
   const defaultPet = {
-    type: 'sheep',
-    hunger: 100,
-    happiness: 100,
-    energy: 100,
+    type: 'ovelhinha',
+    name: 'Ovelhinha',
+    stage: 'filhote',
+    hunger: 80,
+    fun: 80,
+    energy: 80,
+    daysWellCared: 0,
+    lastInteractionAt: new Date().toISOString(),
+    lastFedAt: null,
+    lastPlayedAt: null,
     lastUpdate: Date.now()
   };
 
-  const pet = validateJSON(value, defaultPet);
+  const savedPet = validateJSON(value, defaultPet);
+
+  // Migration: happiness -> fun
+  if (savedPet.happiness !== undefined && savedPet.fun === undefined) {
+      savedPet.fun = savedPet.happiness;
+      delete savedPet.happiness;
+  }
+
+  // Ensure all new fields exist
+  const pet = { ...defaultPet, ...savedPet };
 
   // Validate pet stats (0-100)
   if (pet.hunger !== undefined) pet.hunger = validateNumber(pet.hunger, 0, 100);
-  if (pet.happiness !== undefined) pet.happiness = validateNumber(pet.happiness, 0, 100);
+  if (pet.fun !== undefined) pet.fun = validateNumber(pet.fun, 0, 100);
   if (pet.energy !== undefined) pet.energy = validateNumber(pet.energy, 0, 100);
+  if (pet.daysWellCared !== undefined) pet.daysWellCared = validateNumber(pet.daysWellCared, 0, 10000);
 
   return pet;
 };
@@ -177,8 +193,9 @@ export const setPetState = (pet) => {
   const validated = {
     ...pet,
     hunger: validateNumber(pet.hunger, 0, 100),
-    happiness: validateNumber(pet.happiness, 0, 100),
+    fun: validateNumber(pet.fun, 0, 100),
     energy: validateNumber(pet.energy, 0, 100),
+    daysWellCared: validateNumber(pet.daysWellCared, 0, 10000),
     lastUpdate: Date.now()
   };
   localStorage.setItem(STORAGE_KEYS.PET, JSON.stringify(validated));

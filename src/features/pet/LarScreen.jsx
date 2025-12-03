@@ -1,22 +1,10 @@
-import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { Cloud, Repeat2, Star } from 'lucide-react';
+import { useUser } from '../../contexts/UserContext';
 
-const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
-  // Pet state with localStorage persistence
-  const [pet, setPet] = useState(() => {
-    const saved = localStorage.getItem('checkin_pet');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {
-      type: 'ovelhinha',
-      name: 'Ovelhinha',
-      hunger: 100,
-      happiness: 100,
-      energy: 100,
-      lastUpdate: Date.now()
-    };
-  });
+const LarScreen = memo(({ onOpenEveningPrayer, onOpenMonthlyLetter }) => {
+  // Consume Pet state from Context
+  const { pet, coins, feedPet, playWithPet, restPet, updatePet } = useUser();
 
   // Floating feedback texts
   const [floatingTexts, setFloatingTexts] = useState([]);
@@ -35,43 +23,10 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     { type: 'pomba', name: 'Pombinha', emoji: '🕊️', emojiAlt: '🦅' }
   ], []);
 
-  // Calculate decay based on time passed (runs once on mount)
-  useEffect(() => {
-    const now = Date.now();
-    const lastUpdate = pet.lastUpdate || now;
-    const hoursPassed = (now - lastUpdate) / (1000 * 60 * 60);
-
-    // Decay if more than 0.1 hours passed (6 minutes - for testing)
-    if (hoursPassed > 0.1) {
-      const hungerDecay = Math.floor(hoursPassed * 5);
-      const happinessDecay = Math.floor(hoursPassed * 3);
-      const energyDecay = Math.floor(hoursPassed * 4);
-
-      setPet(prev => ({
-        ...prev,
-        hunger: Math.max(0, prev.hunger - hungerDecay),
-        happiness: Math.max(0, prev.happiness - happinessDecay),
-        energy: Math.max(0, prev.energy - energyDecay),
-        lastUpdate: now
-      }));
-    }
-    // We only want to run this once on mount, but we need to suppress the warning correctly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Save to localStorage whenever pet state changes
-  useEffect(() => {
-    localStorage.setItem('checkin_pet', JSON.stringify(pet));
-  }, [pet]);
-
   // Frutos do Espírito (Gálatas 5:22-23)
   const fruits = useMemo(() => [
-    { id: 1, name: 'Maçã do Amor', emoji: '🍎', cost: 15, hunger: 30, verse: 'Amor' },
-    { id: 2, name: 'Uva da Alegria', emoji: '🍇', cost: 12, hunger: 25, verse: 'Alegria' },
-    { id: 3, name: 'Pêra da Paz', emoji: '🍐', cost: 10, hunger: 20, verse: 'Paz' },
-    { id: 4, name: 'Pêssego da Paciência', emoji: '🍑', cost: 18, hunger: 35, verse: 'Paciência' },
-    { id: 5, name: 'Mel da Amabilidade', emoji: '🍯', cost: 15, hunger: 30, verse: 'Amabilidade' },
-    { id: 6, name: 'Pão da Bondade', emoji: '🍞', cost: 20, hunger: 40, verse: 'Bondade' },
+    { id: 1, name: 'Maçã do Amor', emoji: '🍎', cost: 1, hunger: 25, verse: 'Amor' },
+    { id: 2, name: 'Uva da Alegria', emoji: '🍇', cost: 2, hunger: 30, verse: 'Alegria' },
   ], []);
 
   // Add floating text animation
@@ -95,91 +50,67 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
   // Change pet type
   const changePet = useCallback((newType, newName) => {
-    setPet(prev => ({
-      ...prev,
+    updatePet({
       type: newType,
       name: newName
-    }));
-  }, []);
+    });
+  }, [updatePet]);
 
-  // Feed pet with fruit
-  const feedPet = useCallback((fruit) => {
-    if (coins < fruit.cost) {
-      addFloatingText('⭐ Insuficiente!', 'text-red-500');
-      return;
-    }
-
-    // Check if hunger is already full
+  // Handle Feed
+  const handleFeed = useCallback((fruit) => {
     if (pet.hunger >= 100) {
-      addFloatingText('🍽️ Já está cheio!', 'text-orange-500');
-      return;
+        addFloatingText('🍽️ Já está cheio!', 'text-orange-500');
+        return;
     }
 
-    onSpendCoins(fruit.cost);
-    setPet(prev => ({
-      ...prev,
-      hunger: Math.min(100, prev.hunger + fruit.hunger),
-      lastUpdate: Date.now()
-    }));
+    const success = feedPet(fruit.cost, fruit.hunger);
 
-    animateAction('eating');
-    addFloatingText(`-${fruit.cost} ⭐`, 'text-yellow-500');
-    setTimeout(() => addFloatingText(`+${fruit.hunger} 🍽️`, 'text-green-500'), 200);
-  }, [coins, pet.hunger, onSpendCoins, addFloatingText, animateAction]);
-
-  // Play with pet
-  const playWithPet = useCallback(() => {
-    if (coins < 10) {
-      addFloatingText('⭐ Insuficiente!', 'text-red-500');
-      return;
+    if (success) {
+        animateAction('eating');
+        addFloatingText(`-${fruit.cost} ⭐`, 'text-yellow-500');
+        setTimeout(() => addFloatingText(`+${fruit.hunger} 🍽️`, 'text-green-500'), 200);
+    } else {
+        addFloatingText('⭐ Insuficiente!', 'text-red-500');
     }
+  }, [feedPet, pet.hunger, addFloatingText, animateAction]);
 
-    if (pet.energy < 10) {
+  // Handle Play
+  const handlePlay = useCallback(() => {
+    if (pet.energy < 5) {
       addFloatingText('Sem energia!', 'text-orange-500');
       return;
     }
-
-    // Check if happiness is already full
-    if (pet.happiness >= 100) {
-      addFloatingText('😊 Já está feliz!', 'text-pink-500');
+    if (pet.fun >= 100) {
+      addFloatingText('😊 Já está super feliz!', 'text-pink-500');
       return;
     }
 
-    onSpendCoins(10);
-    setPet(prev => ({
-      ...prev,
-      happiness: Math.min(100, prev.happiness + 30),
-      energy: Math.max(0, prev.energy - 10),
-      lastUpdate: Date.now()
-    }));
+    // Play increases fun by 25, costs 5 energy
+    playWithPet(25, 5);
 
     animateAction('playing');
-    addFloatingText('-10 ⭐', 'text-yellow-500');
-    setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
-  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction]);
+    addFloatingText('-5 ⚡', 'text-blue-500');
+    setTimeout(() => addFloatingText('+25 😊', 'text-pink-500'), 200);
+  }, [playWithPet, pet.energy, pet.fun, addFloatingText, animateAction]);
 
-  // Pet sleep (free action)
-  const petSleep = useCallback(() => {
-    // Check if energy is already full
+  // Handle Sleep/Rest
+  const handleSleep = useCallback(() => {
     if (pet.energy >= 100) {
       addFloatingText('⚡ Energia cheia!', 'text-blue-500');
       return;
     }
 
-    setPet(prev => ({
-      ...prev,
-      energy: 100,
-      lastUpdate: Date.now()
-    }));
+    // Rest recovers 30 energy
+    restPet(30);
 
     animateAction('sleeping');
-    addFloatingText('+100 ⚡', 'text-blue-500');
-  }, [pet.energy, addFloatingText, animateAction]);
+    addFloatingText('+30 ⚡', 'text-blue-500');
+  }, [pet.energy, restPet, addFloatingText, animateAction]);
 
   // Determine pet mood
   const getPetMood = useCallback(() => {
-    const { hunger, happiness, energy } = pet;
-    const avg = (hunger + happiness + energy) / 3;
+    const { hunger, fun, energy } = pet;
+    const avg = (hunger + fun + energy) / 3;
 
     // Check for critical states first (specific emotions)
     if (energy < 20) {
@@ -188,12 +119,12 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     if (hunger < 20) {
       return { emoji: '😫', mood: 'Com Fome!', color: 'text-orange-600' };
     }
-    if (happiness < 20) {
+    if (fun < 20) {
       return { emoji: '😢', mood: 'Triste', color: 'text-gray-600' };
     }
 
-    // Check if multiple stats are low (angry/upset)
-    const lowStats = [hunger < 40, happiness < 40, energy < 40].filter(Boolean).length;
+    // Check if multiple stats are low
+    const lowStats = [hunger < 40, fun < 40, energy < 40].filter(Boolean).length;
     if (lowStats >= 2) {
       return { emoji: '😠', mood: 'Chateado', color: 'text-red-600' };
     }
@@ -213,6 +144,26 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
   }, [pet]);
 
   const mood = getPetMood();
+
+  // Stage Display Text
+  const getStageName = (stage) => {
+      switch(stage) {
+          case 'filhote': return 'Filhote';
+          case 'crianca': return 'Criança';
+          case 'preadolescente': return 'Pré-adolescente';
+          default: return 'Filhote';
+      }
+  };
+
+  // Pet Size/Scale based on Stage
+  const getPetScale = (stage) => {
+      switch(stage) {
+          case 'filhote': return 'scale-100';
+          case 'crianca': return 'scale-110';
+          case 'preadolescente': return 'scale-125';
+          default: return 'scale-100';
+      }
+  };
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
@@ -236,7 +187,7 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             Lar do Amiguinho
           </h1>
           <p className="text-xs text-green-600 mt-1">
-            Um cantinho de paz e cuidado 🌿
+            Fase: <span className="font-bold uppercase">{getStageName(pet.stage)}</span> • Dias Bem Cuidados: {pet.daysWellCared || 0}
           </p>
         </div>
 
@@ -271,14 +222,13 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
           <div className="text-center relative py-16">
             {/* Pet emoji com animação de respiração suave */}
             <div
-              className={`text-9xl relative z-10 inline-block ${!isAnimating && 'animate-[bounce_4s_ease-in-out_infinite]'}`}
+              className={`text-9xl relative z-10 inline-block transition-transform duration-500 ${getPetScale(pet.stage)} ${!isAnimating && 'animate-[bounce_4s_ease-in-out_infinite]'}`}
               style={{
                 animation: isAnimating ? 'petBounce 0.3s ease-in-out infinite' : undefined
               }}
             >
               {(() => {
-                const currentPetType = petTypes.find(p => p.type === pet.type);
-                if (!currentPetType) return '🐑';
+                const currentPetType = petTypes.find(p => p.type === pet.type) || petTypes[0];
 
                 if (isAnimating && animationType === 'eating') {
                   return <span className="inline-block">{currentPetType.emojiAlt}</span>;
@@ -300,7 +250,7 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             <div className="flex items-center justify-center gap-3 mt-6">
               <span className="text-4xl">{mood.emoji}</span>
               <div className="bg-white/60 backdrop-blur-sm px-4 py-1 rounded-full shadow-sm">
-                <p className="font-bold text-sm text-gray-800">{pet.name}</p>
+                <p className="font-bold text-sm text-gray-800">{pet.name || 'Amiguinho'}</p>
               </div>
             </div>
           </div>
@@ -308,9 +258,9 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
           {/* Status Bars - MINIMALISTA E SUTIL */}
           <div className="flex justify-center items-center gap-2 px-4 mt-4">
             {/* Hunger */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm flex items-center gap-1.5">
+            <div className="bg-white/60 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm flex items-center gap-1.5 flex-1 max-w-[120px]">
               <span className="text-sm">🍽️</span>
-              <div className="w-12 h-1 bg-orange-200 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-orange-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-orange-400 transition-all duration-500"
                   style={{ width: `${pet.hunger}%` }}
@@ -318,21 +268,21 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
               </div>
             </div>
 
-            {/* Happiness */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm flex items-center gap-1.5">
-              <span className="text-sm">❤️</span>
-              <div className="w-12 h-1 bg-pink-200 rounded-full overflow-hidden">
+            {/* Fun (was Happiness) */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm flex items-center gap-1.5 flex-1 max-w-[120px]">
+              <span className="text-sm">🎾</span>
+              <div className="w-full h-1.5 bg-pink-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-pink-400 transition-all duration-500"
-                  style={{ width: `${pet.happiness}%` }}
+                  style={{ width: `${pet.fun}%` }}
                 />
               </div>
             </div>
 
             {/* Energy */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm flex items-center gap-1.5">
+            <div className="bg-white/60 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm flex items-center gap-1.5 flex-1 max-w-[120px]">
               <span className="text-sm">⚡</span>
-              <div className="w-12 h-1 bg-blue-200 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-blue-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-400 transition-all duration-500"
                   style={{ width: `${pet.energy}%` }}
@@ -346,11 +296,11 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
         <div className="mt-8 px-4">
           {/* Grid de Botões Limpos */}
           <div className="grid grid-cols-3 gap-4">
-            {/* Alimentar */}
+            {/* Alimentar (Uses first fruit as default action) */}
             {fruits.slice(0, 1).map(fruit => (
               <button
                 key={fruit.id}
-                onClick={() => feedPet(fruit)}
+                onClick={() => handleFeed(fruit)}
                 disabled={coins < fruit.cost}
                 className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
                   coins < fruit.cost
@@ -371,10 +321,10 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
             {/* Brincar */}
             <button
-              onClick={playWithPet}
-              disabled={coins < 10 || pet.energy < 10}
+              onClick={handlePlay}
+              disabled={pet.energy < 5}
               className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
-                coins < 10 || pet.energy < 10
+                pet.energy < 5
                   ? 'opacity-40 cursor-not-allowed'
                   : 'hover:shadow-md hover:-translate-y-1 active:scale-95'
               }`}
@@ -382,28 +332,27 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
               <div className="flex flex-col items-center gap-2">
                 <div className="text-4xl">🎮</div>
                 <p className="font-bold text-xs text-gray-700">BRINCAR</p>
-                <div className="bg-pink-100 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  <Star size={10} className="fill-pink-500 text-pink-500" />
-                  <span className="font-bold text-pink-700 text-[10px]">15</span>
+                <div className="bg-blue-100 rounded-full px-2 py-0.5 flex items-center gap-1">
+                   <span className="text-[10px] font-bold text-blue-600">-5 ⚡</span>
                 </div>
               </div>
             </button>
 
-            {/* Dormir */}
+            {/* Dormir / Acalmar */}
             <button
-              onClick={petSleep}
-              disabled={pet.energy === 100}
+              onClick={handleSleep}
+              disabled={pet.energy >= 100}
               className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
-                pet.energy === 100
+                pet.energy >= 100
                   ? 'opacity-40 cursor-not-allowed'
                   : 'hover:shadow-md hover:-translate-y-1 active:scale-95'
               }`}
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="text-4xl">🌙</div>
-                <p className="font-bold text-xs text-gray-700">DORMIR</p>
-                <div className="bg-blue-100 rounded-full px-2 py-0.5">
-                  <span className="font-bold text-blue-700 text-[10px]">0 ★</span>
+                <p className="font-bold text-xs text-gray-700">DESCANSAR</p>
+                <div className="bg-green-100 rounded-full px-2 py-0.5">
+                  <span className="font-bold text-green-700 text-[10px]">+30 ⚡</span>
                 </div>
               </div>
             </button>
@@ -436,7 +385,7 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
         {/* Info Box - MINIMALISTA */}
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-3 mx-4 shadow-sm">
           <p className="text-[10px] text-green-700 text-center font-medium leading-tight">
-            🌿 Cuide do seu amiguinho com carinho e atenção
+             {mood.mood}
           </p>
         </div>
       </div>
