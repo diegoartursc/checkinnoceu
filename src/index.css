@@ -1,220 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  * {
-    @apply box-border;
-  }
-
-  body {
-    @apply m-0 p-0 antialiased;
-    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
-  }
-
-  #root {
-    @apply w-full h-screen overflow-hidden;
-  }
+/* Reset and Viewport Locking */
+html, body {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-y;
+  width: 100%;
+  height: 100%;
 }
 
-@layer utilities {
-  .animate-in {
-    animation-fill-mode: both;
-  }
-
-  .fade-in {
-    animation: fadeIn 0.3s ease-in;
-  }
-
-  .zoom-in {
-    animation: zoomIn 0.3s ease-out;
-  }
-
-  .slide-in-from-right {
-    animation: slideInFromRight 0.4s ease-out;
-  }
-
-  .slide-in-from-left-5 {
-    animation: slideInFromLeft 0.3s ease-out;
-  }
-
-  .slide-in-from-right-5 {
-    animation: slideInFromRight 0.3s ease-out;
-  }
-
-  .slide-in-from-bottom-10 {
-    animation: slideInFromBottom 0.5s ease-out;
-  }
-
-  .slide-in-from-bottom-4 {
-    animation: slideInFromBottom 0.3s ease-out;
-  }
-
-  /* Scroll styling */
-  .scroll-smooth {
-    scroll-behavior: smooth;
-  }
-
-  /* Custom scrollbar */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-  }
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Base Styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+  background-color: #f0f9ff; /* sky-50 */
 }
 
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fall {
-  0% {
-    top: -50px;
-  }
-  100% {
-    top: 110%;
-  }
-}
-
-.animate-fall {
-  animation-name: fall;
-  animation-timing-function: linear;
-}
-
-@keyframes floatUp {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-100px) scale(1.5);
-  }
-}
-
-@keyframes hoverFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes flyToHUD {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  70% {
-    transform: translate(var(--target-x), var(--target-y)) scale(0.5);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--target-x), var(--target-y)) scale(0);
-    opacity: 0;
-  }
-}
-
-@keyframes confetti {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(500px) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-@keyframes rotateRays {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes petBounce {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-}
-
-/* Performance optimizations */
-.gpu-accelerate {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
+/* Utilities */
 .optimize-scroll {
   -webkit-overflow-scrolling: touch;
-  transform: translate3d(0, 0, 0);
+  scroll-behavior: smooth;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 3s infinite;
+}
+
+.gpu-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
