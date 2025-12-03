@@ -1,3 +1,4 @@
+// LEGACY: Mini-games – não usar no fluxo atual. Guardado para integração futura com Tamagotchi.
 import React, { memo, useState } from 'react';
 import { Gamepad2, BookOpen, Lightbulb, X, Star, Play } from 'lucide-react';
 import Button from '../ui/Button';

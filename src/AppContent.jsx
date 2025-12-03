@@ -15,8 +15,10 @@ import GameOverlay from './components/modals/GameOverlay';
 import StoryOverlay from './components/modals/StoryOverlay';
 import VictoryModal from './components/modals/VictoryModal';
 import StreakBonusModal from './components/modals/StreakBonusModal';
-import DailyModal from './components/modals/DailyModal';
 import FlyingStar from './components/ui/FlyingStar';
+import Toast from './components/ui/Toast';
+import CaminhoDayModal from './features/map/components/CaminhoDayModal';
+import { getCaminhoDevotional } from './data/caminhoDevotionals';
 
 const AppContent = memo(() => {
   const {
@@ -37,9 +39,12 @@ const AppContent = memo(() => {
   const [storyUnlocked, setStoryUnlocked] = useState(false);
   const [showStreakBonus, setShowStreakBonus] = useState(false);
   const [streakBonusAmount] = useState(0);
-  const [dailyModal, setDailyModal] = useState(null);
   const [showEveningPrayer, setShowEveningPrayer] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
+
+  // New States for Caminho Refactor
+  const [toastMessage, setToastMessage] = useState(null);
+  const [caminhoModalData, setCaminhoModalData] = useState(null);
 
   // Check if today is completed
   const isCompletedToday = completedDays[lastCompletedDay + 1] !== undefined && lastCompletedDay + 1 > 0;
@@ -47,23 +52,12 @@ const AppContent = memo(() => {
   // Streak Bonus Check (Effect)
   useEffect(() => {
     // This logic was previously inside handleDayComplete
-    // We might need to move this to UserContext or keep it here if it triggers UI
-    // For now, let's keep the UI trigger here but the logic is partly in Context
   }, [streak]);
 
   // Handlers
   const handleDayComplete = useCallback(() => {
-    // Context handles logic
     completeDay(lastCompletedDay + 1);
-
-    // UI Feedback
-    const coinsReward = 10;
-    addCoins(coinsReward);
-
-    // Check for streak bonus (simplified simulation for now)
-    // In a real app, completeDay would return info about streak changes
-    // Here we can check streak in useEffect or trust the context
-
+    addCoins(10);
     setTimeout(() => navigate('map'), 2000);
   }, [lastCompletedDay, completeDay, addCoins, navigate]);
 
@@ -108,46 +102,75 @@ const AppContent = memo(() => {
   const handleGratitudeComplete = useCallback(() => setDevotionalStep('action'), []);
   const handleActionComplete = useCallback(() => {
     completeDevotional();
+    // No explicit navigation needed, React state update will trigger re-render to CheckInScreen
   }, [completeDevotional]);
 
-  // Daily Modal
+  // --- REFACTORED MAP INTERACTION ---
   const handleDayClick = useCallback((dayIndexInYear, monthData) => {
-      setDailyModal({ dayNumber: dayIndexInYear + 1, monthData });
-  }, []);
+    const clickedDay = dayIndexInYear + 1;
+    const currentDay = lastCompletedDay + 1;
 
-  const handleDailyComplete = useCallback(() => {
-      if (!dailyModal) return;
-      completeDay(dailyModal.dayNumber - 1);
-      const reward = 30;
-      setVictoryCoins(reward);
-      setShowVictoryModal(true);
-      setDailyModal(null);
-  }, [dailyModal, completeDay]);
+    // 1. Future Day (Locked)
+    if (clickedDay > currentDay) {
+        setToastMessage("Essa parte do caminho ainda não foi liberada. Continue caminhando dia a dia ✨");
+        return;
+    }
 
+    // 2. Current Day
+    if (clickedDay === currentDay) {
+        if (!devotionalComplete) {
+            setToastMessage("Antes de seguir pelo Caminho, faça o devocional de hoje na tela HOJE 💛");
+            return;
+        }
+        // If devotional is complete, open modal
+        setCaminhoModalData({
+            dayNumber: clickedDay,
+            monthLabel: monthData.name,
+            devotionalData: getCaminhoDevotional(clickedDay)
+        });
+        return;
+    }
 
-  // Devotional Check
-  if (!devotionalComplete) {
-    return (
-      <div className="w-full min-h-screen max-w-md mx-auto overflow-hidden relative font-sans shadow-2xl">
-        {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
-        {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
-        {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
-      </div>
-    );
-  }
+    // 3. Past Day (Review)
+    if (clickedDay < currentDay) {
+         setCaminhoModalData({
+            dayNumber: clickedDay,
+            monthLabel: monthData.name,
+            devotionalData: getCaminhoDevotional(clickedDay)
+        });
+        return;
+    }
+  }, [lastCompletedDay, devotionalComplete]);
 
   return (
     <MainLayout>
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        isVisible={!!toastMessage}
+        onClose={() => setToastMessage(null)}
+      />
+
       {/* Screen Transitions */}
       <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'translate-x-0 opacity-100' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
           <div className="absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 z-0">
              <CloudBackground />
              <div className="relative z-10 h-full pt-14 sm:pt-16 pb-20">
-                <CheckInScreen
-                    currentDay={lastCompletedDay + 1}
-                    onCompleteDay={handleDayComplete}
-                    isCompletedToday={isCompletedToday}
-                />
+                {!devotionalComplete ? (
+                   /* Devotional Flow (Prayer -> Gratitude -> Action) */
+                   <div className="h-full overflow-y-auto">
+                     {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
+                     {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
+                     {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
+                   </div>
+                ) : (
+                   /* Daily Check-in Game/Content */
+                   <CheckInScreen
+                        currentDay={lastCompletedDay + 1}
+                        onCompleteDay={handleDayComplete}
+                        isCompletedToday={isCompletedToday}
+                   />
+                )}
              </div>
           </div>
       </div>
@@ -175,7 +198,18 @@ const AppContent = memo(() => {
       {currentStory && <StoryOverlay story={currentStory} onClose={() => setCurrentStory(null)} />}
       {showVictoryModal && <VictoryModal coins={victoryCoins} onClaim={handleClaimReward} storyUnlocked={storyUnlocked} />}
       {showStreakBonus && <StreakBonusModal streak={streak} bonusAmount={streakBonusAmount} onClose={() => setShowStreakBonus(false)} />}
-      {dailyModal && <DailyModal dayNumber={dailyModal.dayNumber} monthData={dailyModal.monthData} onComplete={handleDailyComplete} onClose={() => setDailyModal(null)} />}
+
+      {/* New Caminho Modal */}
+      {caminhoModalData && (
+        <CaminhoDayModal
+          isOpen={!!caminhoModalData}
+          onClose={() => setCaminhoModalData(null)}
+          dayNumber={caminhoModalData.dayNumber}
+          monthLabel={caminhoModalData.monthLabel}
+          devotionalData={caminhoModalData.devotionalData}
+        />
+      )}
+
       {flyingStars.map(star => <FlyingStar key={star.id} startPos={star.startPos} endPos={star.endPos} onComplete={() => {}} />)}
       {showEveningPrayer && <div className="absolute inset-0 z-50"><EveningPrayerScreen onComplete={() => { setShowEveningPrayer(false); addCoins(5); updatePet({ energy: Math.min(100, pet.energy + 15) }); }} /></div>}
       {showMonthlyLetter && <MonthlyLetterScreen monthNumber={new Date().getMonth() + 1} onClose={() => setShowMonthlyLetter(false)} />}
