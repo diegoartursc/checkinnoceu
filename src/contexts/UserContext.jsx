@@ -7,7 +7,8 @@ import {
     getPetState, setPetState as savePetState,
     getCompletedDays, setCompletedDays as saveCompletedDays,
     getDevotionalComplete, setDevotionalComplete as saveDevotionalComplete,
-    getDevotionalDate, setDevotionalDate as saveDevotionalDate
+    getDevotionalDate, setDevotionalDate as saveDevotionalDate,
+    getDevotionalStatus, setDevotionalStatus as saveDevotionalStatus
 } from '../services/storage';
 
 const UserContext = createContext();
@@ -33,6 +34,21 @@ export const UserProvider = ({ children }) => {
         return savedDate === today && getDevotionalComplete();
     });
 
+    const [devotionalStatus, setDevotionalStatus] = useState(() => {
+        const today = new Date().toDateString();
+        const savedDate = getDevotionalDate();
+        if (savedDate !== today) {
+            return {
+                morningPrayerDone: false,
+                gratitudeDone: false,
+                goodActionChosen: false,
+                goodActionCompleted: false,
+                nightPrayerDone: false
+            };
+        }
+        return getDevotionalStatus();
+    });
+
     // Initial persistence check
     useEffect(() => {
          const today = new Date().toDateString();
@@ -40,6 +56,16 @@ export const UserProvider = ({ children }) => {
          if (savedDate !== today) {
              setDevotionalComplete(false);
              saveDevotionalComplete(false);
+
+             const resetStatus = {
+                morningPrayerDone: false,
+                gratitudeDone: false,
+                goodActionChosen: false,
+                goodActionCompleted: false,
+                nightPrayerDone: false
+             };
+             setDevotionalStatus(resetStatus);
+             saveDevotionalStatus(resetStatus);
          }
          // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -108,18 +134,37 @@ export const UserProvider = ({ children }) => {
     }, []);
 
     // Devotional Management
+    const updateDevotionalStatus = useCallback((partialStatus) => {
+        setDevotionalStatus(prev => {
+            const newStatus = { ...prev, ...partialStatus };
+            saveDevotionalStatus(newStatus);
+            return newStatus;
+        });
+    }, []);
+
     const completeDevotional = useCallback(() => {
         const today = new Date().toDateString();
         setDevotionalComplete(true);
         saveDevotionalComplete(true);
         saveDevotionalDate(today);
+
+        // Mark all done for today implicitly or explicitly
+        const doneStatus = {
+            morningPrayerDone: true,
+            gratitudeDone: true,
+            goodActionChosen: true,
+            goodActionCompleted: true,
+            // nightPrayerDone might be separate, but let's assume core flow is done
+        };
+        updateDevotionalStatus(doneStatus);
+
         addCoins(10); // Reward
 
         // Boost pet happiness
         updatePet({
             happiness: Math.min(100, pet.happiness + 20)
         });
-    }, [addCoins, pet.happiness, updatePet]);
+    }, [addCoins, pet.happiness, updatePet, updateDevotionalStatus]);
 
     const value = {
         coins,
@@ -132,6 +177,8 @@ export const UserProvider = ({ children }) => {
         updatePet,
         completedDays,
         devotionalComplete,
+        devotionalStatus,
+        updateDevotionalStatus,
         completeDevotional
     };
 

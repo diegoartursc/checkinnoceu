@@ -10,12 +10,17 @@ import FloatingAvatar from './FloatingAvatar';
 import ParallaxDecorations from './ParallaxDecorations';
 import { MONTHS_CONFIG } from '../../config/gameConfig';
 import { calculatePathPosition, calculateDayIndexInYear } from '../../utils/mapUtils';
+import { useDevotionalProgress } from '../../hooks/useDevotionalProgress';
 
-const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDays = {} }) => {
+const MapScreen = memo(({ onOpenGame, onDayClick: onDayClickProp, completedDays = {} }) => {
   const containerRef = useRef(null);
   const currentDayRef = useRef(null);
   const [activeDecoration, setActiveDecoration] = useState(null);
   const [selectedSpecialDate, setSelectedSpecialDate] = useState(null);
+  const [message, setMessage] = useState(null); // For custom toasts/modals
+
+  const { lastCompletedDay, getCurrentDayIndex, getDayStatus } = useDevotionalProgress();
+  const currentDayIndex = getCurrentDayIndex();
 
   const reversedMonths = useMemo(() => [...MONTHS_CONFIG].reverse(), []);
 
@@ -51,12 +56,71 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
     setSelectedSpecialDate(date);
   }, []);
 
+  const handleNodeClick = useCallback((dayIndex, month, status) => {
+     if (status === 'locked') {
+         // Show gentle message
+         setMessage({
+             type: 'toast',
+             text: "Esse dia ainda não chegou. Vamos seguir um passinho de cada vez!"
+         });
+         setTimeout(() => setMessage(null), 3000);
+         return;
+     }
+
+     if (status === 'completed' || status === 'current') {
+         // In this phase, map is only accessible if devotional is complete,
+         // so current day is effectively 'completed' for the day.
+         // Show placeholder modal
+         setMessage({
+             type: 'modal',
+             title: `Dia ${dayIndex + 1} Concluído!`,
+             text: "Em breve você terá uma história e atividade especiais aqui.",
+             action: () => setMessage(null)
+         });
+         return;
+     }
+
+     // If we had a default generic action (like old code), we could call onDayClickProp
+     // but currently requirements say to show message/modal.
+     // onDayClickProp(dayIndex, month);
+  }, []);
+
   return (
     <div
         ref={containerRef}
         className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-950"
         onClick={handleCloseDecoration}
     >
+        {/* Toast/Message Overlay */}
+        {message && message.type === 'toast' && (
+            <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-xl border-2 border-yellow-400 animate-in slide-in-from-top-4 fade-in duration-300">
+                <div className="flex items-center gap-3">
+                    <Clock className="text-yellow-600 animate-pulse" size={20} />
+                    <p className="text-yellow-900 font-bold text-sm text-center">{message.text}</p>
+                </div>
+            </div>
+        )}
+
+        {/* Modal Overlay */}
+        {message && message.type === 'modal' && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={message.action}>
+                <div className="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl border-4 border-yellow-400 animate-in zoom-in duration-300 relative" onClick={e => e.stopPropagation()}>
+                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
+                         <div className="bg-yellow-400 p-4 rounded-full shadow-lg border-4 border-white">
+                            <Trophy size={32} className="text-white" />
+                         </div>
+                    </div>
+                    <div className="mt-8 text-center">
+                        <h3 className="text-xl font-black text-yellow-600 mb-2">{message.title}</h3>
+                        <p className="text-gray-600 font-medium mb-6">{message.text}</p>
+                        <Button onClick={message.action} variant="warning" className="w-full">
+                            Continuar Jornada
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Parallax Decorations */}
         <ParallaxDecorations position={0} />
 
@@ -66,7 +130,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                 <Star className="relative text-yellow-200 fill-white drop-shadow-lg w-16 h-16 sm:w-20 sm:h-20"/>
             </div>
             <h2 className="text-white font-black text-xl sm:text-2xl mt-4 drop-shadow-md tracking-widest uppercase">
-              Caminho da Vida
+              Caminho da Luz
             </h2>
         </div>
 
@@ -292,20 +356,21 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                   const pathPosition = calculatePathPosition(dayIndex, month.days);
                   const specialDate = month.specialDates?.find(sd => sd.day === dayNum);
                   const dayIndexInYear = calculateDayIndexInYear(monthIndex, dayNum, MONTHS_CONFIG);
-                  const isCurrentDay = dayIndexInYear === lastCompletedDay + 1;
+
+                  const status = getDayStatus(dayIndexInYear);
+                  // We need to know if it's the specific "current active" one for scroll reference
+                  const isCurrentDay = dayIndexInYear === currentDayIndex;
 
                   return (
                     <div key={dayNum} ref={isCurrentDay ? currentDayRef : null}>
                       <DayNode
                         dayNum={dayNum}
                         month={month}
-                        monthIndex={monthIndex}
-                        dayIndexInYear={dayIndexInYear}
-                        isCurrentDay={isCurrentDay}
+                        status={status}
                         specialDate={specialDate}
                         onSpecialClick={handleSpecialDateClick}
-                        lastCompletedDay={lastCompletedDay}
-                        onDayClick={onDayClick}
+                        dayIndexInYear={dayIndexInYear}
+                        onDayClick={handleNodeClick}
                         completedDays={completedDays}
                         style={pathPosition}
                       />
@@ -314,6 +379,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                         <PathItems dayIndex={dayIndex} />
                       </div>
 
+                      {/* Show Avatar on the "active" day (which might be the one just completed or the one waiting) */}
                       {isCurrentDay && (
                         <div
                           className="absolute z-50"
