@@ -1,9 +1,10 @@
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import { useUser } from './contexts/UserContext';
 import { useNavigation } from './contexts/NavigationContext';
 import MainLayout from './layouts/MainLayout';
 import CloudBackground from './components/ui/CloudBackground';
 import CheckInScreen from './features/checkin/CheckInScreen';
+import TodayCompletedScreen from './features/checkin/TodayCompletedScreen';
 import MapScreen from './features/map/MapScreen';
 import LarScreen from './features/pet/LarScreen';
 import MorningPrayerScreen from './features/devotional/MorningPrayerScreen';
@@ -17,6 +18,7 @@ import VictoryModal from './components/modals/VictoryModal';
 import StreakBonusModal from './components/modals/StreakBonusModal';
 import DailyModal from './components/modals/DailyModal';
 import FlyingStar from './components/ui/FlyingStar';
+import { getDailyContent } from './utils/contentGenerator';
 
 const AppContent = memo(() => {
   const {
@@ -44,13 +46,6 @@ const AppContent = memo(() => {
   // Check if today is completed
   const isCompletedToday = completedDays[lastCompletedDay + 1] !== undefined && lastCompletedDay + 1 > 0;
 
-  // Streak Bonus Check (Effect)
-  useEffect(() => {
-    // This logic was previously inside handleDayComplete
-    // We might need to move this to UserContext or keep it here if it triggers UI
-    // For now, let's keep the UI trigger here but the logic is partly in Context
-  }, [streak]);
-
   // Handlers
   const handleDayComplete = useCallback(() => {
     // Context handles logic
@@ -59,10 +54,6 @@ const AppContent = memo(() => {
     // UI Feedback
     const coinsReward = 10;
     addCoins(coinsReward);
-
-    // Check for streak bonus (simplified simulation for now)
-    // In a real app, completeDay would return info about streak changes
-    // Here we can check streak in useEffect or trust the context
 
     setTimeout(() => navigate('map'), 2000);
   }, [lastCompletedDay, completeDay, addCoins, navigate]);
@@ -112,7 +103,8 @@ const AppContent = memo(() => {
 
   // Daily Modal
   const handleDayClick = useCallback((dayIndexInYear, monthData) => {
-      setDailyModal({ dayNumber: dayIndexInYear + 1, monthData });
+      // NOTE: Removed daily modal logic as requested by user to clean up map interactions
+      // setDailyModal({ dayNumber: dayIndexInYear + 1, monthData });
   }, []);
 
   const handleDailyComplete = useCallback(() => {
@@ -125,7 +117,7 @@ const AppContent = memo(() => {
   }, [dailyModal, completeDay]);
 
 
-  // Devotional Check
+  // 1. Devotional Check (If not complete, hijack the screen)
   if (!devotionalComplete) {
     return (
       <div className="w-full min-h-screen max-w-md mx-auto overflow-hidden relative font-sans shadow-2xl">
@@ -136,23 +128,43 @@ const AppContent = memo(() => {
     );
   }
 
+  // Helper for determining "Today" content
+  const renderCheckInContent = () => {
+      // Always render something.
+      // If completed today, show TodayCompletedScreen (explicit fallback)
+      if (isCompletedToday) {
+          const dailyData = getDailyContent(lastCompletedDay + 1);
+          return <TodayCompletedScreen verse={dailyData?.verse} />;
+      }
+      // If not completed today, show CheckInScreen
+      return (
+        <CheckInScreen
+            currentDay={lastCompletedDay + 1}
+            onCompleteDay={handleDayComplete}
+            isCompletedToday={isCompletedToday}
+        />
+      );
+  };
+
   return (
     <MainLayout>
-      {/* Screen Transitions */}
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'translate-x-0 opacity-100' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <div className="absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 z-0">
-             <CloudBackground />
-             <div className="relative z-10 h-full pt-14 sm:pt-16 pb-20">
-                <CheckInScreen
-                    currentDay={lastCompletedDay + 1}
-                    onCompleteDay={handleDayComplete}
-                    isCompletedToday={isCompletedToday}
-                />
-             </div>
-          </div>
+      {/*
+        PHASE 1 FIX:
+        Explicitly handle the "checkin" screen visibility.
+        If screen is 'checkin', we FORCE it to be visible and z-index on top.
+        We removed the transition opacity logic that might be causing the black screen.
+      */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 transition-transform duration-500 ease-in-out
+        ${screen === 'checkin' ? 'translate-x-0 z-10' : 'translate-x-[-100%] z-0'}`}
+      >
+         <CloudBackground />
+         <div className="relative z-10 h-full pt-14 sm:pt-16 pb-20">
+            {renderCheckInContent()}
+         </div>
       </div>
 
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'map' ? 'translate-x-0 opacity-100' : screen === 'checkin' ? 'translate-x-[100%] opacity-0 pointer-events-none' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
+      <div className={`absolute inset-0 transition-all duration-500 ease-in-out bg-slate-900 ${screen === 'map' ? 'translate-x-0 opacity-100 z-10' : screen === 'checkin' ? 'translate-x-[100%] opacity-0 pointer-events-none' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
           <MapScreen
             lastCompletedDay={lastCompletedDay}
             onOpenGame={setCurrentGameConfig}
@@ -161,7 +173,7 @@ const AppContent = memo(() => {
           />
       </div>
 
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'lar' ? 'translate-x-0 opacity-100' : 'translate-x-[100%] opacity-0 pointer-events-none'}`}>
+      <div className={`absolute inset-0 transition-all duration-500 ease-in-out bg-slate-900 ${screen === 'lar' ? 'translate-x-0 opacity-100 z-10' : 'translate-x-[100%] opacity-0 pointer-events-none'}`}>
           <LarScreen
             coins={coins}
             onSpendCoins={spendCoins}
@@ -175,6 +187,7 @@ const AppContent = memo(() => {
       {currentStory && <StoryOverlay story={currentStory} onClose={() => setCurrentStory(null)} />}
       {showVictoryModal && <VictoryModal coins={victoryCoins} onClaim={handleClaimReward} storyUnlocked={storyUnlocked} />}
       {showStreakBonus && <StreakBonusModal streak={streak} bonusAmount={streakBonusAmount} onClose={() => setShowStreakBonus(false)} />}
+      {/* Daily Modal removed from usage, but keeping state if needed for legacy cleanup later */}
       {dailyModal && <DailyModal dayNumber={dailyModal.dayNumber} monthData={dailyModal.monthData} onComplete={handleDailyComplete} onClose={() => setDailyModal(null)} />}
       {flyingStars.map(star => <FlyingStar key={star.id} startPos={star.startPos} endPos={star.endPos} onComplete={() => {}} />)}
       {showEveningPrayer && <div className="absolute inset-0 z-50"><EveningPrayerScreen onComplete={() => { setShowEveningPrayer(false); addCoins(5); updatePet({ energy: Math.min(100, pet.energy + 15) }); }} /></div>}
