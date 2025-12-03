@@ -1,5 +1,6 @@
 import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import { Cloud, Repeat2, Star } from 'lucide-react';
+import { PET_TYPES } from '../../constants/pets';
 
 const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
   // Pet state with localStorage persistence
@@ -29,11 +30,7 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
   const [showPetSelector, setShowPetSelector] = useState(false);
 
   // Available pets
-  const petTypes = useMemo(() => [
-    { type: 'ovelhinha', name: 'Ovelhinha', emoji: '🐑', emojiAlt: '🐏' },
-    { type: 'leao', name: 'Leãozinho', emoji: '🦁', emojiAlt: '🐯' },
-    { type: 'pomba', name: 'Pombinha', emoji: '🕊️', emojiAlt: '🦅' }
-  ], []);
+  const petTypes = useMemo(() => PET_TYPES, []);
 
   // Calculate decay based on time passed (runs once on mount)
   useEffect(() => {

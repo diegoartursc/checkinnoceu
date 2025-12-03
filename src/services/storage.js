@@ -14,7 +14,8 @@ export const STORAGE_KEYS = {
   PET: 'checkin_pet',
   COMPLETED_DAYS: 'checkin_completed_days',
   DEVOTIONAL_DATE: 'devotional_date',
-  DEVOTIONAL_COMPLETE: 'devotional_complete'
+  DEVOTIONAL_COMPLETE: 'devotional_complete',
+  ONBOARDING_COMPLETE: 'onboarding_complete'
 };
 
 // Validation limits
@@ -228,6 +229,21 @@ export const getDevotionalComplete = () => {
  */
 export const setDevotionalComplete = (complete) => {
   localStorage.setItem(STORAGE_KEYS.DEVOTIONAL_COMPLETE, complete ? 'true' : 'false');
+};
+
+/**
+ * Get onboarding complete flag
+ */
+export const getOnboardingComplete = () => {
+  const value = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+  return value === 'true';
+};
+
+/**
+ * Set onboarding complete flag
+ */
+export const setOnboardingComplete = (complete) => {
+  localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, complete ? 'true' : 'false');
 };
 
 /**

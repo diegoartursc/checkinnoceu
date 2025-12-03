@@ -11,6 +11,7 @@ import GratitudeScreen from './features/devotional/GratitudeScreen';
 import GoodActionScreen from './features/devotional/GoodActionScreen';
 import EveningPrayerScreen from './features/devotional/EveningPrayerScreen';
 import MonthlyLetterScreen from './features/devotional/MonthlyLetterScreen';
+import OnboardingFlow from './screens/onboarding/OnboardingFlow';
 import GameOverlay from './components/modals/GameOverlay';
 import StoryOverlay from './components/modals/StoryOverlay';
 import VictoryModal from './components/modals/VictoryModal';
@@ -23,7 +24,8 @@ const AppContent = memo(() => {
     coins, addCoins, spendCoins,
     lastCompletedDay, completeDay,
     streak, pet, updatePet, completedDays,
-    devotionalComplete, completeDevotional
+    devotionalComplete, completeDevotional,
+    hasCompletedOnboarding
   } = useUser();
   const { screen, navigate } = useNavigation();
 
@@ -124,6 +126,14 @@ const AppContent = memo(() => {
       setDailyModal(null);
   }, [dailyModal, completeDay]);
 
+  // Onboarding Check
+  if (!hasCompletedOnboarding) {
+    return (
+        <div className="w-full min-h-screen max-w-md mx-auto overflow-hidden relative font-sans shadow-2xl">
+            <OnboardingFlow />
+        </div>
+    );
+  }
 
   // Devotional Check
   if (!devotionalComplete) {

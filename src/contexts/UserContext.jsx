@@ -7,7 +7,8 @@ import {
     getPetState, setPetState as savePetState,
     getCompletedDays, setCompletedDays as saveCompletedDays,
     getDevotionalComplete, setDevotionalComplete as saveDevotionalComplete,
-    getDevotionalDate, setDevotionalDate as saveDevotionalDate
+    getDevotionalDate, setDevotionalDate as saveDevotionalDate,
+    getOnboardingComplete, setOnboardingComplete as saveOnboardingComplete
 } from '../services/storage';
 
 const UserContext = createContext();
@@ -32,6 +33,7 @@ export const UserProvider = ({ children }) => {
         const savedDate = getDevotionalDate();
         return savedDate === today && getDevotionalComplete();
     });
+    const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => getOnboardingComplete());
 
     // Initial persistence check
     useEffect(() => {
@@ -121,6 +123,11 @@ export const UserProvider = ({ children }) => {
         });
     }, [addCoins, pet.happiness, updatePet]);
 
+    const completeOnboarding = useCallback(() => {
+        setHasCompletedOnboarding(true);
+        saveOnboardingComplete(true);
+    }, []);
+
     const value = {
         coins,
         addCoins,
@@ -132,7 +139,9 @@ export const UserProvider = ({ children }) => {
         updatePet,
         completedDays,
         devotionalComplete,
-        completeDevotional
+        completeDevotional,
+        hasCompletedOnboarding,
+        completeOnboarding
     };
 
     return (
