@@ -1,5 +1,5 @@
-import React, { memo, useRef, useState, useLayoutEffect, useCallback, useMemo } from 'react';
-import { Star, Cloud, Lock, Play, Trophy, CheckCircle, Clock } from 'lucide-react';
+import React, { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import { Star, Cloud, Lock, Play, Trophy, CheckCircle, Clock, MapPin } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import SeasonButton from '../../components/ui/SeasonButton';
 import DayNode from './DayNode';
@@ -17,26 +17,69 @@ const MapScreen = memo(({ isActive, devotionalComplete, lastCompletedDay, onOpen
   const [activeDecoration, setActiveDecoration] = useState(null);
   const [selectedSpecialDate, setSelectedSpecialDate] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const [showScrollFab, setShowScrollFab] = useState(false);
 
   const reversedMonths = useMemo(() => [...MONTHS_CONFIG].reverse(), []);
 
-  // Optimized: Scroll animation runs when Map becomes active
-  useLayoutEffect(() => {
-    if (isActive && containerRef.current) {
+  // Robust Scroll Handling
+  useEffect(() => {
+    let scrollAttempts = 0;
+    const maxAttempts = 15; // Try for 1.5 seconds (covers the 500ms transition)
+    let scrollInterval;
+
+    const attemptScroll = () => {
+      if (!isActive) return;
+
       const container = containerRef.current;
+      if (!container) return;
 
-      // Force scroll to bottom first (start of journey)
-      container.scrollTop = container.scrollHeight;
+      if (currentDayRef.current) {
+        currentDayRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // If successful, we can stop polling? Maybe better to keep checking briefly to fight layout shifts
+      } else {
+        // Fallback: Scroll to bottom (start of journey)
+        container.scrollTop = container.scrollHeight;
+      }
 
-      const scrollTimer = setTimeout(() => {
-        if (currentDayRef.current) {
-            currentDayRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 300); // Increased delay to ensure layout stability
+      scrollAttempts++;
+      if (scrollAttempts >= maxAttempts) {
+        clearInterval(scrollInterval);
+      }
+    };
 
-      return () => clearTimeout(scrollTimer);
+    if (isActive) {
+       // Initial attempt
+       attemptScroll();
+       // Poll frequently during transition
+       scrollInterval = setInterval(attemptScroll, 100);
     }
+
+    return () => clearInterval(scrollInterval);
   }, [isActive]);
+
+  // Scroll Spy to show FAB
+  const handleScroll = useCallback(() => {
+    if (!currentDayRef.current || !containerRef.current) return;
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const nodeRect = currentDayRef.current.getBoundingClientRect();
+
+    // Check if node is roughly within view
+    const isVisible = (
+        nodeRect.top >= containerRect.top &&
+        nodeRect.bottom <= containerRect.bottom
+    );
+
+    setShowScrollFab(!isVisible);
+  }, []);
+
+  const handleScrollToCurrent = () => {
+      if (currentDayRef.current) {
+          currentDayRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
+  };
 
   const handleCloseDecoration = useCallback(() => {
     setActiveDecoration(null);
@@ -91,11 +134,23 @@ const MapScreen = memo(({ isActive, devotionalComplete, lastCompletedDay, onOpen
   return (
     <div
         ref={containerRef}
+        onScroll={handleScroll}
         className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-600"
         onClick={handleCloseDecoration}
     >
         {/* Parallax Decorations */}
         <ParallaxDecorations position={0} />
+
+        {/* FAB: Scroll to Current */}
+        <div className={`fixed bottom-24 right-4 z-[90] transition-all duration-300 ${showScrollFab ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
+            <button
+                onClick={(e) => { e.stopPropagation(); handleScrollToCurrent(); }}
+                className="bg-yellow-400 text-yellow-900 p-3 rounded-full shadow-lg border-2 border-white hover:scale-110 active:scale-90 transition-transform flex items-center gap-2 font-bold text-xs"
+            >
+                <MapPin size={20} fill="currentColor" />
+                <span className="hidden sm:inline">Dia Atual</span>
+            </button>
+        </div>
 
         {/* Toast Notification */}
         {toastMessage && (
@@ -107,14 +162,17 @@ const MapScreen = memo(({ isActive, devotionalComplete, lastCompletedDay, onOpen
             </div>
         )}
 
-        <div className="pt-20 sm:pt-32 pb-10 text-center animate-pulse z-10 relative">
-            <div className="inline-block relative">
-                <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-50 rounded-full"></div>
-                <Star className="relative text-yellow-200 fill-white drop-shadow-lg w-16 h-16 sm:w-20 sm:h-20"/>
+        <div className="pt-20 sm:pt-32 pb-10 text-center relative z-10 min-h-[50vh] flex flex-col items-center justify-start">
+            <div className="inline-block relative animate-pulse">
+                <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-20 rounded-full"></div>
+                <Cloud size={64} className="text-white/40 mb-4" fill="currentColor" />
             </div>
-            <h2 className="text-white font-black text-xl sm:text-2xl mt-4 drop-shadow-md tracking-widest uppercase">
-              Caminho da Luz
+            <h2 className="text-white/60 font-black text-xl sm:text-2xl drop-shadow-md tracking-widest uppercase">
+              O Futuro Aguarda
             </h2>
+            <p className="text-white/40 text-sm font-bold mt-2 px-8">
+                Continue sua jornada dia após dia para descobrir novas surpresas no céu!
+            </p>
         </div>
 
       {selectedSpecialDate && (
@@ -276,7 +334,7 @@ const MapScreen = memo(({ isActive, devotionalComplete, lastCompletedDay, onOpen
                               {month.label}
                             </h4>
                           </div>
-                          <p className="text-gray-600 text-xs font-bold leading-tight mb-3">{month.desc}</p>
+                          <p className="text-gray-600 text-xs font-bold leading-tight mb-3 text-center">{month.desc}</p>
                           <button
                             onClick={() => onOpenGame(month)}
                             className={`w-full py-2 rounded-xl text-xs font-black text-white shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2 ${month.color.replace('text', 'bg')}`}
