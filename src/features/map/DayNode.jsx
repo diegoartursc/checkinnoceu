@@ -8,6 +8,7 @@ const DayNode = memo(({
   isCurrentDay,
   specialDate,
   onSpecialClick,
+  onLockedDayClick,
   style,
   dayIndexInYear,
   lastCompletedDay,
@@ -15,9 +16,9 @@ const DayNode = memo(({
   completedDays = []
 }) => {
   // Calculate if this day is locked (not completed previous day)
-  const isLocked = dayIndexInYear > lastCompletedDay + 1;
-  const isCompleted = dayIndexInYear <= lastCompletedDay;
-  const isAvailable = dayIndexInYear === lastCompletedDay + 1;
+  const isLocked = dayIndexInYear > lastCompletedDay;
+  const isCompleted = dayIndexInYear < lastCompletedDay;
+  const isAvailable = dayIndexInYear === lastCompletedDay;
 
   // Check if day has all 3 stars
   const stars = completedDays[dayIndexInYear] || 0;
@@ -26,7 +27,10 @@ const DayNode = memo(({
   const SpecialIcon = specialDate?.icon;
 
   const handleClick = () => {
-    if (isLocked) return; // Can't click locked days
+    if (isLocked) {
+        if (onLockedDayClick) onLockedDayClick();
+        return;
+    }
     if (specialDate && !isCompleted) {
       onSpecialClick(specialDate);
     } else if (isAvailable || isCurrentDay) {
@@ -43,13 +47,13 @@ const DayNode = memo(({
       <div
         onClick={handleClick}
         className={`
-            relative w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-[3px]
+            relative w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-[10px] font-bold transition-all duration-500 border-[3px]
             ${isAvailable || isCurrentDay
                 ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-600 scale-125 sm:scale-150 shadow-[0_0_25px_rgba(250,204,21,0.8)] z-20 animate-pulse cursor-pointer'
                 : isCompleted
                     ? 'bg-gradient-to-b from-green-400 to-green-600 border-green-700 text-white shadow-[0_4px_15px_rgba(34,197,94,0.5)] cursor-pointer hover:scale-110'
                     : isLocked
-                        ? 'bg-gradient-to-b from-slate-700/60 to-slate-800/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale cursor-not-allowed'
+                        ? 'bg-gradient-to-b from-slate-700/60 to-slate-800/60 border-slate-600 text-slate-500 opacity-40 scale-90 grayscale cursor-pointer'
                         : specialDate
                             ? `${neonStyle} cursor-pointer hover:scale-125 shadow-lg border-white/50`
                             : 'bg-gradient-to-b from-blue-400 to-blue-600 border-blue-700 text-white shadow-[0_4px_15px_rgba(59,130,246,0.5)] hover:scale-110 hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)]'

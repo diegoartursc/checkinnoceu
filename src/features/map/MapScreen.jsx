@@ -11,54 +11,101 @@ import ParallaxDecorations from './ParallaxDecorations';
 import { MONTHS_CONFIG } from '../../config/gameConfig';
 import { calculatePathPosition, calculateDayIndexInYear } from '../../utils/mapUtils';
 
-const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDays = {} }) => {
+const MapScreen = memo(({ isActive, devotionalComplete, lastCompletedDay, onOpenGame, onDayClick, completedDays = {} }) => {
   const containerRef = useRef(null);
   const currentDayRef = useRef(null);
   const [activeDecoration, setActiveDecoration] = useState(null);
   const [selectedSpecialDate, setSelectedSpecialDate] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
 
   const reversedMonths = useMemo(() => [...MONTHS_CONFIG].reverse(), []);
 
-  // Optimized: Scroll animation only runs once on mount
+  // Optimized: Scroll animation runs when Map becomes active
   useLayoutEffect(() => {
-    if (containerRef.current) {
+    if (isActive && containerRef.current) {
       const container = containerRef.current;
 
-      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+      // Force scroll to bottom first (start of journey)
+      container.scrollTop = container.scrollHeight;
 
-      const scrollUpTimer = setTimeout(() => {
-        container.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 300);
-
-      const scrollBackTimer = setTimeout(() => {
+      const scrollTimer = setTimeout(() => {
         if (currentDayRef.current) {
             currentDayRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, 2500);
+      }, 300); // Increased delay to ensure layout stability
 
-      return () => {
-        clearTimeout(scrollUpTimer);
-        clearTimeout(scrollBackTimer);
-      };
+      return () => clearTimeout(scrollTimer);
     }
-  }, []);
+  }, [isActive]);
 
   const handleCloseDecoration = useCallback(() => {
     setActiveDecoration(null);
+    setToastMessage(null);
   }, []);
 
   const handleSpecialDateClick = useCallback((date) => {
     setSelectedSpecialDate(date);
   }, []);
 
+  const showToast = useCallback((msg) => {
+      setToastMessage(msg);
+      setTimeout(() => setToastMessage(null), 3000);
+  }, []);
+
+  const handleLockedDayClick = useCallback(() => {
+      showToast("Esse dia ainda não chegou. Vamos seguir um passinho de cada vez!");
+  }, [showToast]);
+
+  const handleDayNodeClick = useCallback((dayIndexInYear, month) => {
+      // Check if it is the current day (next to be completed)
+      const isCurrentDay = dayIndexInYear === lastCompletedDay;
+
+      if (isCurrentDay) {
+          if (!devotionalComplete) {
+              showToast("Complete primeiro a oração, gratidão e boa ação de hoje.");
+              return;
+          } else {
+              // Devotional done, show placeholder modal
+               showToast("Dia concluído! Em breve teremos história e atividade aqui.");
+               // Alternatively call onDayClick if we want to open a modal managed by parent
+               // onDayClick(dayIndexInYear, month);
+               return;
+          }
+      }
+
+      // Completed days
+      onDayClick(dayIndexInYear, month);
+  }, [lastCompletedDay, devotionalComplete, showToast, onDayClick]);
+
+  if (!reversedMonths || reversedMonths.length === 0) {
+      return (
+          <div className="h-full flex items-center justify-center bg-sky-200 p-8 text-center">
+              <div className="bg-white/80 p-6 rounded-2xl shadow-xl">
+                  <h3 className="text-xl font-bold text-sky-800 mb-2">Preparando Caminho...</h3>
+                  <p className="text-sky-600">Ainda estamos preparando o seu Caminho da Luz. Tente novamente em alguns instantes.</p>
+              </div>
+          </div>
+      );
+  }
+
   return (
     <div
         ref={containerRef}
-        className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-950"
+        className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-600"
         onClick={handleCloseDecoration}
     >
         {/* Parallax Decorations */}
         <ParallaxDecorations position={0} />
+
+        {/* Toast Notification */}
+        {toastMessage && (
+            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[80] animate-in slide-in-from-top-4 fade-in duration-300 w-11/12 max-w-sm">
+                <div className="bg-white/90 backdrop-blur-md border-2 border-yellow-400 text-yellow-800 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+                    <Star className="text-yellow-500 animate-spin-slow flex-shrink-0" size={24} fill="currentColor" />
+                    <p className="font-bold text-sm leading-tight">{toastMessage}</p>
+                </div>
+            </div>
+        )}
 
         <div className="pt-20 sm:pt-32 pb-10 text-center animate-pulse z-10 relative">
             <div className="inline-block relative">
@@ -66,7 +113,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                 <Star className="relative text-yellow-200 fill-white drop-shadow-lg w-16 h-16 sm:w-20 sm:h-20"/>
             </div>
             <h2 className="text-white font-black text-xl sm:text-2xl mt-4 drop-shadow-md tracking-widest uppercase">
-              Caminho da Vida
+              Caminho da Luz
             </h2>
         </div>
 
@@ -292,7 +339,7 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                   const pathPosition = calculatePathPosition(dayIndex, month.days);
                   const specialDate = month.specialDates?.find(sd => sd.day === dayNum);
                   const dayIndexInYear = calculateDayIndexInYear(monthIndex, dayNum, MONTHS_CONFIG);
-                  const isCurrentDay = dayIndexInYear === lastCompletedDay + 1;
+                  const isCurrentDay = dayIndexInYear === lastCompletedDay;
 
                   return (
                     <div key={dayNum} ref={isCurrentDay ? currentDayRef : null}>
@@ -304,8 +351,9 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                         isCurrentDay={isCurrentDay}
                         specialDate={specialDate}
                         onSpecialClick={handleSpecialDateClick}
+                        onLockedDayClick={handleLockedDayClick}
                         lastCompletedDay={lastCompletedDay}
-                        onDayClick={onDayClick}
+                        onDayClick={handleDayNodeClick}
                         completedDays={completedDays}
                         style={pathPosition}
                       />

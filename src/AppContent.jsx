@@ -154,6 +154,8 @@ const AppContent = memo(() => {
 
       <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'map' ? 'translate-x-0 opacity-100' : screen === 'checkin' ? 'translate-x-[100%] opacity-0 pointer-events-none' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
           <MapScreen
+            isActive={screen === 'map'}
+            devotionalComplete={devotionalComplete}
             lastCompletedDay={lastCompletedDay}
             onOpenGame={setCurrentGameConfig}
             onDayClick={handleDayClick}
