@@ -1,16 +1,16 @@
 import React from 'react';
-import { UserProvider } from './contexts/UserContext';
+import { AppStateProvider } from './context/AppStateContext';
 import { NavigationProvider } from './contexts/NavigationContext';
 import AppContent from './AppContent';
 import './App.css';
 
 function App() {
   return (
-    <UserProvider>
+    <AppStateProvider>
       <NavigationProvider>
         <AppContent />
       </NavigationProvider>
-    </UserProvider>
+    </AppStateProvider>
   );
 }
 

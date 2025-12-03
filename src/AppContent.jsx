@@ -1,5 +1,5 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
-import { useUser } from './contexts/UserContext';
+import { useAppState } from './context/AppStateContext';
 import { useNavigation } from './contexts/NavigationContext';
 import MainLayout from './layouts/MainLayout';
 import CloudBackground from './components/ui/CloudBackground';
@@ -24,7 +24,7 @@ const AppContent = memo(() => {
     lastCompletedDay, completeDay,
     streak, pet, updatePet, completedDays,
     devotionalComplete, completeDevotional
-  } = useUser();
+  } = useAppState();
   const { screen, navigate } = useNavigation();
 
   // Local UI states
@@ -104,11 +104,22 @@ const AppContent = memo(() => {
   }, [victoryCoins, addCoins]);
 
   // Devotional Flow
-  const handlePrayerComplete = useCallback(() => setDevotionalStep('gratitude'), []);
-  const handleGratitudeComplete = useCallback(() => setDevotionalStep('action'), []);
+  const { markMorningPrayerDone, markGratitudeDone, markGoodActionCompleted } = useAppState();
+
+  const handlePrayerComplete = useCallback(() => {
+    markMorningPrayerDone();
+    setDevotionalStep('gratitude');
+  }, [markMorningPrayerDone]);
+
+  const handleGratitudeComplete = useCallback(() => {
+    markGratitudeDone();
+    setDevotionalStep('action');
+  }, [markGratitudeDone]);
+
   const handleActionComplete = useCallback(() => {
+    markGoodActionCompleted();
     completeDevotional();
-  }, [completeDevotional]);
+  }, [markGoodActionCompleted, completeDevotional]);
 
   // Daily Modal
   const handleDayClick = useCallback((dayIndexInYear, monthData) => {
@@ -163,8 +174,6 @@ const AppContent = memo(() => {
 
       <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'lar' ? 'translate-x-0 opacity-100' : 'translate-x-[100%] opacity-0 pointer-events-none'}`}>
           <LarScreen
-            coins={coins}
-            onSpendCoins={spendCoins}
             onOpenEveningPrayer={() => setShowEveningPrayer(true)}
             onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
           />

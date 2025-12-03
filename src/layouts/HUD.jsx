@@ -1,10 +1,10 @@
 import React, { memo } from 'react';
 import { Star } from 'lucide-react';
-import { useUser } from '../contexts/UserContext';
+import { useAppState } from '../context/AppStateContext';
 import { useNavigation } from '../contexts/NavigationContext';
 
 const HUD = memo(() => {
-    const { coins, streak } = useUser();
+    const { coins, streak } = useAppState();
     const { screen } = useNavigation();
 
     return (

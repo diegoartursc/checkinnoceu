@@ -14,7 +14,8 @@ export const STORAGE_KEYS = {
   PET: 'checkin_pet',
   COMPLETED_DAYS: 'checkin_completed_days',
   DEVOTIONAL_DATE: 'devotional_date',
-  DEVOTIONAL_COMPLETE: 'devotional_complete'
+  DEVOTIONAL_COMPLETE: 'devotional_complete',
+  DEVOTIONAL_STATUS: 'checkin_devotional_status'
 };
 
 // Validation limits
@@ -153,10 +154,10 @@ export const setReadStories = (stories) => {
 export const getPetState = () => {
   const value = localStorage.getItem(STORAGE_KEYS.PET);
   const defaultPet = {
-    type: 'sheep',
+    type: 'cordeirinho',
     hunger: 100,
-    happiness: 100,
-    energy: 100,
+    happiness: 70,
+    energy: 80,
     lastUpdate: Date.now()
   };
 
@@ -228,6 +229,30 @@ export const getDevotionalComplete = () => {
  */
 export const setDevotionalComplete = (complete) => {
   localStorage.setItem(STORAGE_KEYS.DEVOTIONAL_COMPLETE, complete ? 'true' : 'false');
+};
+
+/**
+ * Get devotional status
+ */
+export const getDevotionalStatus = () => {
+  const value = localStorage.getItem(STORAGE_KEYS.DEVOTIONAL_STATUS);
+  return validateJSON(value, {
+    morningPrayerDone: false,
+    gratitudeDone: false,
+    goodActionChosen: null,
+    goodActionCompleted: false,
+    nightPrayerDone: false,
+    lastUpdated: Date.now()
+  });
+};
+
+/**
+ * Set devotional status
+ */
+export const setDevotionalStatus = (status) => {
+  const validated = typeof status === 'object' && status !== null ? status : {};
+  localStorage.setItem(STORAGE_KEYS.DEVOTIONAL_STATUS, JSON.stringify(validated));
+  return validated;
 };
 
 /**
