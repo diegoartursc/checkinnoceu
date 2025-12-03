@@ -29,7 +29,7 @@ const GratitudeScreen = memo(({ onComplete }) => {
   };
 
   return (
-    <div className="h-full flex flex-col p-6 relative overflow-hidden">
+    <div className="h-full flex flex-col p-6 relative overflow-y-auto">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-pink-100 via-purple-50 to-blue-50" />
 
