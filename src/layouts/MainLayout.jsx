@@ -2,14 +2,16 @@ import React, { memo } from 'react';
 import HUD from './HUD';
 import BottomNav from './BottomNav';
 
-const MainLayout = memo(({ children }) => {
+const MainLayout = memo(({ children, showHud = true, showNav = true }) => {
     return (
-        <div className="w-full h-screen max-w-md mx-auto bg-slate-900 overflow-hidden relative font-sans shadow-2xl">
-            <HUD />
-            <div className="h-full z-10 relative bg-slate-900 overflow-hidden">
-                {children}
+        <div className="flex justify-center w-full h-[100dvh] bg-sky-50 overflow-hidden">
+            <div className="relative w-full max-w-md h-full flex flex-col shadow-2xl bg-sky-50 overflow-hidden">
+                {showHud && <HUD />}
+                <main className="flex-1 w-full h-full overflow-y-auto scroll-smooth custom-scrollbar relative">
+                    {children}
+                </main>
+                {showNav && <BottomNav />}
             </div>
-            <BottomNav />
         </div>
     );
 });

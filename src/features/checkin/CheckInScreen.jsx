@@ -28,7 +28,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
   }
 
   return (
-    <div className="flex flex-col h-full p-4 sm:p-6 pt-8 sm:pt-10 overflow-y-auto relative z-20 custom-scrollbar">
+    <div className="flex flex-col min-h-full p-4 sm:p-6 pt-8 sm:pt-10 relative z-20">
       <div className="w-full h-3 bg-black/10 rounded-full mb-4 sm:mb-6 overflow-hidden border border-white/20">
         <div
           className="h-full bg-yellow-400 transition-all duration-500 shadow-[0_0_10px_rgba(250,204,21,0.5)]"

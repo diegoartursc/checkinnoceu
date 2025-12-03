@@ -128,21 +128,23 @@ const AppContent = memo(() => {
   // Devotional Check
   if (!devotionalComplete) {
     return (
-      <div className="w-full min-h-screen max-w-md mx-auto overflow-hidden relative font-sans shadow-2xl">
-        {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
-        {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
-        {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
-      </div>
+      <MainLayout>
+        <div className="w-full h-full pt-14 sm:pt-16 pb-24">
+          {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
+          {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
+          {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
+        </div>
+      </MainLayout>
     );
   }
 
   return (
     <MainLayout>
       {/* Screen Transitions */}
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'translate-x-0 opacity-100' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <div className="absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 z-0">
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
+          <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
              <CloudBackground />
-             <div className="relative z-10 h-full pt-14 sm:pt-16 pb-20">
+             <div className="relative z-10 pt-14 sm:pt-16 pb-24">
                 <CheckInScreen
                     currentDay={lastCompletedDay + 1}
                     onCompleteDay={handleDayComplete}
@@ -152,7 +154,7 @@ const AppContent = memo(() => {
           </div>
       </div>
 
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'map' ? 'translate-x-0 opacity-100' : screen === 'checkin' ? 'translate-x-[100%] opacity-0 pointer-events-none' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'map' ? 'relative w-full h-full opacity-100' : screen === 'checkin' ? 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
           <MapScreen
             lastCompletedDay={lastCompletedDay}
             onOpenGame={setCurrentGameConfig}
@@ -161,7 +163,7 @@ const AppContent = memo(() => {
           />
       </div>
 
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'lar' ? 'translate-x-0 opacity-100' : 'translate-x-[100%] opacity-0 pointer-events-none'}`}>
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'lar' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
           <LarScreen
             coins={coins}
             onSpendCoins={spendCoins}
