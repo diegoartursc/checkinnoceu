@@ -6,9 +6,6 @@ import CloudBackground from './components/ui/CloudBackground';
 import CheckInScreen from './features/checkin/CheckInScreen';
 import MapScreen from './features/map/MapScreen';
 import LarScreen from './features/pet/LarScreen';
-import MorningPrayerScreen from './features/devotional/MorningPrayerScreen';
-import GratitudeScreen from './features/devotional/GratitudeScreen';
-import GoodActionScreen from './features/devotional/GoodActionScreen';
 import EveningPrayerScreen from './features/devotional/EveningPrayerScreen';
 import MonthlyLetterScreen from './features/devotional/MonthlyLetterScreen';
 import GameOverlay from './components/modals/GameOverlay';
@@ -22,13 +19,11 @@ const AppContent = memo(() => {
   const {
     coins, addCoins, spendCoins,
     lastCompletedDay, completeDay,
-    streak, pet, updatePet, completedDays,
-    devotionalComplete, completeDevotional
+    streak, pet, updatePet, completedDays
   } = useUser();
-  const { screen, navigate } = useNavigation();
+  const { screen } = useNavigation();
 
   // Local UI states
-  const [devotionalStep, setDevotionalStep] = useState('prayer'); // prayer, gratitude, action
   const [currentGameConfig, setCurrentGameConfig] = useState(null);
   const [currentStory, setCurrentStory] = useState(null);
   const [showVictoryModal, setShowVictoryModal] = useState(false);
@@ -60,12 +55,11 @@ const AppContent = memo(() => {
     const coinsReward = 10;
     addCoins(coinsReward);
 
-    // Check for streak bonus (simplified simulation for now)
-    // In a real app, completeDay would return info about streak changes
-    // Here we can check streak in useEffect or trust the context
+    // Navigate to Lar or show completion feedback inside CheckInScreen (handled by isCompletedToday prop)
+    // We don't force navigation to map anymore per the new flow,
+    // the user stays on the completion screen which directs them to Lar.
 
-    setTimeout(() => navigate('map'), 2000);
-  }, [lastCompletedDay, completeDay, addCoins, navigate]);
+  }, [lastCompletedDay, completeDay, addCoins]);
 
   const handleWinGame = useCallback(() => {
     const coinsToAdd = 50;
@@ -103,13 +97,6 @@ const AppContent = memo(() => {
     setShowVictoryModal(false);
   }, [victoryCoins, addCoins]);
 
-  // Devotional Flow
-  const handlePrayerComplete = useCallback(() => setDevotionalStep('gratitude'), []);
-  const handleGratitudeComplete = useCallback(() => setDevotionalStep('action'), []);
-  const handleActionComplete = useCallback(() => {
-    completeDevotional();
-  }, [completeDevotional]);
-
   // Daily Modal
   const handleDayClick = useCallback((dayIndexInYear, monthData) => {
       setDailyModal({ dayNumber: dayIndexInYear + 1, monthData });
@@ -124,23 +111,6 @@ const AppContent = memo(() => {
       setDailyModal(null);
   }, [dailyModal, completeDay]);
 
-
-  // Devotional Check
-  if (!devotionalComplete) {
-    return (
-      <MainLayout>
-        {/* Added overflow-y-auto wrapper for Devotional Screens */}
-        <div className="w-full h-full overflow-y-auto">
-          <div className="min-h-full pt-14 sm:pt-16 pb-24">
-            {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
-            {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
-            {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout>
       {/* Screen Transitions */}
@@ -149,7 +119,7 @@ const AppContent = memo(() => {
           <div className="w-full h-full overflow-y-auto">
               <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
                  <CloudBackground />
-                 <div className="relative z-10 pt-14 sm:pt-16 pb-24">
+                 <div className="relative z-10 pt-14 sm:pt-16 pb-24 h-full">
                     <CheckInScreen
                         currentDay={lastCompletedDay + 1}
                         onCompleteDay={handleDayComplete}

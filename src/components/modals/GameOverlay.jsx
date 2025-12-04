@@ -2,7 +2,6 @@ import React, { memo, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { GAME_TYPES } from '../../config/gameConfig';
 import MemoryGame from '../games/MemoryGame';
-import CatcherGame from '../games/CatcherGame';
 import QuizGame from '../games/QuizGame';
 import HarvestGame from '../games/HarvestGame';
 import WarmupGame from '../games/WarmupGame';
@@ -13,7 +12,6 @@ const GameOverlay = memo(({ config, onClose, onWin }) => {
   const GameComponent = useMemo(() => {
     switch(config.gameType) {
       case GAME_TYPES.MEMORY: return MemoryGame;
-      case GAME_TYPES.CATCHER: return CatcherGame;
       case GAME_TYPES.QUIZ: return QuizGame;
       case GAME_TYPES.HARVEST: return HarvestGame;
       case GAME_TYPES.WARMUP: return WarmupGame;
