@@ -3,6 +3,7 @@ import { Play, ArrowRight, Sun, CheckCircle, X } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import CatcherGame from '../../components/games/CatcherGame';
 import { getDailyContent } from '../../utils/contentGenerator';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => {
   const [step, setStep] = useState(0);
@@ -11,9 +12,20 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
 
   const dailyData = useMemo(() => getDailyContent(currentDay), [currentDay]);
 
+  const { navigate } = useNavigation();
+
   if (isCompletedToday) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in z-20 relative">
+        <div className="absolute top-0 right-0 p-4">
+             <button
+               onClick={() => navigate('lar')}
+               className="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30 text-white hover:bg-white/40 transition-all animate-pulse"
+             >
+                <span className="text-2xl">🐑</span>
+             </button>
+        </div>
+
         <div className="w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-b from-green-300 to-green-500 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(74,222,128,0.6)] border-4 border-green-600 animate-bounce">
           <CheckCircle size={64} className="text-white sm:w-20 sm:h-20" />
         </div>
@@ -29,6 +41,15 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
 
   return (
     <div className="flex flex-col min-h-full p-4 sm:p-6 pt-8 sm:pt-10 relative z-20">
+      <div className="absolute top-0 right-0 p-4 z-50">
+           <button
+             onClick={() => navigate('lar')}
+             className="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30 text-white hover:bg-white/40 transition-all"
+           >
+              <span className="text-2xl">🐑</span>
+           </button>
+      </div>
+
       <div className="w-full h-3 bg-black/10 rounded-full mb-4 sm:mb-6 overflow-hidden border border-white/20">
         <div
           className="h-full bg-yellow-400 transition-all duration-500 shadow-[0_0_10px_rgba(250,204,21,0.5)]"

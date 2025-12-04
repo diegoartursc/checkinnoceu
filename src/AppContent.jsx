@@ -5,7 +5,11 @@ import MainLayout from './layouts/MainLayout';
 import CloudBackground from './components/ui/CloudBackground';
 import CheckInScreen from './features/checkin/CheckInScreen';
 import MapScreen from './features/map/MapScreen';
-import LarScreen from './features/pet/LarScreen';
+import TamagotchiRoom from './features/pet/TamagotchiRoom';
+import GamesHub from './features/games/GamesHub';
+import DocinhosDoCeuGame from './features/games/screens/DocinhosDoCeuGame';
+import FazendinhaDaCriacaoGame from './features/games/screens/FazendinhaDaCriacaoGame';
+import CorridaDaLuzGame from './features/games/screens/CorridaDaLuzGame';
 import MorningPrayerScreen from './features/devotional/MorningPrayerScreen';
 import GratitudeScreen from './features/devotional/GratitudeScreen';
 import GoodActionScreen from './features/devotional/GoodActionScreen';
@@ -170,9 +174,9 @@ const AppContent = memo(() => {
       </div>
 
       <div className={`transition-all duration-500 ease-in-out ${screen === 'lar' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
-          {/* Lar Screen usually handles its own scroll or fits in screen, but adding overflow support is safer */}
+          {/* Tamagotchi Room */}
           <div className="w-full h-full overflow-y-auto">
-              <LarScreen
+              <TamagotchiRoom
                 coins={coins}
                 onSpendCoins={spendCoins}
                 onOpenEveningPrayer={() => setShowEveningPrayer(true)}
@@ -180,6 +184,32 @@ const AppContent = memo(() => {
               />
           </div>
       </div>
+
+      {/* New Games Hub & Screens */}
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'games-hub' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
+          <div className="w-full h-full overflow-y-auto">
+              <GamesHub />
+          </div>
+      </div>
+
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'game-docinhos' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
+          <div className="w-full h-full overflow-y-auto">
+              <DocinhosDoCeuGame />
+          </div>
+      </div>
+
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'game-fazendinha' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
+          <div className="w-full h-full overflow-y-auto">
+              <FazendinhaDaCriacaoGame />
+          </div>
+      </div>
+
+      <div className={`transition-all duration-500 ease-in-out ${screen === 'game-corrida' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
+          <div className="w-full h-full overflow-y-auto">
+              <CorridaDaLuzGame />
+          </div>
+      </div>
+
 
       {/* Modals & Overlays */}
       {currentGameConfig && <GameOverlay config={currentGameConfig} onClose={() => setCurrentGameConfig(null)} onWin={handleWinGame} />}
