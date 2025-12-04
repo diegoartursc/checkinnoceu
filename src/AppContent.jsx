@@ -29,6 +29,7 @@ const AppContent = memo(() => {
 
   // Local UI states
   const [devotionalStep, setDevotionalStep] = useState('prayer'); // prayer, gratitude, action
+  const [showDevotionalFlow, setShowDevotionalFlow] = useState(false);
   const [currentGameConfig, setCurrentGameConfig] = useState(null);
   const [currentStory, setCurrentStory] = useState(null);
   const [showVictoryModal, setShowVictoryModal] = useState(false);
@@ -104,10 +105,17 @@ const AppContent = memo(() => {
   }, [victoryCoins, addCoins]);
 
   // Devotional Flow
+  const startDevotionalFromCheckIn = useCallback(() => {
+    if (devotionalComplete) return;
+    setDevotionalStep('prayer');
+    setShowDevotionalFlow(true);
+  }, [devotionalComplete]);
+
   const handlePrayerComplete = useCallback(() => setDevotionalStep('gratitude'), []);
   const handleGratitudeComplete = useCallback(() => setDevotionalStep('action'), []);
   const handleActionComplete = useCallback(() => {
     completeDevotional();
+    setShowDevotionalFlow(false);
   }, [completeDevotional]);
 
   // Daily Modal
@@ -125,8 +133,7 @@ const AppContent = memo(() => {
   }, [dailyModal, completeDay]);
 
 
-  // Devotional Check
-  if (!devotionalComplete) {
+  if (showDevotionalFlow && !devotionalComplete) {
     return (
       <MainLayout>
         {/* Added overflow-y-auto wrapper for Devotional Screens */}
@@ -144,42 +151,50 @@ const AppContent = memo(() => {
   return (
     <MainLayout>
       {/* Screen Transitions */}
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          {/* Added overflow-y-auto for CheckIn Screen */}
-          <div className="w-full h-full overflow-y-auto">
-              <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
-                 <CloudBackground />
-                 <div className="relative z-10 pt-14 sm:pt-16 pb-24">
-                    <CheckInScreen
-                        currentDay={lastCompletedDay + 1}
-                        onCompleteDay={handleDayComplete}
-                        isCompletedToday={isCompletedToday}
-                    />
-                 </div>
-              </div>
-          </div>
-      </div>
+      {screen === 'checkin' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+            {/* Added overflow-y-auto for CheckIn Screen */}
+            <div className="w-full h-full overflow-y-auto">
+                <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
+                   <CloudBackground />
+                   <div className="relative z-10 pt-14 sm:pt-16 pb-24">
+                      <CheckInScreen
+                          currentDay={lastCompletedDay + 1}
+                          onCompleteDay={handleDayComplete}
+                          isCompletedToday={isCompletedToday}
+                          devotionalComplete={devotionalComplete}
+                          onStartDevotional={startDevotionalFromCheckIn}
+                      />
+                   </div>
+                </div>
+            </div>
+        </div>
+      )}
 
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'map' ? 'relative w-full h-full opacity-100' : screen === 'checkin' ? 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <MapScreen
-            lastCompletedDay={lastCompletedDay}
-            onOpenGame={setCurrentGameConfig}
-            onDayClick={handleDayClick}
-            completedDays={completedDays}
-          />
-      </div>
+      {screen === 'map' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+            <MapScreen
+              lastCompletedDay={lastCompletedDay}
+              onOpenGame={setCurrentGameConfig}
+              onDayClick={handleDayClick}
+              completedDays={completedDays}
+            />
+        </div>
+      )}
 
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'lar' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
-          {/* Lar Screen usually handles its own scroll or fits in screen, but adding overflow support is safer */}
-          <div className="w-full h-full overflow-y-auto">
-              <LarScreen
-                coins={coins}
-                onSpendCoins={spendCoins}
-                onOpenEveningPrayer={() => setShowEveningPrayer(true)}
-                onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
-              />
-          </div>
-      </div>
+      {screen === 'lar' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+            {/* Lar Screen usually handles its own scroll or fits in screen, but adding overflow support is safer */}
+            <div className="w-full h-full overflow-y-auto">
+                <LarScreen
+                  coins={coins}
+                  onSpendCoins={spendCoins}
+                  onOpenEveningPrayer={() => setShowEveningPrayer(true)}
+                  onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
+                />
+            </div>
+        </div>
+      )}
 
       {/* Modals & Overlays */}
       {currentGameConfig && <GameOverlay config={currentGameConfig} onClose={() => setCurrentGameConfig(null)} onWin={handleWinGame} />}

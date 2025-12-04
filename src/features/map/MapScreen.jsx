@@ -55,7 +55,16 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
     <div
         ref={containerRef}
         className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-950"
-        onClick={handleCloseDecoration}
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            handleCloseDecoration();
+          }
+        }}
+        onTouchStart={(e) => {
+          if (e.target === e.currentTarget) {
+            handleCloseDecoration();
+          }
+        }}
     >
         {/* Parallax Decorations */}
         <ParallaxDecorations position={0} />
