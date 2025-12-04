@@ -136,7 +136,6 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
         strokeWidth="68"
         strokeLinecap="round"
         strokeLinejoin="round"
-        filter="url(#roadRelief)"
       />
 
       {/* CAMADA 5: Overlay Profundidade */}

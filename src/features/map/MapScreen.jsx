@@ -279,7 +279,8 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                     return { x, y };
                   });
 
-                  return <DynamicRoadPath nodePositions={nodePositions} containerHeight={month.days * 55 + 100} />;
+                  // return <DynamicRoadPath nodePositions={nodePositions} containerHeight={month.days * 55 + 100} />;
+                  return null;
                 })()}
 
                 {/* BiomeDecorations - Decorações Sazonais */}

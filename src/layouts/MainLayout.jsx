@@ -4,19 +4,21 @@ import HUD from './HUD';
 
 const MainLayout = memo(({ children }) => {
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-sky-50">
-      {/* HUD - Overlay/Fixed Top */}
-      <HUD />
+    <div className="flex justify-center min-h-screen w-full bg-slate-900">
+      <div className="flex flex-col h-screen w-full max-w-[480px] bg-sky-50 relative shadow-2xl overflow-hidden">
+        {/* HUD - Overlay/Fixed Top */}
+        <HUD />
 
-      {/* Main Content Area - Clipped, children handle scroll */}
-      <div className="flex-1 overflow-hidden relative">
-        <div className="w-full h-full relative">
-          {children}
+        {/* Main Content Area - Clipped, children handle scroll */}
+        <div className="flex-1 overflow-hidden relative">
+          <div className="w-full h-full relative">
+            {children}
+          </div>
         </div>
-      </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+        {/* Bottom Navigation */}
+        <BottomNav />
+      </div>
     </div>
   );
 });
