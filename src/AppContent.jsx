@@ -129,13 +129,11 @@ const AppContent = memo(() => {
   if (!devotionalComplete) {
     return (
       <MainLayout>
-        {/* Added overflow-y-auto wrapper for Devotional Screens */}
-        <div className="w-full h-full overflow-y-auto">
-          <div className="min-h-full pt-14 sm:pt-16 pb-24">
+        {/* Devotional Screens - No extra scrolling wrapper needed as MainLayout handles it */}
+        <div className="w-full">
             {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
             {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
             {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
-          </div>
         </div>
       </MainLayout>
     );
@@ -143,42 +141,42 @@ const AppContent = memo(() => {
 
   return (
     <MainLayout>
-      {/* Screen Transitions */}
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          {/* Added overflow-y-auto for CheckIn Screen */}
-          <div className="w-full h-full overflow-y-auto">
-              <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
+      {/* CSS Grid Stacking for Main Screens */}
+      <div className="grid grid-cols-1 grid-rows-1 w-full h-full relative">
+
+        {/* CheckIn Screen */}
+        <div className={`col-start-1 row-start-1 w-full h-full transition-opacity duration-300 ${screen === 'checkin' ? 'opacity-100 pointer-events-auto relative z-10' : 'opacity-0 pointer-events-none z-0'}`}>
+            <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
                  <CloudBackground />
-                 <div className="relative z-10 pt-14 sm:pt-16 pb-24">
+                 <div className="relative z-10">
                     <CheckInScreen
                         currentDay={lastCompletedDay + 1}
                         onCompleteDay={handleDayComplete}
                         isCompletedToday={isCompletedToday}
                     />
                  </div>
-              </div>
-          </div>
-      </div>
+            </div>
+        </div>
 
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'map' ? 'relative w-full h-full opacity-100' : screen === 'checkin' ? 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <MapScreen
-            lastCompletedDay={lastCompletedDay}
-            onOpenGame={setCurrentGameConfig}
-            onDayClick={handleDayClick}
-            completedDays={completedDays}
-          />
-      </div>
+        {/* Map Screen */}
+        <div className={`col-start-1 row-start-1 w-full h-full transition-opacity duration-300 ${screen === 'map' ? 'opacity-100 pointer-events-auto relative z-10' : 'opacity-0 pointer-events-none z-0'}`}>
+             <MapScreen
+                lastCompletedDay={lastCompletedDay}
+                onOpenGame={setCurrentGameConfig}
+                onDayClick={handleDayClick}
+                completedDays={completedDays}
+              />
+        </div>
 
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'lar' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
-          {/* Lar Screen usually handles its own scroll or fits in screen, but adding overflow support is safer */}
-          <div className="w-full h-full overflow-y-auto">
+        {/* Lar Screen */}
+        <div className={`col-start-1 row-start-1 w-full h-full transition-opacity duration-300 ${screen === 'lar' ? 'opacity-100 pointer-events-auto relative z-10' : 'opacity-0 pointer-events-none z-0'}`}>
               <LarScreen
                 coins={coins}
                 onSpendCoins={spendCoins}
                 onOpenEveningPrayer={() => setShowEveningPrayer(true)}
                 onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
               />
-          </div>
+        </div>
       </div>
 
       {/* Modals & Overlays */}
