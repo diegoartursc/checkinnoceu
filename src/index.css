@@ -2,21 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Reset and Viewport Locking */
+/* Reset and Viewport Locking - UPDATED PER SPEC */
 html, body {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
+  /* Removed position: fixed, inset: 0, height: 100% per Spec 2.1 */
   overscroll-behavior: none;
   touch-action: pan-y;
   width: 100%;
-  height: 100%;
 }
 
 #root {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* overflow-y-auto is default, DO NOT use overflow-hidden on Y axis */
   display: flex;
   flex-direction: column;
 }

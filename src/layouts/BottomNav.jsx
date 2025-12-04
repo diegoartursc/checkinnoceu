@@ -6,7 +6,9 @@ const BottomNav = memo(() => {
     const { screen, navigate } = useNavigation();
 
     return (
-        <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] flex items-center justify-around z-40 px-4 py-3 border-t-4 border-gray-100">
+        // Changed from absolute to fixed to ensure visibility regardless of container height quirks
+        // Added max-w-md and centering to match the mobile frame
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] flex items-center justify-around z-50 px-4 py-3 border-t-4 border-gray-100">
             <button
                 onClick={() => navigate('checkin')}
                 className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${screen === 'checkin'

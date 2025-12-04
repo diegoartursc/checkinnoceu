@@ -3,7 +3,6 @@ import { Star, Cloud, Lock, Play, Trophy, CheckCircle, Clock } from 'lucide-reac
 import Button from '../../components/ui/Button';
 import SeasonButton from '../../components/ui/SeasonButton';
 import DayNode from './DayNode';
-import DynamicRoadPath from './DynamicRoadPath';
 import BiomeDecorations from './BiomeDecorations';
 import PathItems from './PathItems';
 import FloatingAvatar from './FloatingAvatar';
@@ -263,24 +262,6 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                   <Cloud size={60} className="absolute right-[-10px] top-[70%] text-white fill-white" />
                   <Cloud size={55} className="absolute right-[-8px] top-[90%] text-white fill-white" />
                 </div>
-
-                {/* Dynamic Road Path - Conecta os centros exatos dos nodes (King/Zynga Style) */}
-                {(() => {
-                  // COLETAR todas as coordenadas dos nodes ANTES de renderizar
-                  const nodePositions = Array.from({ length: month.days }, (_, i) => {
-                    const dayIndex = i;
-                    const pathPosition = calculatePathPosition(dayIndex, month.days);
-
-                    // Converter de porcentagem para pixels absolutos
-                    const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
-                    const x = (parseFloat(pathPosition.left) / 100) * containerWidth;
-                    const y = parseInt(pathPosition.top);
-
-                    return { x, y };
-                  });
-
-                  return <DynamicRoadPath nodePositions={nodePositions} containerHeight={month.days * 55 + 100} />;
-                })()}
 
                 {/* BiomeDecorations - Decorações Sazonais */}
                 <BiomeDecorations monthName={month.name} monthIndex={monthIndex} />
