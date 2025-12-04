@@ -128,46 +128,74 @@ const AppContent = memo(() => {
   // Devotional Check
   if (!devotionalComplete) {
     return (
-      <div className="w-full min-h-screen max-w-md mx-auto overflow-hidden relative font-sans shadow-2xl">
-        {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
-        {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
-        {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
-      </div>
+      <MainLayout>
+        <div className="w-full h-full pt-14 sm:pt-16 pb-24 overflow-y-auto">
+          {devotionalStep === 'prayer' && <MorningPrayerScreen onComplete={handlePrayerComplete} />}
+          {devotionalStep === 'gratitude' && <GratitudeScreen onComplete={handleGratitudeComplete} />}
+          {devotionalStep === 'action' && <GoodActionScreen onComplete={handleActionComplete} />}
+        </div>
+      </MainLayout>
     );
   }
 
   return (
     <MainLayout>
-      {/* Screen Transitions */}
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'translate-x-0 opacity-100' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <div className="absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 z-0">
-             <CloudBackground />
-             <div className="relative z-10 h-full pt-14 sm:pt-16 pb-20">
-                <CheckInScreen
-                    currentDay={lastCompletedDay + 1}
-                    onCompleteDay={handleDayComplete}
-                    isCompletedToday={isCompletedToday}
-                />
-             </div>
+      {/* Grid Stack Layout for Screen Transitions */}
+      <div className="grid grid-cols-1 grid-rows-1 w-full h-full overflow-hidden relative">
+
+          {/* CheckIn Screen */}
+          <div
+            className={`col-start-1 row-start-1 w-full h-full transition-all duration-500 ease-in-out ${
+                screen === 'checkin'
+                ? 'opacity-100 pointer-events-auto z-10 translate-x-0'
+                : 'opacity-0 pointer-events-none z-0 -translate-x-full'
+            }`}
+          >
+              <div className="w-full h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative overflow-hidden">
+                 <CloudBackground />
+                 <div className="relative z-10 pt-14 sm:pt-16 pb-24 h-full overflow-y-auto custom-scrollbar">
+                    <CheckInScreen
+                        currentDay={lastCompletedDay + 1}
+                        onCompleteDay={handleDayComplete}
+                        isCompletedToday={isCompletedToday}
+                    />
+                 </div>
+              </div>
           </div>
-      </div>
 
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'map' ? 'translate-x-0 opacity-100' : screen === 'checkin' ? 'translate-x-[100%] opacity-0 pointer-events-none' : 'translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <MapScreen
-            lastCompletedDay={lastCompletedDay}
-            onOpenGame={setCurrentGameConfig}
-            onDayClick={handleDayClick}
-            completedDays={completedDays}
-          />
-      </div>
+          {/* Map Screen */}
+          <div
+            className={`col-start-1 row-start-1 w-full h-full transition-all duration-500 ease-in-out ${
+                screen === 'map'
+                ? 'opacity-100 pointer-events-auto z-10 translate-x-0'
+                : screen === 'checkin'
+                    ? 'opacity-0 pointer-events-none z-0 translate-x-full'
+                    : 'opacity-0 pointer-events-none z-0 -translate-x-full'
+            }`}
+          >
+              <MapScreen
+                lastCompletedDay={lastCompletedDay}
+                onOpenGame={setCurrentGameConfig}
+                onDayClick={handleDayClick}
+                completedDays={completedDays}
+              />
+          </div>
 
-      <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${screen === 'lar' ? 'translate-x-0 opacity-100' : 'translate-x-[100%] opacity-0 pointer-events-none'}`}>
-          <LarScreen
-            coins={coins}
-            onSpendCoins={spendCoins}
-            onOpenEveningPrayer={() => setShowEveningPrayer(true)}
-            onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
-          />
+          {/* Lar Screen */}
+          <div
+            className={`col-start-1 row-start-1 w-full h-full transition-all duration-500 ease-in-out ${
+                screen === 'lar'
+                ? 'opacity-100 pointer-events-auto z-10 translate-x-0'
+                : 'opacity-0 pointer-events-none z-0 translate-x-full'
+            }`}
+          >
+              <LarScreen
+                coins={coins}
+                onSpendCoins={spendCoins}
+                onOpenEveningPrayer={() => setShowEveningPrayer(true)}
+                onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
+              />
+          </div>
       </div>
 
       {/* Modals & Overlays */}
