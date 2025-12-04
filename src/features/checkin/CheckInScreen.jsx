@@ -1,7 +1,6 @@
 import React, { memo, useState, useMemo } from 'react';
 import { Play, ArrowRight, Sun, CheckCircle, X } from 'lucide-react';
 import Button from '../../components/ui/Button';
-import CatcherGame from '../../components/games/CatcherGame';
 import { getDailyContent } from '../../utils/contentGenerator';
 
 const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => {
@@ -32,7 +31,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
       <div className="w-full h-3 bg-black/10 rounded-full mb-4 sm:mb-6 overflow-hidden border border-white/20">
         <div
           className="h-full bg-yellow-400 transition-all duration-500 shadow-[0_0_10px_rgba(250,204,21,0.5)]"
-          style={{ width: `${(step / 3) * 100}%` }}
+          style={{ width: `${(step / 2) * 100}%` }}
         />
       </div>
 
@@ -67,18 +66,6 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
       )}
 
       {step === 2 && (
-        <div className="flex-1 flex flex-col justify-center animate-in slide-in-from-right">
-          <h2 className="text-xl sm:text-2xl font-black text-white text-center mb-4 drop-shadow-md">
-            Estoure o Medo!
-          </h2>
-          <CatcherGame
-            data={{ target: '☁️', avoid: '⚡' }}
-            onWin={() => setTimeout(() => setStep(3), 1000)}
-          />
-        </div>
-      )}
-
-      {step === 3 && (
         <div className="flex-1 flex flex-col justify-center animate-in slide-in-from-right space-y-4">
            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl mb-4 text-center">
              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Desafio</span>
