@@ -11,7 +11,7 @@ import ParallaxDecorations from './ParallaxDecorations';
 import { MONTHS_CONFIG } from '../../config/gameConfig';
 import { calculatePathPosition, calculateDayIndexInYear } from '../../utils/mapUtils';
 
-const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDays = {} }) => {
+const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDays = {}, navigate }) => {
   const containerRef = useRef(null);
   const currentDayRef = useRef(null);
   const [activeDecoration, setActiveDecoration] = useState(null);
@@ -51,10 +51,33 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
     setSelectedSpecialDate(date);
   }, []);
 
+  // If no months are configured or there's an issue, show a helpful message
+  if (!reversedMonths || reversedMonths.length === 0) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-sky-400 to-blue-600 p-4 text-center relative">
+        <div className="max-w-sm">
+          <div className="text-6xl mb-4">🌟</div>
+          <h2 className="text-2xl font-black text-white mb-2">Caminho da Vida</h2>
+          <p className="text-white/90 mb-6">
+            O mapa de jornada anual está sendo preparado! Complete seu devocional HOJE para começar a explorar o Caminho da Vida.
+          </p>
+          {navigate && (
+            <button 
+              onClick={() => navigate('checkin')}
+              className="px-6 py-3 bg-white text-blue-600 font-black rounded-full shadow-lg hover:shadow-xl transition-all"
+            >
+              Ir para HOJE
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
         ref={containerRef}
-        className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-950"
+        className="h-full overflow-y-auto pb-24 relative scroll-smooth optimize-scroll custom-scrollbar bg-gradient-to-t from-sky-200 via-indigo-300 to-indigo-500"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) {
             handleCloseDecoration();

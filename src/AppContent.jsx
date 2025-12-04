@@ -17,6 +17,7 @@ import VictoryModal from './components/modals/VictoryModal';
 import StreakBonusModal from './components/modals/StreakBonusModal';
 import DailyModal from './components/modals/DailyModal';
 import FlyingStar from './components/ui/FlyingStar';
+import SettingsSupportScreen from './screens/SettingsSupportScreen';
 
 const AppContent = memo(() => {
   const {
@@ -178,6 +179,7 @@ const AppContent = memo(() => {
               onOpenGame={setCurrentGameConfig}
               onDayClick={handleDayClick}
               completedDays={completedDays}
+              navigate={navigate}
             />
         </div>
       )}
@@ -193,6 +195,12 @@ const AppContent = memo(() => {
                   onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
                 />
             </div>
+        </div>
+      )}
+
+      {screen === 'settings' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+          <SettingsSupportScreen />
         </div>
       )}
 

@@ -11,7 +11,7 @@ export const useNavigation = () => {
 };
 
 export const NavigationProvider = ({ children }) => {
-    const [screen, setScreen] = useState('checkin'); // checkin, map, lar
+    const [screen, setScreen] = useState('checkin'); // checkin, map, lar, settings
     const lastNavigateTime = useRef(0);
 
     const navigate = useCallback((screenName) => {
