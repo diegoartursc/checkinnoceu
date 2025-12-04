@@ -144,42 +144,48 @@ const AppContent = memo(() => {
   return (
     <MainLayout>
       {/* Screen Transitions */}
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'checkin' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          {/* Added overflow-y-auto for CheckIn Screen */}
-          <div className="w-full h-full overflow-y-auto">
-              <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
-                 <CloudBackground />
-                 <div className="relative z-10 pt-14 sm:pt-16 pb-24">
-                    <CheckInScreen
-                        currentDay={lastCompletedDay + 1}
-                        onCompleteDay={handleDayComplete}
-                        isCompletedToday={isCompletedToday}
-                    />
-                 </div>
-              </div>
-          </div>
-      </div>
+      {screen === 'checkin' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+            {/* Added overflow-y-auto for CheckIn Screen */}
+            <div className="w-full h-full overflow-y-auto">
+                <div className="min-h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-100 relative">
+                   <CloudBackground />
+                   <div className="relative z-10 pt-14 sm:pt-16 pb-24">
+                      <CheckInScreen
+                          currentDay={lastCompletedDay + 1}
+                          onCompleteDay={handleDayComplete}
+                          isCompletedToday={isCompletedToday}
+                      />
+                   </div>
+                </div>
+            </div>
+        </div>
+      )}
 
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'map' ? 'relative w-full h-full opacity-100' : screen === 'checkin' ? 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none' : 'absolute inset-0 translate-x-[-100%] opacity-0 pointer-events-none'}`}>
-          <MapScreen
-            lastCompletedDay={lastCompletedDay}
-            onOpenGame={setCurrentGameConfig}
-            onDayClick={handleDayClick}
-            completedDays={completedDays}
-          />
-      </div>
+      {screen === 'map' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+            <MapScreen
+              lastCompletedDay={lastCompletedDay}
+              onOpenGame={setCurrentGameConfig}
+              onDayClick={handleDayClick}
+              completedDays={completedDays}
+            />
+        </div>
+      )}
 
-      <div className={`transition-all duration-500 ease-in-out ${screen === 'lar' ? 'relative w-full h-full opacity-100' : 'absolute inset-0 translate-x-[100%] opacity-0 pointer-events-none'}`}>
-          {/* Lar Screen usually handles its own scroll or fits in screen, but adding overflow support is safer */}
-          <div className="w-full h-full overflow-y-auto">
-              <LarScreen
-                coins={coins}
-                onSpendCoins={spendCoins}
-                onOpenEveningPrayer={() => setShowEveningPrayer(true)}
-                onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
-              />
-          </div>
-      </div>
+      {screen === 'lar' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+            {/* Lar Screen usually handles its own scroll or fits in screen, but adding overflow support is safer */}
+            <div className="w-full h-full overflow-y-auto">
+                <LarScreen
+                  coins={coins}
+                  onSpendCoins={spendCoins}
+                  onOpenEveningPrayer={() => setShowEveningPrayer(true)}
+                  onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
+                />
+            </div>
+        </div>
+      )}
 
       {/* Modals & Overlays */}
       {currentGameConfig && <GameOverlay config={currentGameConfig} onClose={() => setCurrentGameConfig(null)} onWin={handleWinGame} />}
