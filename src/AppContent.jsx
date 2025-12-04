@@ -189,6 +189,7 @@ const AppContent = memo(() => {
                 <LarScreen
                   coins={coins}
                   onSpendCoins={spendCoins}
+                  onAddCoins={addCoins}
                   onOpenEveningPrayer={() => setShowEveningPrayer(true)}
                   onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
                 />
