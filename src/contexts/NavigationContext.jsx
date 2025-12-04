@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 
 const NavigationContext = createContext();
 
@@ -12,10 +12,16 @@ export const useNavigation = () => {
 
 export const NavigationProvider = ({ children }) => {
     const [screen, setScreen] = useState('checkin'); // checkin, map, lar
+    const lastNavigateTime = useRef(0);
 
-    const navigate = (screenName) => {
+    const navigate = useCallback((screenName) => {
+        const now = Date.now();
+        if (now - lastNavigateTime.current < 300) {
+            return;
+        }
+        lastNavigateTime.current = now;
         setScreen(screenName);
-    };
+    }, []);
 
     return (
         <NavigationContext.Provider value={{ screen, navigate }}>

@@ -1,15 +1,22 @@
 import React, { memo, useState, useMemo } from 'react';
 import { Play, ArrowRight, Sun, CheckCircle, X } from 'lucide-react';
 import Button from '../../components/ui/Button';
-import CatcherGame from '../../components/games/CatcherGame';
 import { getDailyContent } from '../../utils/contentGenerator';
 
-const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => {
+const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday, devotionalComplete, onStartDevotional }) => {
   const [step, setStep] = useState(0);
   const [quizSelected, setQuizSelected] = useState(null);
   const [isQuizCorrect, setIsQuizCorrect] = useState(null);
 
   const dailyData = useMemo(() => getDailyContent(currentDay), [currentDay]);
+
+  const handleStartDay = () => {
+    if (!devotionalComplete && typeof onStartDevotional === 'function') {
+      onStartDevotional();
+      return;
+    }
+    setStep(1);
+  };
 
   if (isCompletedToday) {
     return (
@@ -27,12 +34,14 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
     );
   }
 
+  const totalSteps = 2; // 0, 1, 2
+
   return (
     <div className="flex flex-col min-h-full p-4 sm:p-6 pt-8 sm:pt-10 relative z-20">
       <div className="w-full h-3 bg-black/10 rounded-full mb-4 sm:mb-6 overflow-hidden border border-white/20">
         <div
           className="h-full bg-yellow-400 transition-all duration-500 shadow-[0_0_10px_rgba(250,204,21,0.5)]"
-          style={{ width: `${(step / 3) * 100}%` }}
+          style={{ width: `${(step / totalSteps) * 100}%` }}
         />
       </div>
 
@@ -44,7 +53,7 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
           <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg font-[nunito]">
             Jornada<br/>do Dia {currentDay}
           </h1>
-          <Button onClick={() => setStep(1)} className="w-full text-lg sm:text-xl bg-gradient-to-b from-orange-400 to-orange-600 border-orange-700 shadow-[0_8px_30px_rgba(251,146,60,0.4)]">
+          <Button onClick={handleStartDay} className="w-full text-lg sm:text-xl bg-gradient-to-b from-orange-400 to-orange-600 border-orange-700 shadow-[0_8px_30px_rgba(251,146,60,0.4)]">
             Começar <Play fill="white" size={20}/>
           </Button>
         </div>
@@ -67,18 +76,6 @@ const CheckInScreen = memo(({ currentDay, onCompleteDay, isCompletedToday }) => 
       )}
 
       {step === 2 && (
-        <div className="flex-1 flex flex-col justify-center animate-in slide-in-from-right">
-          <h2 className="text-xl sm:text-2xl font-black text-white text-center mb-4 drop-shadow-md">
-            Estoure o Medo!
-          </h2>
-          <CatcherGame
-            data={{ target: '☁️', avoid: '⚡' }}
-            onWin={() => setTimeout(() => setStep(3), 1000)}
-          />
-        </div>
-      )}
-
-      {step === 3 && (
         <div className="flex-1 flex flex-col justify-center animate-in slide-in-from-right space-y-4">
            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-xl mb-4 text-center">
              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Desafio</span>
