@@ -1,7 +1,7 @@
 import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import { Cloud, Repeat2, Star } from 'lucide-react';
 
-const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
+const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter, onOpenGames }) => {
   // Pet state with localStorage persistence
   const [pet, setPet] = useState(() => {
     const saved = localStorage.getItem('checkin_pet');
@@ -129,6 +129,12 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
   // Play with pet
   const playWithPet = useCallback(() => {
+    if (onOpenGames) {
+      onOpenGames();
+      return;
+    }
+
+    // Legacy simple play logic if no game handler provided
     if (coins < 10) {
       addFloatingText('⭐ Insuficiente!', 'text-red-500');
       return;
@@ -156,7 +162,7 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     animateAction('playing');
     addFloatingText('-10 ⭐', 'text-yellow-500');
     setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
-  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction]);
+  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction, onOpenGames]);
 
   // Pet sleep (free action)
   const petSleep = useCallback(() => {
@@ -372,9 +378,9 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             {/* Brincar */}
             <button
               onClick={playWithPet}
-              disabled={coins < 10 || pet.energy < 10}
+              disabled={!onOpenGames && (coins < 10 || pet.energy < 10)}
               className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
-                coins < 10 || pet.energy < 10
+                !onOpenGames && (coins < 10 || pet.energy < 10)
                   ? 'opacity-40 cursor-not-allowed'
                   : 'hover:shadow-md hover:-translate-y-1 active:scale-95'
               }`}
