@@ -4,19 +4,23 @@ import HUD from './HUD';
 
 const MainLayout = memo(({ children }) => {
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-sky-50">
-      {/* HUD - Overlay/Fixed Top */}
-      <HUD />
+    <div className="w-full min-h-screen flex justify-center bg-sky-50">
+      {/* Inner wrapper: Mobile frame */}
+      {/* CHANGED: min-h-screen -> h-screen (or h-[100dvh]) to fix infinite growth bug.
+          This is CRITICAL for the central scrollable area to work. */}
+      <div className="relative flex flex-col max-w-md w-full h-[100dvh] overflow-hidden bg-sky-50 shadow-2xl">
+        {/* HUD - Overlay/Fixed Top */}
+        <HUD />
 
-      {/* Main Content Area - Clipped, children handle scroll */}
-      <div className="flex-1 overflow-hidden relative">
-        <div className="w-full h-full relative">
+        {/* Central Scrollable Area */}
+        {/* Adds padding for HUD and BottomNav so content doesn't get hidden */}
+        <div className="flex-1 w-full overflow-y-auto custom-scrollbar optimize-scroll pt-16 pb-24">
           {children}
         </div>
-      </div>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+        {/* Bottom Navigation */}
+        <BottomNav />
+      </div>
     </div>
   );
 });

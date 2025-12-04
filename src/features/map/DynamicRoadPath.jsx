@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 // Dynamic Road Path - Conecta Pontos Exatos dos Nodes (King/Zynga Professional Style)
-const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
+const DynamicRoadPath = memo(({ nodePositions, containerHeight, idPrefix }) => {
   // Gera SVG path que conecta EXATAMENTE os centros dos nodes
   const generateConnectedPath = useCallback(() => {
     if (!nodePositions || nodePositions.length === 0) return '';
@@ -28,6 +28,11 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
 
   const pathData = useMemo(() => generateConnectedPath(), [generateConnectedPath]);
 
+  // Ensure unique IDs for this instance to prevent conflicts in loops
+  const textureId = `${idPrefix}-roadTexture`;
+  const reliefId = `${idPrefix}-roadRelief`;
+  const gradientId = `${idPrefix}-depthGradient`;
+
   if (!pathData) return null;
 
   return (
@@ -39,7 +44,7 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
     >
       <defs>
         {/* Enhanced Cobblestone Texture Pattern - Realista */}
-        <pattern id="roadTexture" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+        <pattern id={textureId} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
           {/* Pedra 1 - Tom mais claro */}
           <rect x="2" y="2" width="24" height="24" fill="#8b8680" rx="4" opacity="0.95">
             <animate attributeName="opacity" values="0.95;0.92;0.95" dur="5s" repeatCount="indefinite" />
@@ -79,7 +84,7 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
           <ellipse cx="18" cy="42" rx="2.5" ry="2" fill="#fafaf9" opacity="0.1" />
         </pattern>
 
-        <filter id="roadRelief">
+        <filter id={reliefId}>
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" />
           <feDiffuseLighting in="noise" lightingColor="#d4d4d8" surfaceScale="1.5" result="diffLight">
             <feDistantLight azimuth="45" elevation="60" />
@@ -87,7 +92,7 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
           <feComposite in="diffLight" in2="SourceGraphic" operator="multiply" />
         </filter>
 
-        <linearGradient id="depthGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#57534e" stopOpacity="0.9" />
           <stop offset="50%" stopColor="#78716c" stopOpacity="0.95" />
           <stop offset="100%" stopColor="#6b7280" stopOpacity="1" />
@@ -132,18 +137,18 @@ const DynamicRoadPath = memo(({ nodePositions, containerHeight }) => {
       <path
         d={pathData}
         fill="none"
-        stroke="url(#roadTexture)"
+        stroke={`url(#${textureId})`}
         strokeWidth="68"
         strokeLinecap="round"
         strokeLinejoin="round"
-        filter="url(#roadRelief)"
+        filter={`url(#${reliefId})`}
       />
 
       {/* CAMADA 5: Overlay Profundidade */}
       <path
         d={pathData}
         fill="none"
-        stroke="url(#depthGradient)"
+        stroke={`url(#${gradientId})`}
         strokeWidth="68"
         strokeLinecap="round"
         strokeLinejoin="round"

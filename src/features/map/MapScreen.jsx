@@ -272,14 +272,15 @@ const MapScreen = memo(({ lastCompletedDay, onOpenGame, onDayClick, completedDay
                     const pathPosition = calculatePathPosition(dayIndex, month.days);
 
                     // Converter de porcentagem para pixels absolutos
-                    const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
+                    // FIX: Clamp width to 448px (max-w-md) to support Desktop Mobile Frame correctly
+                    const containerWidth = typeof window !== 'undefined' ? Math.min(window.innerWidth, 448) : 400;
                     const x = (parseFloat(pathPosition.left) / 100) * containerWidth;
                     const y = parseInt(pathPosition.top);
 
                     return { x, y };
                   });
 
-                  return <DynamicRoadPath nodePositions={nodePositions} containerHeight={month.days * 55 + 100} />;
+                  return <DynamicRoadPath nodePositions={nodePositions} containerHeight={month.days * 55 + 100} idPrefix={month.name} />;
                 })()}
 
                 {/* BiomeDecorations - Decorações Sazonais */}

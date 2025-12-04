@@ -21,7 +21,7 @@ const MorningPrayerScreen = memo(({ onComplete }) => {
   };
 
   return (
-    <div className="min-h-full flex flex-col items-center justify-center p-6 relative">
+    <div className="flex flex-col items-center justify-center p-6 relative">
       {/* Background com gradiente suave */}
       <div className="absolute inset-0 bg-gradient-to-b from-amber-100 via-orange-50 to-yellow-50" />
 
