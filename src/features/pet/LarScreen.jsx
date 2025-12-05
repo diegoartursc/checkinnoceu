@@ -139,12 +139,6 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
       return;
     }
 
-    // Check if happiness is already full
-    if (pet.happiness >= 100) {
-      addFloatingText('😊 Já está feliz!', 'text-pink-500');
-      return;
-    }
-
     onSpendCoins(10);
     setPet(prev => ({
       ...prev,

@@ -6,6 +6,7 @@ import CloudBackground from './components/ui/CloudBackground';
 import CheckInScreen from './features/checkin/CheckInScreen';
 import MapScreen from './features/map/MapScreen';
 import LarScreen from './features/pet/LarScreen';
+import SettingsScreen from './features/settings/SettingsScreen';
 import MorningPrayerScreen from './features/devotional/MorningPrayerScreen';
 import GratitudeScreen from './features/devotional/GratitudeScreen';
 import GoodActionScreen from './features/devotional/GoodActionScreen';
@@ -193,6 +194,12 @@ const AppContent = memo(() => {
                   onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
                 />
             </div>
+        </div>
+      )}
+
+      {screen === 'settings' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+             <SettingsScreen />
         </div>
       )}
 
