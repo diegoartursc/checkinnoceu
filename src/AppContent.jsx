@@ -6,11 +6,13 @@ import CloudBackground from './components/ui/CloudBackground';
 import CheckInScreen from './features/checkin/CheckInScreen';
 import MapScreen from './features/map/MapScreen';
 import LarScreen from './features/pet/LarScreen';
+import SettingsScreen from './features/settings/SettingsScreen';
 import MorningPrayerScreen from './features/devotional/MorningPrayerScreen';
 import GratitudeScreen from './features/devotional/GratitudeScreen';
 import GoodActionScreen from './features/devotional/GoodActionScreen';
 import EveningPrayerScreen from './features/devotional/EveningPrayerScreen';
 import MonthlyLetterScreen from './features/devotional/MonthlyLetterScreen';
+import GameHub from './features/games/GameHub';
 import GameOverlay from './components/modals/GameOverlay';
 import StoryOverlay from './components/modals/StoryOverlay';
 import VictoryModal from './components/modals/VictoryModal';
@@ -41,6 +43,7 @@ const AppContent = memo(() => {
   const [dailyModal, setDailyModal] = useState(null);
   const [showEveningPrayer, setShowEveningPrayer] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
+  const [showGameHub, setShowGameHub] = useState(false);
 
   // Check if today is completed
   const isCompletedToday = completedDays[lastCompletedDay + 1] !== undefined && lastCompletedDay + 1 > 0;
@@ -191,12 +194,28 @@ const AppContent = memo(() => {
                   onSpendCoins={spendCoins}
                   onOpenEveningPrayer={() => setShowEveningPrayer(true)}
                   onOpenMonthlyLetter={() => setShowMonthlyLetter(true)}
+                  onOpenGames={() => setShowGameHub(true)}
                 />
             </div>
         </div>
       )}
 
+      {screen === 'settings' && (
+        <div className="relative w-full h-full animate-in fade-in duration-500">
+             <SettingsScreen />
+        </div>
+      )}
+
       {/* Modals & Overlays */}
+      {showGameHub && (
+        <GameHub
+          onClose={() => setShowGameHub(false)}
+          onSelectGame={(config) => {
+            setShowGameHub(false);
+            setCurrentGameConfig(config);
+          }}
+        />
+      )}
       {currentGameConfig && <GameOverlay config={currentGameConfig} onClose={() => setCurrentGameConfig(null)} onWin={handleWinGame} />}
       {currentStory && <StoryOverlay story={currentStory} onClose={() => setCurrentStory(null)} />}
       {showVictoryModal && <VictoryModal coins={victoryCoins} onClaim={handleClaimReward} storyUnlocked={storyUnlocked} />}

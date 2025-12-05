@@ -1,7 +1,7 @@
 import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import { Cloud, Repeat2, Star } from 'lucide-react';
 
-const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
+const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter, onOpenGames }) => {
   // Pet state with localStorage persistence
   const [pet, setPet] = useState(() => {
     const saved = localStorage.getItem('checkin_pet');
@@ -129,34 +129,12 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
   // Play with pet
   const playWithPet = useCallback(() => {
-    if (coins < 10) {
-      addFloatingText('⭐ Insuficiente!', 'text-red-500');
-      return;
+    // If opening games menu, we just trigger the callback
+    // The previous logic for "playing" interaction is replaced by opening the hub
+    if (onOpenGames) {
+      onOpenGames();
     }
-
-    if (pet.energy < 10) {
-      addFloatingText('Sem energia!', 'text-orange-500');
-      return;
-    }
-
-    // Check if happiness is already full
-    if (pet.happiness >= 100) {
-      addFloatingText('😊 Já está feliz!', 'text-pink-500');
-      return;
-    }
-
-    onSpendCoins(10);
-    setPet(prev => ({
-      ...prev,
-      happiness: Math.min(100, prev.happiness + 30),
-      energy: Math.max(0, prev.energy - 10),
-      lastUpdate: Date.now()
-    }));
-
-    animateAction('playing');
-    addFloatingText('-10 ⭐', 'text-yellow-500');
-    setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
-  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction]);
+  }, [onOpenGames]);
 
   // Pet sleep (free action)
   const petSleep = useCallback(() => {
@@ -369,22 +347,16 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
               </button>
             ))}
 
-            {/* Brincar */}
+            {/* Brincar - Agora abre o Menu de Jogos e está sempre disponível */}
             <button
               onClick={playWithPet}
-              disabled={coins < 10 || pet.energy < 10}
-              className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
-                coins < 10 || pet.energy < 10
-                  ? 'opacity-40 cursor-not-allowed'
-                  : 'hover:shadow-md hover:-translate-y-1 active:scale-95'
-              }`}
+              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1 active:scale-95"
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="text-4xl">🎮</div>
                 <p className="font-bold text-xs text-gray-700">BRINCAR</p>
                 <div className="bg-pink-100 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  <Star size={10} className="fill-pink-500 text-pink-500" />
-                  <span className="font-bold text-pink-700 text-[10px]">15</span>
+                  <span className="font-bold text-pink-700 text-[10px]">JOGAR</span>
                 </div>
               </div>
             </button>
