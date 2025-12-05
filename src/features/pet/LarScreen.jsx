@@ -1,7 +1,7 @@
 import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
-import { Cloud, Repeat2, Star } from 'lucide-react';
+import { Cloud, Repeat2, Star, Gamepad2, Coins } from 'lucide-react';
 
-const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
+const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter, onOpenGames }) => {
   // Pet state with localStorage persistence
   const [pet, setPet] = useState(() => {
     const saved = localStorage.getItem('checkin_pet');
@@ -129,6 +129,11 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
   // Play with pet
   const playWithPet = useCallback(() => {
+    if (onOpenGames) {
+        onOpenGames();
+        return;
+    }
+
     if (coins < 10) {
       addFloatingText('⭐ Insuficiente!', 'text-red-500');
       return;
@@ -156,7 +161,7 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     animateAction('playing');
     addFloatingText('-10 ⭐', 'text-yellow-500');
     setTimeout(() => addFloatingText('+30 😊', 'text-pink-500'), 200);
-  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction]);
+  }, [coins, pet.energy, pet.happiness, onSpendCoins, addFloatingText, animateAction, onOpenGames]);
 
   // Pet sleep (free action)
   const petSleep = useCallback(() => {
@@ -372,9 +377,9 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             {/* Brincar */}
             <button
               onClick={playWithPet}
-              disabled={coins < 10 || pet.energy < 10}
+              disabled={!onOpenGames && (coins < 10 || pet.energy < 10)}
               className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
-                coins < 10 || pet.energy < 10
+                !onOpenGames && (coins < 10 || pet.energy < 10)
                   ? 'opacity-40 cursor-not-allowed'
                   : 'hover:shadow-md hover:-translate-y-1 active:scale-95'
               }`}
@@ -382,10 +387,17 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
               <div className="flex flex-col items-center gap-2">
                 <div className="text-4xl">🎮</div>
                 <p className="font-bold text-xs text-gray-700">BRINCAR</p>
-                <div className="bg-pink-100 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  <Star size={10} className="fill-pink-500 text-pink-500" />
-                  <span className="font-bold text-pink-700 text-[10px]">15</span>
-                </div>
+                <div className="flex items-center justify-center gap-1 mt-1 text-[10px] text-slate-400">
+                  {!onOpenGames && (
+                      <>
+                          <div className="bg-pink-100 rounded-full px-2 py-0.5 flex items-center gap-1">
+                              <Star size={10} className="fill-pink-500 text-pink-500" />
+                              <span className="font-bold text-pink-700 text-[10px]">15</span>
+                          </div>
+                      </>
+                  )}
+                  {onOpenGames && <span className="text-purple-400 font-bold">Jogos</span>}
+              </div>
               </div>
             </button>
 

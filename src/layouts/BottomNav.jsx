@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Home, Map, Heart } from 'lucide-react';
+import { Home, Map, Heart, Settings } from 'lucide-react';
 import { useNavigation } from '../contexts/NavigationContext';
 
 const BottomNav = memo(() => {
@@ -38,6 +38,17 @@ const BottomNav = memo(() => {
             >
                 <Heart size={screen === 'lar' ? 28 : 24} strokeWidth={3} fill={screen === 'lar' ? 'currentColor' : 'none'} />
                 <span className={`text-[10px] font-black uppercase tracking-widest ${screen === 'lar' ? 'text-white' : 'text-slate-500'}`}>LAR</span>
+            </button>
+
+            <button
+                onClick={() => navigate('settings')}
+                className={`flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${screen === 'settings'
+                        ? 'bg-gradient-to-b from-slate-600 to-slate-800 text-white shadow-[0_8px_25px_rgba(71,85,105,0.6)] scale-125 -translate-y-6 border-b-4 border-slate-900'
+                        : 'text-slate-400 scale-100 hover:scale-110 active:scale-95'
+                    }`}
+            >
+                <Settings size={screen === 'settings' ? 28 : 24} strokeWidth={3} />
+                <span className={`text-[10px] font-black uppercase tracking-widest ${screen === 'settings' ? 'text-white' : 'text-slate-500'}`}>CONFIG</span>
             </button>
         </div>
     );
