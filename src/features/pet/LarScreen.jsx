@@ -1,7 +1,11 @@
 import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
-import { Cloud, Repeat2, Star } from 'lucide-react';
+import { Cloud, Repeat2, Star, Gamepad2 } from 'lucide-react';
+import GamesMenu from './games/GamesMenu';
+import DocinhosDoCeuGame from './games/DocinhosDoCeuGame';
+import FazendinhaDaCriacaoGame from './games/FazendinhaDaCriacaoGame';
+import CorridaDaLuzGame from './games/CorridaDaLuzGame';
 
-const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
+const LarScreen = memo(({ coins, onSpendCoins, onAddCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
   // Pet state with localStorage persistence
   const [pet, setPet] = useState(() => {
     const saved = localStorage.getItem('checkin_pet');
@@ -27,6 +31,11 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
   // Pet selector modal
   const [showPetSelector, setShowPetSelector] = useState(false);
+
+  // Game state
+  const [gameView, setGameView] = useState('home'); // 'home', 'gamesMenu', 'game'
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [gameFeedback, setGameFeedback] = useState(null);
 
   // Available pets
   const petTypes = useMemo(() => [
@@ -176,6 +185,55 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     addFloatingText('+100 ⚡', 'text-blue-500');
   }, [pet.energy, addFloatingText, animateAction]);
 
+  // Handle game completion
+  const handleGameCompleted = useCallback((gameId, score) => {
+    // Add coins based on score
+    const earnedCoins = Math.floor(score / 10); // Convert score to coins (adjust ratio as needed)
+    
+    // Update pet happiness based on game performance
+    setPet(prev => ({
+      ...prev,
+      happiness: Math.min(100, prev.happiness + Math.min(20, Math.floor(score / 20))), // Add happiness based on score
+      lastUpdate: Date.now()
+    }));
+
+    // Add earned coins to user's balance
+    if (onAddCoins) {
+      onAddCoins(earnedCoins);
+    }
+
+    // Show feedback
+    setGameFeedback({
+      score: earnedCoins,
+      message: `Você ganhou ${earnedCoins} moedas! 🎉`
+    });
+
+    // Clear feedback after delay
+    setTimeout(() => {
+      setGameFeedback(null);
+    }, 3000);
+
+    // Return to home view
+    setGameView('home');
+  }, [onAddCoins]);
+
+  // Navigate to games menu
+  const goToGamesMenu = useCallback(() => {
+    setGameView('gamesMenu');
+  }, []);
+
+  // Start a specific game
+  const startGame = useCallback((gameId) => {
+    setSelectedGame(gameId);
+    setGameView('game');
+  }, []);
+
+  // Go back to pet home
+  const goBackToHome = useCallback(() => {
+    setGameView('home');
+    setSelectedGame(null);
+  }, []);
+
   // Determine pet mood
   const getPetMood = useCallback(() => {
     const { hunger, happiness, energy } = pet;
@@ -214,6 +272,30 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
   const mood = getPetMood();
 
+  // Render game view if in game mode
+  if (gameView === 'gamesMenu') {
+    return (
+      <GamesMenu
+        onSelectGame={startGame}
+        onBack={goBackToHome}
+      />
+    );
+  }
+
+  if (gameView === 'game') {
+    switch (selectedGame) {
+      case 'docinhos':
+        return <DocinhosDoCeuGame onFinish={(score) => handleGameCompleted('docinhos', score)} />;
+      case 'fazendinha':
+        return <FazendinhaDaCriacaoGame onFinish={(score) => handleGameCompleted('fazendinha', score)} />;
+      case 'corrida':
+        return <CorridaDaLuzGame onFinish={(score) => handleGameCompleted('corrida', score)} />;
+      default:
+        return <div>Erro: Jogo não encontrado</div>;
+    }
+  }
+
+  // Default home view (original pet screen)
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {/* CAMADA 1: Fundo Verde Zen (Campo Tranquilo) */}
@@ -371,20 +453,15 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
 
             {/* Brincar */}
             <button
-              onClick={playWithPet}
-              disabled={coins < 10 || pet.energy < 10}
-              className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all ${
-                coins < 10 || pet.energy < 10
-                  ? 'opacity-40 cursor-not-allowed'
-                  : 'hover:shadow-md hover:-translate-y-1 active:scale-95'
-              }`}
+              onClick={goToGamesMenu} // Changed to go to games menu instead of playing directly
+              className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1 active:scale-95"
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="text-4xl">🎮</div>
                 <p className="font-bold text-xs text-gray-700">BRINCAR</p>
                 <div className="bg-pink-100 rounded-full px-2 py-0.5 flex items-center gap-1">
-                  <Star size={10} className="fill-pink-500 text-pink-500" />
-                  <span className="font-bold text-pink-700 text-[10px]">15</span>
+                  <Gamepad2 size={10} className="fill-pink-500 text-pink-500" />
+                  <span className="font-bold text-pink-700 text-[10px]">Jogos</span>
                 </div>
               </div>
             </button>
@@ -439,6 +516,13 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
             🌿 Cuide do seu amiguinho com carinho e atenção
           </p>
         </div>
+
+        {/* Game Feedback */}
+        {gameFeedback && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] bg-green-500 text-white px-4 py-2 rounded-full shadow-lg animate-bounce">
+            {gameFeedback.message}
+          </div>
+        )}
       </div>
 
       {/* Modal de Seleção de Pet - ZEN */}
