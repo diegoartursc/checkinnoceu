@@ -11,6 +11,7 @@ html, body {
   overscroll-behavior-y: none;
   touch-action: pan-y;
   overflow-y: hidden; /* Prevent body scroll, let React app handle it */
+  background-color: #0f172a; /* dark slate background for the 'void' area */
 }
 
 #root {
@@ -24,7 +25,7 @@ html, body {
 /* Base Styles */
 body {
   font-family: 'Nunito', sans-serif;
-  background-color: #f0f9ff; /* sky-50 */
+  /* background-color removed from here as it's set in html, body */
 }
 
 /* Utilities */
@@ -43,12 +44,12 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.2); /* Lighter scrollbar for dark/colored themes */
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Animations */
