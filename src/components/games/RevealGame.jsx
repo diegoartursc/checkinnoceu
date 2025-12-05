@@ -1,25 +1,27 @@
-import React, { useState, useCallback, useRef, memo } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Cloud } from 'lucide-react';
+import { useGameWin } from '../../hooks/useGameWin';
 
 /**
  * Reveal Game - Clear clouds to reveal the sun
  */
 const RevealGame = memo(({ data, onWin }) => {
     const [tiles, setTiles] = useState(Array(16).fill(true));
-    const hasWonRef = useRef(false);
+    const [hasWon, setHasWon] = useState(false);
+
+    useGameWin(hasWon, onWin);
 
     const handleHover = useCallback((index) => {
         setTiles(prev => {
             const n = [...prev];
             n[index] = false;
             const cleared = n.filter(x => !x).length;
-            if (cleared >= 14 && !hasWonRef.current) {
-                hasWonRef.current = true;
-                onWin();
+            if (cleared >= 14) {
+                setHasWon(true);
             }
             return n;
         });
-    }, [onWin]);
+    }, []);
 
     return (
         <div className="h-full flex flex-col items-center justify-center bg-yellow-50 rounded-xl p-4">

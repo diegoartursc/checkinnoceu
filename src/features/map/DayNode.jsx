@@ -66,23 +66,6 @@ const DayNode = memo(({
           specialDate ? <SpecialIcon size={10} className="animate-spin-slow"/> : dayNum
         )}
       </div>
-
-      {/* Stars indicator for completed days */}
-      {isCompleted && stars > 0 && (
-        <div className="absolute -bottom-3 flex gap-[2px]">
-          {/*
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Star
-              key={i}
-              size={8}
-              className={i < stars ? 'text-yellow-400' : 'text-gray-300'}
-              fill={i < stars ? 'currentColor' : 'none'}
-              strokeWidth={2}
-            />
-          ))}
-          */}
-        </div>
-      )}
     </div>
   );
 });

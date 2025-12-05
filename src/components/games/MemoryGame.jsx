@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
+import { useGameWin } from '../../hooks/useGameWin';
 
 /**
  * Memory Game - Match pairs of emojis
@@ -35,11 +36,7 @@ const MemoryGame = memo(({ data, onWin }) => {
     }
   }, [flipped, matched, cards]);
 
-  useEffect(() => {
-    if (cards.length > 0 && matched.length === cards.length) {
-      setTimeout(onWin, 500);
-    }
-  }, [matched, cards, onWin]);
+  useGameWin(cards.length > 0 && matched.length === cards.length, onWin, 500);
 
   return (
     <div className="grid grid-cols-4 gap-2 h-full content-center p-2">

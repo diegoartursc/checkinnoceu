@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
+import { useGameWin } from '../../hooks/useGameWin';
 
 /**
  * Warmup Game - Keep temperature above 0 by clicking
@@ -6,15 +7,17 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 const WarmupGame = memo(({ data, onWin }) => {
     const [temp, setTemp] = useState(50);
     const [timeLeft, setTimeLeft] = useState(10);
-    const hasWonRef = useRef(false);
+    const [hasWon, setHasWon] = useState(false);
+
+    useGameWin(hasWon, onWin);
 
     useEffect(() => {
+        if (hasWon) return;
+
         const timer = setInterval(() => {
-            if (hasWonRef.current) return;
             setTimeLeft(t => {
                 if (t <= 1 && temp > 0) {
-                    hasWonRef.current = true;
-                    onWin();
+                    setHasWon(true);
                     return 0;
                 }
                 return t - 1;
@@ -22,7 +25,6 @@ const WarmupGame = memo(({ data, onWin }) => {
         }, 1000);
 
         const cooler = setInterval(() => {
-            if (hasWonRef.current) return;
             setTemp(t => Math.max(0, t - 2));
         }, 100);
 
@@ -30,7 +32,7 @@ const WarmupGame = memo(({ data, onWin }) => {
             clearInterval(timer);
             clearInterval(cooler);
         };
-    }, [temp, onWin]);
+    }, [temp, hasWon]);
 
     return (
         <div className="h-full flex flex-col items-center justify-center bg-blue-50 rounded-xl p-4">

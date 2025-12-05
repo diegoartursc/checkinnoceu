@@ -1,4 +1,5 @@
 import React, { useState, useCallback, memo } from 'react';
+import { useGameWin } from '../../hooks/useGameWin';
 
 /**
  * Quiz Game - Multiple choice question
@@ -6,10 +7,11 @@ import React, { useState, useCallback, memo } from 'react';
 const QuizGame = memo(({ data, onWin }) => {
   const [selected, setSelected] = useState(null);
 
+  useGameWin(selected === data.answer, onWin, 1000);
+
   const handleSelect = useCallback((idx) => {
     setSelected(idx);
-    if (idx === data.answer) setTimeout(onWin, 1000);
-  }, [data.answer, onWin]);
+  }, []);
 
   return (
     <div className="h-full flex flex-col justify-center p-4">

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { useGameWin } from '../../hooks/useGameWin';
 
 /**
  * Harvest Game - Click good items in 3x3 grid, avoid bad
@@ -6,14 +7,8 @@ import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 const HarvestGame = memo(({ data, onWin }) => {
     const [grid, setGrid] = useState(Array(9).fill(null));
     const [score, setScore] = useState(0);
-    const hasWonRef = useRef(false);
 
-    useEffect(() => {
-        if (score >= 5 && !hasWonRef.current) {
-            hasWonRef.current = true;
-            onWin();
-        }
-    }, [score, onWin]);
+    useGameWin(score >= 5, onWin);
 
     useEffect(() => {
         const interval = setInterval(() => {

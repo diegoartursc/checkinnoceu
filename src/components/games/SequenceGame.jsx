@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { useGameWin } from '../../hooks/useGameWin';
 
 /**
  * Sequence Game - Memorize and repeat a sequence (Simon Says)
@@ -9,7 +10,9 @@ const SequenceGame = memo(({ data, onWin }) => {
     const [playingIdx, setPlayingIdx] = useState(null);
     const [round, setRound] = useState(1);
     const [status, setStatus] = useState('watch');
-    const hasWonRef = useRef(false);
+    const [hasWon, setHasWon] = useState(false);
+
+    useGameWin(hasWon, onWin);
 
     const playSequence = async (seq) => {
         setPlayerSeq([]);
@@ -23,14 +26,14 @@ const SequenceGame = memo(({ data, onWin }) => {
     };
 
     useEffect(() => {
-        if (status === 'watch' && !hasWonRef.current) {
+        if (status === 'watch' && !hasWon) {
             const newStep = Math.floor(Math.random() * 4);
             const newSeq = [...sequence, newStep];
             setSequence(newSeq);
             playSequence(newSeq);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [round, status]);
+    }, [round, status, hasWon]);
 
     const handleTap = useCallback((index) => {
         if (status !== 'play') return;
@@ -50,16 +53,13 @@ const SequenceGame = memo(({ data, onWin }) => {
 
         if (newPlayerSeq.length === sequence.length) {
             if (round >= 3) {
-                if (!hasWonRef.current) {
-                    hasWonRef.current = true;
-                    onWin();
-                }
+                setHasWon(true);
             } else {
                 setRound(r => r + 1);
                 setStatus('watch');
             }
         }
-    }, [status, playerSeq, sequence, round, onWin]);
+    }, [status, playerSeq, sequence, round]);
 
     return (
         <div className="h-full flex flex-col items-center justify-center bg-pink-50 rounded-xl p-4">

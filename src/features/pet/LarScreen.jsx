@@ -1,21 +1,23 @@
 import React, { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import { Cloud, Repeat2, Star } from 'lucide-react';
+import { getPetState, setPetState as savePetState } from '../../services/storage';
 
 const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthlyLetter }) => {
-  // Pet state with localStorage persistence
+  // Pet state with localStorage persistence via storage service
   const [pet, setPet] = useState(() => {
-    const saved = localStorage.getItem('checkin_pet');
-    if (saved) {
-      return JSON.parse(saved);
+    const saved = getPetState();
+    // Ensure we have the expected pet structure with name
+    if (!saved.name) {
+      return {
+        type: saved.type || 'ovelhinha',
+        name: saved.type === 'leao' ? 'Leãozinho' : saved.type === 'pomba' ? 'Pombinha' : 'Ovelhinha',
+        hunger: saved.hunger || 100,
+        happiness: saved.happiness || 100,
+        energy: saved.energy || 100,
+        lastUpdate: saved.lastUpdate || Date.now()
+      };
     }
-    return {
-      type: 'ovelhinha',
-      name: 'Ovelhinha',
-      hunger: 100,
-      happiness: 100,
-      energy: 100,
-      lastUpdate: Date.now()
-    };
+    return saved;
   });
 
   // Floating feedback texts
@@ -59,9 +61,9 @@ const LarScreen = memo(({ coins, onSpendCoins, onOpenEveningPrayer, onOpenMonthl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save to localStorage whenever pet state changes
+  // Save to localStorage via storage service whenever pet state changes
   useEffect(() => {
-    localStorage.setItem('checkin_pet', JSON.stringify(pet));
+    savePetState(pet);
   }, [pet]);
 
   // Frutos do Espírito (Gálatas 5:22-23)
